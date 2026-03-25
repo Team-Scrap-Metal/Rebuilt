@@ -6,8 +6,8 @@ package frc.robot.Subsystems.Gyro;
 
 public class GyroConstants {
   /** Sets the offset of the heading so that the Intake side is the front of the robot */
-  public static final double HEADING_OFFSET_DEGREES = 0;
+  public static final double HEADING_OFFSET_DEGREES = -90;
 
   /** CANID for the Pigeon */
-  public static final int CAN_ID = 23;
+  public static final int CAN_ID = 2;
 }
