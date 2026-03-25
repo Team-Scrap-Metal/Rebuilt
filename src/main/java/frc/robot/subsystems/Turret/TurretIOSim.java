@@ -17,17 +17,18 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 
 public class TurretIOSim implements TurretIO {
     private final DCMotorSim m_motorSim;
+    /* private final SparkMaxConfig m_Config;
+    private final SparkClosedLoopController m_ClosedLoopController; */
 
     public TurretIOSim() {
         m_motorSim =
             new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(
-                DCMotor.getNEO(1), 0.005, TurretConstants.GEAR_RATIO),
-                DCMotor.getNEO(1));
-
+            LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.005, TurretConstants.GEAR_RATIO),
+            DCMotor.getNEO(1));
     }
 
     @Override
@@ -41,5 +42,9 @@ public class TurretIOSim implements TurretIO {
     @Override
     public void setTurretVoltage (double volts) {
         m_motorSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
+    }
+    @Override
+    public void setTurretPosition(float angle) {
+       m_motorSim.setAngle(angle); 
     }
 }
