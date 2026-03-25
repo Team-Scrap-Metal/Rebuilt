@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Drum;
+package frc.robot.subsystems.Gyro;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -14,14 +14,14 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class GyroIOSpark implements GyroIO {
-    private final SparkBase drumMotor;
-    private final SparkBase drumFollowerMotor;
-    private final RelativeEncoder drumEncoder;
+    private final SparkBase gyroMotor;
+    private final SparkBase gyroFollowerMotor;
+    private final RelativeEncoder gyroEncoder;
 
     public GyroIOSpark() {
-        drumMotor = new SparkMax(GyroConstants.CAN_ID, MotorType.kBrushless);
-        drumFollowerMotor = new SparkMax(GyroConstants.FOLLOWER_CAN_ID, MotorType.kBrushless);
-        drumEncoder = drumMotor.getEncoder();
+        gyroMotor = new SparkMax(GyroConstants.CAN_ID, MotorType.kBrushless);
+        gyroFollowerMotor = new SparkMax(GyroConstants.FOLLOWER_CAN_ID, MotorType.kBrushless);
+        gyroEncoder = gyroMotor.getEncoder();
 
         var motorConfig = new SparkMaxConfig();
         var followerConfig = new SparkMaxConfig();
@@ -31,23 +31,23 @@ public class GyroIOSpark implements GyroIO {
             .smartCurrentLimit(GyroConstants.CURRENT_LIMIT);
         followerConfig
             .apply(motorConfig)
-            .follow(drumMotor, GyroConstants.FOLLOWER_INVERTED);
+            .follow(gyroMotor, GyroConstants.FOLLOWER_INVERTED);
 
 
-        drumMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        drumFollowerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        gyroMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        gyroFollowerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
-    public void updateInputs(DrumIOInputs inputs) {
-        inputs.drumAppliedVolts = drumMotor.getAppliedOutput() * drumMotor.getBusVoltage();
-        inputs.drumVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(drumEncoder.getVelocity());
-        inputs.drumPosition = drumEncoder.getPosition();
-        inputs.drumAppliedCurrent = drumMotor.getOutputCurrent();
+    public void updateInputs(GyroIOInputs inputs) {
+        inputs.gyroAppliedVolts = gyroMotor.getAppliedOutput() * gyroMotor.getBusVoltage();
+        inputs.gyroVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(gyroEncoder.getVelocity());
+        inputs.gyroPosition = gyroEncoder.getPosition();
+        inputs.gyroAppliedCurrent = gyroMotor.getOutputCurrent();
     }
 
     @Override
-    public void setDrumVoltage (double volts) {
-        drumMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
+    public void setGyroVoltage (double volts) {
+        gyroMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
     }
 }

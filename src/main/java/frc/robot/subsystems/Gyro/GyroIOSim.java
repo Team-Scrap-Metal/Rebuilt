@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.gyro;
+package frc.robot.subsystems.Gyro;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -27,7 +27,7 @@ public class GyroIOSim implements GyroIO {
     }
 
     @Override
-    public void setgyroVoltage (double volts) {
+    public void setGyroVoltage (double volts) {
         m_motorSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
     }
 }
