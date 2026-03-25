@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Shooter;
+package frc.robot.Subsystems.Shooter;
 
 public final class ShooterConstants {
     public static final int CAN_ID = 5;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Drum;
+package frc.robot.Subsystems.Intake.Drum;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

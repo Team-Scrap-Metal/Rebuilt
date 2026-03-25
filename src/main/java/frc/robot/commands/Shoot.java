@@ -6,12 +6,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import frc.robot.subsystems.Feeder.FeederConstants;
-import frc.robot.subsystems.Shooter.ShooterConstants;
-import frc.robot.subsystems.Spindexer.SpindexerConstants;
-import frc.robot.subsystems.Feeder.Feeder;
-import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Spindexer.Spindexer;
+import frc.robot.Subsystems.Feeder.Feeder;
+import frc.robot.Subsystems.Feeder.FeederConstants;
+import frc.robot.Subsystems.Shooter.Shooter;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
+import frc.robot.Subsystems.Spindexer.Spindexer;
+import frc.robot.Subsystems.Spindexer.SpindexerConstants;
 
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more

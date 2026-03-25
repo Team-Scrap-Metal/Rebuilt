@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Spindexer;
+package frc.robot.Subsystems.Spindexer;
 
 public final class SpindexerConstants {
     public static final int CAN_ID = 20;

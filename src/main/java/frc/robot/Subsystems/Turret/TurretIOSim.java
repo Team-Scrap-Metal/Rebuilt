@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Turret;
+package frc.robot.Subsystems.Turret;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

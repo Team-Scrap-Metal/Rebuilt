@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Spindexer;
+package frc.robot.Subsystems.Spindexer;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

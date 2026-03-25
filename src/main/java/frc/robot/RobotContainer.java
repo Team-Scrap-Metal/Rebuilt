@@ -5,13 +5,17 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Subsystems.Drive.Drive;
+import frc.robot.Subsystems.Drive.GyroIO;
+import frc.robot.Subsystems.Drive.GyroIOPigeon2;
+import frc.robot.Subsystems.Drive.ModuleIO;
+import frc.robot.Subsystems.Drive.ModuleIOReal;
+import frc.robot.Subsystems.Drive.ModuleIOSim;
+import frc.robot.Subsystems.Feeder.*;
+import frc.robot.Subsystems.Shooter.*;
+import frc.robot.Subsystems.Spindexer.*;
+import frc.robot.Subsystems.Turret.*;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Drive.Drive;
-import frc.robot.subsystems.Drive.GyroIO;
-import frc.robot.subsystems.Drive.GyroIOPigeon2;
-import frc.robot.subsystems.Drive.ModuleIO;
-import frc.robot.subsystems.Drive.ModuleIOSim;
-import frc.robot.subsystems.Drive.ModuleIOReal;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -25,10 +29,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.Feeder.*;
-import frc.robot.subsystems.Spindexer.*;
-import frc.robot.subsystems.Shooter.*;
-import frc.robot.subsystems.Turret.*;
 import frc.robot.commands.Shoot;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
