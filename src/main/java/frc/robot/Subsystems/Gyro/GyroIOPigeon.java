@@ -21,15 +21,10 @@ public class GyroIOPigeon implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.rollPositionRad =
-        new Rotation2d(Units.degreesToRadians(gyro.getRoll().getValueAsDouble()));
-    inputs.pitchPositionRad =
-        new Rotation2d(Units.degreesToRadians(gyro.getPitch().getValueAsDouble()));
+    inputs.rollPositionRad = new Rotation2d(Units.degreesToRadians(gyro.getRoll().getValueAsDouble()));
+    inputs.pitchPositionRad = new Rotation2d(Units.degreesToRadians(gyro.getPitch().getValueAsDouble()));
     // Value is Negative because NavX reads CW and everything else runs CCW
-    inputs.yawPositionRad =
-        new Rotation2d(
-            Units.degreesToRadians(
-                gyro.getYaw().getValueAsDouble() + GyroConstants.HEADING_OFFSET_DEGREES));
+    inputs.yawPositionRad = new Rotation2d(Units.degreesToRadians(gyro.getYaw().getValueAsDouble() + GyroConstants.HEADING_OFFSET_DEGREES));
     inputs.rollVelocityRadPerSec =
         Units.degreesToRadians(
             gyro.getAngularVelocityYDevice()
