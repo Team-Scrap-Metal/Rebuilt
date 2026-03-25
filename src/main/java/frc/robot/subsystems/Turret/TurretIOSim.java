@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Spindexer;
+package frc.robot.subsystems.Turret;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -18,28 +18,28 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-public class SpindexerIOSim implements SpindexerIO {
+public class TurretIOSim implements TurretIO {
     private final DCMotorSim m_motorSim;
 
-    public SpindexerIOSim() {
+    public TurretIOSim() {
         m_motorSim =
             new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                    DCMotor.getNEO(1), 0.005, SpindexerConstants.GEAR_RATIO),
+                DCMotor.getNEO(1), 0.005, TurretConstants.GEAR_RATIO),
                 DCMotor.getNEO(1));
 
     }
 
     @Override
-    public void updateInputs(SpindexerIOInputs inputs) {
-        inputs.spindexerAppliedVolts = m_motorSim.getInputVoltage(); 
-        inputs.spindexerVelocityRadPerSec = m_motorSim.getAngularVelocityRadPerSec();
-        inputs.spindexerPosition = m_motorSim.getAngularPositionRotations();
-        inputs.spindexerAppliedCurrent = m_motorSim.getCurrentDrawAmps();
+    public void updateInputs(TurretIOInputs inputs) {
+        inputs.turretAppliedVolts = m_motorSim.getInputVoltage(); 
+        inputs.turretVelocityRadPerSec = m_motorSim.getAngularVelocityRadPerSec();
+        inputs.turretPosition = m_motorSim.getAngularPositionRotations();
+        inputs.turretAppliedCurrent = m_motorSim.getCurrentDrawAmps();
     }
 
     @Override
-    public void setSpindexerVoltage (double volts) {
+    public void setTurretVoltage (double volts) {
         m_motorSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
     }
 }
