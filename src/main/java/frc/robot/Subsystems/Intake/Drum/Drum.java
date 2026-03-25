@@ -2,16 +2,16 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Intake.Drum;
+package frc.robot.Subsystems.Intake.Drum;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Intake.Drum.DrumIO;
-import frc.robot.subsystems.Intake.Drum.DrumIOInputsAutoLogged;
-import frc.robot.subsystems.Intake.Drum.DrumConstants.DrumState;
+import frc.robot.Subsystems.Intake.Drum.DrumIO;
+import frc.robot.Subsystems.Intake.Drum.DrumConstants.DrumState;
+import frc.robot.Subsystems.Intake.Drum.DrumIOInputsAutoLogged;
 
 public class Drum extends SubsystemBase {
   private final DrumIO m_io;

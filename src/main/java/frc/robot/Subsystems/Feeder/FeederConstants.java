@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Feeder;
+package frc.robot.Subsystems.Feeder;
 
 public final class FeederConstants {
     public static final int CAN_ID = 7;

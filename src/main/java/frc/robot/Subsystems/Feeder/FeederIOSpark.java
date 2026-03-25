@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Feeder;
+package frc.robot.Subsystems.Feeder;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

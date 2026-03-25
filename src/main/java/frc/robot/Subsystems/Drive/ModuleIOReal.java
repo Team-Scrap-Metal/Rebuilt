@@ -5,9 +5,7 @@
 // license that can be found in the LICENSE file
 // at the root directory of this project.
 
-package frc.robot.subsystems.Drive;
-
-import static frc.robot.subsystems.Drive.DriveConstants.*;
+package frc.robot.Subsystems.Drive;
 
 import frc.robot.util.SparkUtil;
 import frc.robot.util.PhoenixUtil;
@@ -50,6 +48,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+
+import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;

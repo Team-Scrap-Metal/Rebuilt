@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Drum;
+package frc.robot.Subsystems.Intake.Drum;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Turret;
+package frc.robot.Subsystems.Turret;
 
 public final class TurretConstants {
     public static final int CAN_ID = 12;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Drum;
+package frc.robot.Subsystems.Intake.Drum;
 
 public final class DrumConstants {
     public static final int CAN_ID = 9; // TODO: update
