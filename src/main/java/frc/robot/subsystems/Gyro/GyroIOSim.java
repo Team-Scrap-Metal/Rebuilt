@@ -19,7 +19,7 @@ public class GyroIOSim implements GyroIO {
     }
 
     @Override
-    public void updateInputs(gyroIOInputs inputs) {
+    public void updateInputs(GyroIOInputs inputs) {
         inputs.gyroAppliedVolts = m_motorSim.getInputVoltage(); 
         inputs.gyroVelocityRadPerSec = m_motorSim.getAngularVelocityRadPerSec();
         inputs.gyroPosition = m_motorSim.getAngularPositionRotations();
