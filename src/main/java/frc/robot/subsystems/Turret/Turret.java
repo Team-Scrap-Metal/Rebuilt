@@ -9,12 +9,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Turret extends SubsystemBase {
-  private final TurretIO io;
+  private final TurretIO m_io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
 
-  public Turret(SpindexerIO io) {
+  public Turret(TurretIO io) {
     System.out.println("[Init] Creating Turret");
-    this.io = io;
+    this.m_io = io;
   }
 
   @Override
@@ -24,16 +24,16 @@ public class Turret extends SubsystemBase {
   }
 
   public void updateInputs () {
-    io.updateInputs(inputs);
+    m_io.updateInputs(inputs);
   }
 
   public void setTurretVoltage(double volts) {
-    io.setTurretVoltage(
+    m_io.setTurretVoltage(
       MathUtil.clamp(volts, -Constants.MAX_VOLTAGE, Constants.MAX_VOLTAGE)
     );
   }
 
   public void setTurretPercent(int percent) {
-    io.setTurretVoltage(((double)percent) / 100 * 12);
+    m_io.setTurretVoltage(((double)percent) / 100 * 12);
   }
 }
