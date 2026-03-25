@@ -88,6 +88,10 @@ public class Shooter extends SubsystemBase {
     m_io.setShooterVoltage(((double)percent) / 100 * 12);
   }
 
+  public void setShooterRPM (double rpm) {
+    m_io.setShooterRPM(rpm);
+  }
+
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.quasistatic(direction);
   }

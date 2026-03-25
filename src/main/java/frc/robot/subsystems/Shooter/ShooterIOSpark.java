@@ -4,6 +4,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -28,7 +29,14 @@ public class ShooterIOSpark implements ShooterIO {
         motorConfig
             .inverted(ShooterConstants.INVERTED)
             .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(ShooterConstants.CURRENT_LIMIT);
+            .smartCurrentLimit(ShooterConstants.CURRENT_LIMIT)
+            .closedLoop
+                .p(ShooterConstants.KP)
+                .i(ShooterConstants.KI)
+                .d(ShooterConstants.KD)
+                .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
+            .feedForward
+                .kV(ShooterConstants.KV);
         followerConfig
             .apply(motorConfig)
             .follow(m_shooterMotor, ShooterConstants.FOLLOWER_INVERTED);
@@ -48,5 +56,10 @@ public class ShooterIOSpark implements ShooterIO {
     @Override
     public void setShooterVoltage (double volts) {
         m_shooterMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
+    }
+
+    @Override 
+    public void setShooterRPM (double rpm) {
+        m_shooterMotor.getClosedLoopController().setSetpoint(rpm, ControlType.kVelocity);
     }
 }

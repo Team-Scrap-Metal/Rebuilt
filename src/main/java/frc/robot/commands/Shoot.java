@@ -33,7 +33,7 @@ public class Shoot extends ParallelCommandGroup {
             spindexer),
         new InstantCommand(
           () ->
-            shooter.setShooterPercent(ShooterConstants.SHOOTING_PERCENT),
+            shooter.setShooterRPM(ShooterConstants.SHOOTING_SPEED_RPM),
             shooter)
     );
   }
