@@ -182,7 +182,7 @@ public class ModuleIOReal implements ModuleIO {
     driveAppliedVolts = driveTalon.getMotorVoltage();
     driveCurrent = driveTalon.getStatorCurrent();
 
-        // Configure periodic frames
+    // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
         odometryFrequency, drivePosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
