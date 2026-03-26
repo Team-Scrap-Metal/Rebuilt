@@ -115,6 +115,8 @@ public class Shooter extends SubsystemBase {
     
     var targetAsRadians = targetVelocity / ShooterConstants.WHEEL_RADIUS_M;
 
+    Logger.recordOutput("Shooter/VelocitySetpointRPS", targetAsRadians);
+
     System.out.println("shoot from distance: " + targetAsRadians);
     setShooterRPM(targetAsRadians * 30/Math.PI);
   }
