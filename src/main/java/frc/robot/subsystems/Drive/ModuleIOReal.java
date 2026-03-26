@@ -18,6 +18,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -40,6 +41,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -61,14 +63,18 @@ public class ModuleIOReal implements ModuleIO {
   // Hardware objects
   private final TalonFX driveTalon;
   private final SparkBase turnSpark;
-  private final AbsoluteEncoder turnEncoder;
+  private final Rotation2d absoluteEncoderOffset;
+  private final PIDController steePIDController = new PIDController(0, 0, 0);
+  private Rotation2d absoluteTurnPosition;
 
   // Voltage control requests
   private final VoltageOut voltageRequest = new VoltageOut(0);
   private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
 
   // Closed loop controllers
-  private final SparkClosedLoopController turnController;
+//   private final SparkClosedLoopController turnController;
+
+  private CANcoder absoluteEncoder;
 
   // Queue inputs from odometry thread
   private final Queue<Double> timestampQueue;
@@ -117,11 +123,28 @@ public class ModuleIOReal implements ModuleIO {
               default -> 0;
             },
             MotorType.kBrushless);
+    
+    absoluteEncoder = new CANcoder(
+        switch (module) {
+            case 0 -> frontLeftAbsoluteCanId;
+            case 1 -> frontRightAbsoluteCanId;
+            case 2 -> backLeftAbsoluteCanId;
+            case 3 -> backRightAbsoluteCanId;
+            default -> 0;
+        });
+    
+        absoluteEncoderOffset = switch (module) {
+            case 0 -> frontLeftZeroRotation;
+            case 1 ->  frontRightZeroRotation;
+            case 2 ->  backLeftZeroRotation;
+            case 3 ->  backRightZeroRotation;
+            default -> new Rotation2d();
+        };
 
-    turnEncoder = turnSpark.getAbsoluteEncoder();
+    // turnEncoder = turnSpark.getAbsoluteEncoder();
     // driveController = driveTalon.getClosedLoopController();
-    turnController = turnSpark.getClosedLoopController();
-
+    // turnController = turnSpark.getClosedLoopController();
+        
     // Configure drive motor
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -140,27 +163,30 @@ public class ModuleIOReal implements ModuleIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turnMotorCurrentLimit)
         .voltageCompensation(12.0);
-    turnConfig
-        .absoluteEncoder
-        .inverted(turnEncoderInverted)
-        .positionConversionFactor(turnEncoderPositionFactor)
-        .velocityConversionFactor(turnEncoderVelocityFactor)
-        .averageDepth(2);
+    // turnConfig
+    //     .absoluteEncoder
+    //     .inverted(turnEncoderInverted)
+    //     .positionConversionFactor(turnEncoderPositionFactor)
+    //     .velocityConversionFactor(turnEncoderVelocityFactor)
+    //     .averageDepth(2);
     turnConfig
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .feedbackSensor(FeedbackSensor.kNoSensor)
         .positionWrappingEnabled(true)
         .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-        .pid(turnKp, 0.0, turnKd);
-    turnConfig
-        .signals
-        .absoluteEncoderPositionAlwaysOn(true)
-        .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
-        .absoluteEncoderVelocityAlwaysOn(true)
-        .absoluteEncoderVelocityPeriodMs(20)
-        .appliedOutputPeriodMs(20)
-        .busVoltagePeriodMs(20)
-        .outputCurrentPeriodMs(20);
+        .pid(0.0, 0.0, 0.0);
+    
+    steePIDController.setPID(turnKp, 0.0, turnKd);
+            // .p
+    // turnConfig
+    //     .signals
+    //     .absoluteEncoderPositionAlwaysOn(true)
+    //     .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
+    //     .absoluteEncoderVelocityAlwaysOn(true)
+    //     .absoluteEncoderVelocityPeriodMs(20)
+    //     .appliedOutputPeriodMs(20)
+    //     .busVoltagePeriodMs(20)
+    //     .outputCurrentPeriodMs(20);
     SparkUtil.tryUntilOk(
         turnSpark,
         5,
@@ -175,7 +201,7 @@ public class ModuleIOReal implements ModuleIO {
     drivePositionQueue =
         odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
     turnPositionQueue =
-        odometryThread.getInstance().registerSignal(turnSpark, turnEncoder::getPosition);
+        odometryThread.getInstance().registerSignal(turnSpark, ()-> absoluteEncoder.getAbsolutePosition().getValueAsDouble());
 
     drivePosition = driveTalon.getPosition();
     driveVelocity = driveTalon.getVelocity();
@@ -209,20 +235,29 @@ public class ModuleIOReal implements ModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
+    
+
     // Update turn inputs
     SparkUtil.sparkStickyFault = false;
-    SparkUtil.ifOk(
-        turnSpark,
-        turnEncoder::getPosition,
-        (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation));
-    SparkUtil.ifOk(turnSpark, turnEncoder::getVelocity, (value) -> inputs.turnVelocityRadPerSec = value);
+    // SparkUtil.ifOk(
+    //     turnSpark,
+    //     turnEncoder::getPosition,
+    //     (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation));
+    // SparkUtil.ifOk(turnSpark, turnEncoder::getVelocity, (value) -> inputs.turnVelocityRadPerSec = value);
     SparkUtil.ifOk(
         turnSpark,
         new DoubleSupplier[] {turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
         (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
     SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
     inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
-
+    inputs.turnPosition =
+    
+    new Rotation2d(MathUtil.angleModulus(
+        Units.rotationsToRadians(
+            absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).plus(absoluteEncoderOffset);
+            
+            absoluteTurnPosition = inputs.turnPosition;
+    
     // Update odometry inputs
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
@@ -233,7 +268,7 @@ public class ModuleIOReal implements ModuleIO {
             .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
             .toArray(Rotation2d[]::new);
     timestampQueue.clear();
-    drivePositionQueue.clear();
+    // drivePositionQueue.clear();
     turnPositionQueue.clear();
   }
 
@@ -244,20 +279,23 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setTurnOpenLoop(double output) {
+    System.out.println(output);
     turnSpark.setVoltage(output);
-  }
+}
 
-  @Override
+@Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
     driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
-
+  
   @Override
   public void setTurnPosition(Rotation2d rotation) {
-    double setpoint =
-        MathUtil.inputModulus(
-            rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
-    turnController.setSetpoint(setpoint, ControlType.kPosition);
+      // System.out.println("Turn position: " + rotation);
+      double setpoint =
+      MathUtil.inputModulus(
+          rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
+    System.out.println(setpoint);
+     turnSpark.setVoltage(steePIDController.calculate(absoluteTurnPosition.getRadians(), setpoint));
   }
 }

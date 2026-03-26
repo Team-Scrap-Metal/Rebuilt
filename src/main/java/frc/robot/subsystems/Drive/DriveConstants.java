@@ -57,6 +57,12 @@ public class DriveConstants {
   public static final int frontRightTurnCanId = 10;
   public static final int backRightTurnCanId = 14;
 
+  
+  public static final int frontLeftAbsoluteCanId = 24;
+  public static final int backLeftAbsoluteCanId = 22;
+  public static final int frontRightAbsoluteCanId = 35;
+  public static final int backRightAbsoluteCanId = 33;
+
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 40;
   public static final int driveMotorSlipCurrent = 80;
@@ -94,7 +100,7 @@ public class DriveConstants {
   public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 2.0;
+  public static final double turnKp = 0.2;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

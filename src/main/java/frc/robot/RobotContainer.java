@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Feeder.*;
-import frc.robot.subsystems.Spindexer.*;
+// import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
 import frc.robot.commands.Shoot;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -39,7 +39,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
  */
 public class RobotContainer {
   private final Feeder m_feeder;
-  private final Spindexer m_spindexer;
+  // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
 
 
@@ -58,7 +58,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         m_feeder = new Feeder(new FeederIOSpark());
-        m_spindexer = new Spindexer(new SpindexerIOSpark());
+        // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
 
         drive =
@@ -72,7 +72,7 @@ public class RobotContainer {
 
       case SIM:
         m_feeder = new Feeder(new FeederIOSim());
-        m_spindexer = new Spindexer(new SpindexerIOSim());
+        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
 
         drive =
@@ -86,7 +86,7 @@ public class RobotContainer {
 
       default:
         m_feeder = new Feeder(new FeederIOSim());
-        m_spindexer = new Spindexer(new SpindexerIOSim());
+        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
 
 
@@ -133,24 +133,24 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    m_driverController
-      .rightTrigger()
-      .onTrue(
-        new Shoot(m_feeder, m_spindexer, m_shooter)
-      )
-      .onFalse(new ParallelCommandGroup(
-        new InstantCommand(
-          () ->
-            m_feeder.setFeederPercent(0),
-            m_feeder),
-        new InstantCommand(
-          () ->
-            m_spindexer.setSpindexerPercent(0),
-            m_spindexer),
-        new InstantCommand(
-          () ->
-            m_shooter.setShooterPercent(0),
-            m_shooter)));
+    // m_driverController
+    //   .rightTrigger()
+    //   .onTrue(
+    //     new Shoot(m_feeder, m_spindexer, m_shooter)
+    //   )
+    //   .onFalse(new ParallelCommandGroup(
+    //     new InstantCommand(
+    //       () ->
+    //         m_feeder.setFeederPercent(0),
+    //         m_feeder),
+    //     new InstantCommand(
+    //       () ->
+    //         m_spindexer.setSpindexerPercent(0),
+    //         m_spindexer),
+    //     new InstantCommand(
+    //       () ->
+    //         m_shooter.setShooterPercent(0),
+    //         m_shooter)));
 
 
         // Default command, normal field-relative drive
