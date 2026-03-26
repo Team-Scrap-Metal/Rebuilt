@@ -14,6 +14,12 @@ public final class ShooterConstants {
     public static final double KI = 0.0;
     public static final double KD = 0.0;
     public static final double KV = 0.0;
-    
+    public static final double SHOOTER_ANGLE = 19.11;
+    public static final double HUB_HEIGHT_IN = 72.0;
+    public static final double SHOOTER_HEIGHT_IN = 18.5;
+    public static final double WHEEL_RADIUS_M = 0.1;
+    public static final double GRAVITY_CONSTANT = 9.8;
+
+    public static final double SHOOTER_VELOCITY_COEFFICIENT = 1;
     // public static final int SHOOTING_PERCENT = 30;
 }

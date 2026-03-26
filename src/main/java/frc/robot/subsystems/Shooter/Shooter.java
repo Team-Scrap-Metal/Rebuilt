@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.subsystems.Shooter.ShooterConstants.*;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO m_io;
@@ -90,6 +91,23 @@ public class Shooter extends SubsystemBase {
 
   public void setShooterRPM (double rpm) {
     m_io.setShooterRPM(rpm);
+  }
+
+  public void shootFromDistance (double distance) {
+    distance = distance * 0.0254;
+
+    var targetVelocity = 
+      ShooterConstants.SHOOTER_VELOCITY_COEFFICIENT
+      *
+      Math.sqrt(
+        (ShooterConstants.GRAVITY_CONSTANT * Math.pow(distance, 2.0))
+        /
+        2*Math.pow(Math.cos(Math.toRadians(ShooterConstants.SHOOTER_ANGLE)), 2)*(distance*Math.tan(ShooterConstants.SHOOTER_ANGLE)-(ShooterConstants.HUB_HEIGHT_IN*0.0254-ShooterConstants.SHOOTER_HEIGHT_IN*0.0254))
+      );
+    
+    var targetAsRadians = targetVelocity / ShooterConstants.WHEEL_RADIUS_M;
+
+    setShooterRPM(targetAsRadians * 30/Math.PI);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Feeder.*;
 import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
-import frc.robot.commands.Shoot;
+import frc.robot.commands.Feed;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -136,7 +136,13 @@ public class RobotContainer {
     m_driverController
       .rightTrigger()
       .onTrue(
-        new Shoot(m_feeder, m_spindexer, m_shooter)
+        new ParallelCommandGroup(
+          new Feed(m_feeder, m_spindexer),
+          new  InstantCommand(
+            () ->
+            m_shooter.shootFromDistance(10)
+          )
+          )  
       )
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
