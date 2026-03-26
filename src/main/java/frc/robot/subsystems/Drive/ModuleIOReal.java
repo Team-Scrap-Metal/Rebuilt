@@ -42,6 +42,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -64,6 +65,8 @@ public class ModuleIOReal implements ModuleIO {
   private final TalonFX driveTalon;
   private final SparkBase turnSpark;
   private final Rotation2d absoluteEncoderOffset;
+  private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(0, 0, 0);
+  private final PIDController drivePIDController = new PIDController(0, 0, 0);
   private final PIDController steePIDController = new PIDController(0, 0, 0);
   private Rotation2d absoluteTurnPosition;
 
@@ -175,9 +178,12 @@ public class ModuleIOReal implements ModuleIO {
         .positionWrappingEnabled(true)
         .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
         .pid(0.0, 0.0, 0.0);
-    
-    steePIDController.setPID(turnKp, 0.0, turnKd);
-            // .p
+        
+        drivePIDController.setPID(driveKp, 0.0, driveKd);
+        driveFeedForward.setKs(driveKs);
+        driveFeedForward.setKv(driveKv);
+        steePIDController.setPID(turnKp, 0.0, turnKd);
+        // .p
     // turnConfig
     //     .signals
     //     .absoluteEncoderPositionAlwaysOn(true)
@@ -286,7 +292,9 @@ public class ModuleIOReal implements ModuleIO {
 @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-    driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
+        driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
+        drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    // driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
   
   @Override
