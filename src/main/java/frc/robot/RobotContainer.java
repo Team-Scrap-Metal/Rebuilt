@@ -14,6 +14,7 @@ import frc.robot.subsystems.Drive.ModuleIOSim;
 import frc.robot.subsystems.Drive.ModuleIOReal;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -51,6 +52,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub");
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -138,7 +141,7 @@ public class RobotContainer {
       .onTrue(
           new  InstantCommand(
             () ->
-            m_shooter.shootFromDistance(10)
+            m_shooter.shootFromDistance(shootDistanceInput.getAsDouble())
           )
       )
       .onFalse(new ParallelCommandGroup(
