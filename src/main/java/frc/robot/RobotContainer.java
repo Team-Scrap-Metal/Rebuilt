@@ -134,15 +134,22 @@ public class RobotContainer {
   private void configureBindings() {
 
     m_driverController
-      .rightTrigger()
+      .leftTrigger()
       .onTrue(
-        new ParallelCommandGroup(
-          new Feed(m_feeder, m_spindexer),
           new  InstantCommand(
             () ->
             m_shooter.shootFromDistance(10)
           )
-          )  
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter)));
+    m_driverController
+      .rightTrigger()
+      .onTrue(
+          new Feed(m_feeder, m_spindexer)
       )
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
@@ -152,11 +159,9 @@ public class RobotContainer {
         new InstantCommand(
           () ->
             m_spindexer.setSpindexerPercent(0),
-            m_spindexer),
-        new InstantCommand(
-          () ->
-            m_shooter.setShooterPercent(0),
-            m_shooter)));
+            m_spindexer)
+        )
+      );
 
 
         // Default command, normal field-relative drive
