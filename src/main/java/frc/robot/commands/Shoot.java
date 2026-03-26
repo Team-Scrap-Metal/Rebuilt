@@ -25,11 +25,11 @@ public class Shoot extends ParallelCommandGroup {
     addCommands(
         new InstantCommand(
           () ->
-            feeder.setFeederPercent(FeederConstants.FEEDING_PERCENT),
+            feeder.setFeederPercent(feeder.getTunedPercent()),
             feeder),
         new InstantCommand(
           () ->
-            spindexer.setSpindexerPercent(SpindexerConstants.INDEXING_PERCENT),
+            spindexer.setSpindexerPercent(spindexer.getTunedPercent()),
             spindexer),
         new InstantCommand(
           () ->

@@ -5,6 +5,7 @@
 package frc.robot.subsystems.Spindexer;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +14,7 @@ import frc.robot.Constants;
 public class Spindexer extends SubsystemBase {
   private final SpindexerIO io;
   private final SpindexerIOInputsAutoLogged inputs = new SpindexerIOInputsAutoLogged();
+  private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/SpindexerPercent", SpindexerConstants.INDEXING_PERCENT);
 
   public Spindexer(SpindexerIO io) {
     System.out.println("[Init] Creating Spindexer");
@@ -37,5 +39,9 @@ public class Spindexer extends SubsystemBase {
 
   public void setSpindexerPercent(int percent) {
     io.setSpindexerVoltage(((double)percent) / 100 * 12);
+  }
+
+  public int getTunedPercent() {
+    return (int)speedPercentInput.getAsDouble();
   }
 }
