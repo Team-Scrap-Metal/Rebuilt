@@ -36,7 +36,9 @@ public class ShooterIOSpark implements ShooterIO {
                 .d(ShooterConstants.KD)
                 .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
             .feedForward
+                .kS(ShooterConstants.KS)
                 .kV(ShooterConstants.KV);
+                // .kA(ShooterConstants.KA);
         followerConfig
             .apply(motorConfig)
             .follow(m_shooterMotor, ShooterConstants.FOLLOWER_INVERTED);
@@ -60,6 +62,7 @@ public class ShooterIOSpark implements ShooterIO {
 
     @Override 
     public void setShooterRPM (double rpm) {
+        System.out.println("Shooter rpm set to: " + rpm);
         m_shooterMotor.getClosedLoopController().setSetpoint(rpm, ControlType.kVelocity);
     }
 }

@@ -94,19 +94,28 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shootFromDistance (double distance) {
-    distance = distance * 0.0254;
+    double heightDiff = (ShooterConstants.HUB_HEIGHT_IN - ShooterConstants.SHOOTER_HEIGHT_IN) * 0.0254;
+    double angleRad = Math.toRadians(ShooterConstants.SHOOTER_ANGLE);
 
+    double denominatorPart = distance * Math.tan(angleRad) - heightDiff;
+
+    if (denominatorPart <= 0) {
+      System.out.println("Can't shoot");  
+      System.out.println("Denom: " + denominatorPart);  
+      return;
+    }
     var targetVelocity = 
       ShooterConstants.SHOOTER_VELOCITY_COEFFICIENT
       *
       Math.sqrt(
         (ShooterConstants.GRAVITY_CONSTANT * Math.pow(distance, 2.0))
         /
-        2*Math.pow(Math.cos(Math.toRadians(ShooterConstants.SHOOTER_ANGLE)), 2)*(distance*Math.tan(ShooterConstants.SHOOTER_ANGLE)-(ShooterConstants.HUB_HEIGHT_IN*0.0254-ShooterConstants.SHOOTER_HEIGHT_IN*0.0254))
+        (2*Math.pow(Math.cos(Math.toRadians(ShooterConstants.SHOOTER_ANGLE)), 2)*(distance*Math.tan(Math.toRadians(ShooterConstants.SHOOTER_ANGLE))-(ShooterConstants.HUB_HEIGHT_IN*0.0254-ShooterConstants.SHOOTER_HEIGHT_IN*0.0254)))
       );
     
     var targetAsRadians = targetVelocity / ShooterConstants.WHEEL_RADIUS_M;
 
+    System.out.println("shoot from distance: " + targetAsRadians);
     setShooterRPM(targetAsRadians * 30/Math.PI);
   }
 
