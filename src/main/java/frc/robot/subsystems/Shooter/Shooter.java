@@ -30,7 +30,6 @@ public class Shooter extends SubsystemBase {
   private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub", 15);
   private final LoggedNetworkNumber shootRpmInput = new LoggedNetworkNumber("/Tuning/ShooterRPM", 100);
 
-  private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/ShooterKP", ShooterConstants.KP)
     private final MutVoltage m_appliedVoltage;
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
     private final MutAngle m_angle;

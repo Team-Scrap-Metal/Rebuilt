@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -18,6 +20,18 @@ public class ShooterIOSpark implements ShooterIO {
     private final SparkBase m_shooterMotor;
     private final SparkBase m_shooterFollowerMotor;
     private final RelativeEncoder m_shooterEncoder;
+
+    private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/ShooterKP", ShooterConstants.KP);
+    private final LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/ShooterKI", ShooterConstants.KI);
+    private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/ShooterKD", ShooterConstants.KD);
+    private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/ShooterKS", ShooterConstants.KS);
+    private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/ShooterKV", ShooterConstants.KV);
+
+    private double lastKP = ShooterConstants.KP;
+    private double lastKI = ShooterConstants.KI;
+    private double lastKD = ShooterConstants.KD;
+    private double lastKS = ShooterConstants.KS;
+    private double lastKV = ShooterConstants.KV;
 
     public ShooterIOSpark() {
         m_shooterMotor = new SparkMax(ShooterConstants.CAN_ID, MotorType.kBrushless);
@@ -54,6 +68,37 @@ public class ShooterIOSpark implements ShooterIO {
         inputs.shooterVelocityRPM = m_shooterEncoder.getVelocity();
         inputs.shooterPosition = m_shooterEncoder.getPosition();
         inputs.shooterAppliedCurrent = m_shooterMotor.getOutputCurrent();
+
+        double newKP = kP.get();
+        double newKI = kI.get();
+        double newKD = kD.get();
+        double newKS = kS.get();
+        double newKV = kV.get();
+
+        if (newKP != lastKP || newKI != lastKI || newKD != lastKD 
+            || newKS != lastKS || newKV != lastKV) {
+
+            var config = new SparkMaxConfig();
+
+            config
+                .closedLoop
+                    .p(newKP)
+                    .i(newKI)
+                    .d(newKD)
+                    .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
+                .feedForward
+                    .kS(newKS)
+                    .kV(newKV);
+                    // .kA(ShooterConstants.KA);
+
+            m_shooterMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+
+            lastKP = newKP;
+            lastKI = newKI;
+            lastKD = newKD;
+            lastKS = newKS;
+            lastKV = newKV;
+        }
     }
 
     @Override
