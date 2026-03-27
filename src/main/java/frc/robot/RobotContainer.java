@@ -53,8 +53,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub");
-
+  // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -141,7 +140,7 @@ public class RobotContainer {
       .onTrue(
           new  InstantCommand(
             () ->
-            m_shooter.shootFromDistance(shootDistanceInput.getAsDouble())
+            m_shooter.shootFromDistance(m_shooter.getHubDistance())
           )
       )
       .onFalse(new ParallelCommandGroup(

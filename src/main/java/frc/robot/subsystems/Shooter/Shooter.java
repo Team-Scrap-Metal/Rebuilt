@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.MutAngle;
@@ -26,6 +27,8 @@ import frc.robot.subsystems.Shooter.ShooterConstants.*;
 public class Shooter extends SubsystemBase {
   private final ShooterIO m_io;
   private final ShooterIOInputsAutoLogged m_inputs = new ShooterIOInputsAutoLogged();
+  private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub", 15);
+
 
     private final MutVoltage m_appliedVoltage;
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
@@ -91,6 +94,9 @@ public class Shooter extends SubsystemBase {
 
   public void setShooterRPM (double rpm) {
     m_io.setShooterRPM(rpm);
+  }
+  public int getHubDistance() {
+    return (int)shootDistanceInput.getAsDouble();
   }
 
   public void shootFromDistance (double distance) {
