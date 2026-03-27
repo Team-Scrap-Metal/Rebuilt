@@ -51,6 +51,7 @@ public class ShooterIOSpark implements ShooterIO {
     public void updateInputs(ShooterIOInputs inputs) {
         inputs.shooterAppliedVolts = m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
         inputs.shooterVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_shooterEncoder.getVelocity());
+        inputs.shooterVelocityRPM = m_shooterEncoder.getVelocity();
         inputs.shooterPosition = m_shooterEncoder.getPosition();
         inputs.shooterAppliedCurrent = m_shooterMotor.getOutputCurrent();
     }
