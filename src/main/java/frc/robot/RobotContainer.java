@@ -42,6 +42,7 @@ public class RobotContainer {
   private final Feeder m_feeder;
   private final Spindexer m_spindexer;
   private final Shooter m_shooter;
+  private final Turret m_turret;
 
 
   private final Drive drive;
@@ -62,6 +63,8 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
+        m_turret = new Turret(new TurretIOSpark());
+        
 
         drive =
             new Drive(
@@ -76,6 +79,8 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
+        m_turret = new Turret(new TurretIOSim());
+        
 
         drive =
           new Drive(
@@ -90,7 +95,7 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-
+        m_turret = new Turret(new TurretIOSim());
 
         drive =
           new Drive(

@@ -5,6 +5,7 @@
 package frc.robot.subsystems.Intake.Roller;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,6 +16,7 @@ import frc.robot.subsystems.Intake.Roller.RollerIOInputsAutoLogged;
 public class Roller extends SubsystemBase {
   private final RollerIO m_io;
   private final RollerIOInputsAutoLogged m_inputs = new RollerIOInputsAutoLogged();
+  private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/SpindexerPercent", RollerConstants.INTAKING_ROLLER_PERCENT);
 
   public Roller(RollerIO io) {
     System.out.println("[Init] Creating Roller");
@@ -42,6 +44,11 @@ public class Roller extends SubsystemBase {
   }
 
   public void runRoller() {
-    setRollerPercent(RollerConstants.INTAKING_ROLLER_PERCENT);
+    setRollerPercent(getTunedPercent());
   }
+
+  public int getTunedPercent() {
+    return (int)speedPercentInput.getAsDouble();
+  }
+
 }
