@@ -26,11 +26,11 @@ public class TurretIOSpark implements TurretIO {
     private final SparkRelativeEncoder m_turretEncoder;
     private final SparkClosedLoopController m_turretClosedLoopController;
   
-    private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/ShooterKP", ShooterConstants.KP);
-    private final LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/ShooterKI", ShooterConstants.KI);
-    private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/ShooterKD", ShooterConstants.KD);
-    private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/ShooterKS", ShooterConstants.KS);
-    private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/ShooterKV", ShooterConstants.KV);
+    private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/Turret/TurretKP", TurretConstants.kP);
+    private final LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/Turret/TurretKI", TurretConstants.kI);
+    private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/Turret/TurretKD", TurretConstants.kD);
+    private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Turret/TurretKS", TurretConstants.kS);
+    private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Turret/TurretKV", TurretConstants.kV);
     
     private double lastKP = ShooterConstants.KP;
     private double lastKI = ShooterConstants.KI;
@@ -55,15 +55,14 @@ public class TurretIOSpark implements TurretIO {
             .outputRange(TurretConstants.kMinOutput, TurretConstants.kMaxOutput)
         .feedForward
             .kS(TurretConstants.kS)
-            .kV(TurretConstants.kV)
-            .kA(TurretConstants.kA);
+            .kV(TurretConstants.kV);
         motorConfig
         .encoder
             .positionConversionFactor(TurretConstants.POSITION_CONVERSION_FACTOR);
         motorConfig
         .softLimit
             .forwardSoftLimit(TurretConstants.FORWARD_SOFT_LIMIT)
-            .forwardSoftLimitEnabled(TurretConstants.BACKWARD_SOFT_LIMIT_ENABLED)
+            .forwardSoftLimitEnabled(TurretConstants.FORWARD_SOFT_LIMIT_ENABLED)
             .reverseSoftLimit(TurretConstants.BACKWARD_SOFT_LIMIT)
             .reverseSoftLimitEnabled(TurretConstants.BACKWARD_SOFT_LIMIT_ENABLED);
 
