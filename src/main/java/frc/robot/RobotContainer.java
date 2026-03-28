@@ -147,6 +147,7 @@ public class RobotContainer {
             () ->
             // m_shooter.shootFromDistance(m_shooter.getHubDistance())
             m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+            // m_shooter.setShooterVoltage(12)
           )
       )
       .onFalse(new ParallelCommandGroup(
