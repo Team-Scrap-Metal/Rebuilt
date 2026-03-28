@@ -4,17 +4,34 @@
 
 package frc.robot.subsystems.Turret;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import frc.robot.Constants;
 
 public class Turret extends SubsystemBase {
   private final TurretIO m_io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+  private final LoggedNetworkNumber something = new LoggedNetworkNumber("/Tuning/Turret/something", 200);
 
-  public Turret(TurretIO io) {
+  private final MutVoltage m_appliedVoltage;
+  private final MutAngle m_angle;
+
+
+  public Turret (TurretIO io) {
     System.out.println("[Init] Creating Turret");
     this.m_io = io;
+    m_appliedVoltage = Volts.mutable(0);
+    m_angle = Radians.mutable(0);
+    
   }
 
   @Override
@@ -35,5 +52,9 @@ public class Turret extends SubsystemBase {
 
   public void setTurretPercent(int percent) {
     m_io.setTurretVoltage(((double)percent) / 100 * 12);
+  }
+  public void setTurretPosition(float angle) {
+    m_io.setTurretPosition(angle);
+
   }
 }

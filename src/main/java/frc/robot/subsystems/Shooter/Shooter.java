@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void updateInputs () {
-    m_io.updateInputs(m_inputs);
+    m_io.updateInputs(m_inputs);  
   }
 
   public void setShooterVoltage(double volts) {

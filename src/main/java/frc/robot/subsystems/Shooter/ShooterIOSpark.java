@@ -33,6 +33,7 @@ public class ShooterIOSpark implements ShooterIO {
     private double lastKS = ShooterConstants.KS;
     private double lastKV = ShooterConstants.KV;
 
+    
     public ShooterIOSpark() {
         m_shooterMotor = new SparkMax(ShooterConstants.CAN_ID, MotorType.kBrushless);
         m_shooterFollowerMotor = new SparkMax(ShooterConstants.FOLLOWER_CAN_ID, MotorType.kBrushless);
