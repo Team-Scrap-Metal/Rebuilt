@@ -46,6 +46,7 @@ public class RobotContainer {
   private final Turret m_turret;
 
 
+
   private final Drive drive;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -143,7 +144,7 @@ public class RobotContainer {
     m_driverController
       .leftBumper()
       .onTrue(new InstantCommand(
-        () -> m_turret.setTurretPosition(10)      
+        () -> m_turret.setTurretPosition(90)     
       ));
     m_driverController
       .rightBumper()

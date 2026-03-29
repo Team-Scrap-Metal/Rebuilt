@@ -14,6 +14,7 @@ import com.revrobotics.spark.SparkRelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.Shooter.ShooterConstants;
@@ -31,7 +32,7 @@ public class TurretIOSpark implements TurretIO {
     private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/Turret/TurretKD", TurretConstants.kD);
     private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Turret/TurretKS", TurretConstants.kS);
     private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Turret/TurretKV", TurretConstants.kV);
-    
+    private final LoggedNetworkNumber Target_Pose = new LoggedNetworkNumber("/Tuning/Turret/SetPoint", 0);
     private double lastKP = ShooterConstants.KP;
     private double lastKI = ShooterConstants.KI;
     private double lastKD = ShooterConstants.KD;
@@ -113,7 +114,7 @@ public class TurretIOSpark implements TurretIO {
     }
     @Override
     public void setTurretPosition (float angle) {
-        System.out.println("Turret position set to: " + angle);
-        m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
+        System.out.println("Turret position set to: " + Target_Pose.get());
+        m_turretClosedLoopController.setSetpoint(Target_Pose.get(), ControlType.kPosition);
     }
 }

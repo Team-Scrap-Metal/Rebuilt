@@ -16,8 +16,8 @@ public final class TurretConstants {
     public static final double POSITION_CONVERSION_FACTOR = 360 / GEAR_RATIO;
     public static final boolean FORWARD_SOFT_LIMIT_ENABLED = true;
     public static final boolean BACKWARD_SOFT_LIMIT_ENABLED = true;
-    public static final double FORWARD_SOFT_LIMIT = 1;
-    public static final double BACKWARD_SOFT_LIMIT = 1;
+    public static final double FORWARD_SOFT_LIMIT = 90;
+    public static final double BACKWARD_SOFT_LIMIT = 0;
 
 
 
