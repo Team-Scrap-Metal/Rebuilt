@@ -9,6 +9,8 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
@@ -53,8 +55,19 @@ public class Turret extends SubsystemBase {
   public void setTurretPercent(int percent) {
     m_io.setTurretVoltage(((double)percent) / 100 * 12);
   }
-  public void setTurretPosition(float angle) {
+  public void setTurretPosition(double angle) {
     m_io.setTurretPosition(angle);
+  }
 
+  public Command setTurretPositionWithController(double joystickX, double joystickY) {
+    return Commands.run(
+      () -> {
+        double angle =  Math.atan2(joystickY, joystickX);
+        double magnitude = Math.pow(joystickX, 2) + Math.pow(joystickY, joystickX);
+
+        if (magnitude > .2) {
+          setTurretPosition(angle);
+        }
+      });
   }
 }

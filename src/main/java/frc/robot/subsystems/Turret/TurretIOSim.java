@@ -44,7 +44,7 @@ public class TurretIOSim implements TurretIO {
         m_motorSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
     }
     @Override
-    public void setTurretPosition(float angle) {
+    public void setTurretPosition(double angle) {
        m_motorSim.setAngle(angle); 
     }
 }

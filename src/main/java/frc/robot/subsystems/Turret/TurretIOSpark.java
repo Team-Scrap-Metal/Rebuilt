@@ -78,7 +78,7 @@ public class TurretIOSpark implements TurretIO {
     public void updateInputs(TurretIOInputs inputs) {
         inputs.turretAppliedVolts = m_turretMotor.getAppliedOutput() * m_turretMotor.getBusVoltage();
         inputs.turretVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_turretEncoder.getVelocity());
-        inputs.turretPosition = m_turretEncoder.getPosition();
+        inputs.turretPosition = Units.radiansToDegrees(m_turretEncoder.getPosition());
         inputs.turretAppliedCurrent = m_turretMotor.getOutputCurrent();
         double newKP = kP.get();
         double newKI = kI.get();
@@ -114,14 +114,8 @@ public class TurretIOSpark implements TurretIO {
         m_turretMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
     }
     @Override
-    public void setTurretPosition (float angle) {
+    public void setTurretPosition (double angle) {
         System.out.println("Turret position set to: " + Target_Pose.get());
         m_turretClosedLoopController.setSetpoint(Target_Pose.get(), ControlType.kPosition);
-    }
-    @Override
-    public void setTurretPositionWithController(double joystickX, double joystickY) {
-         double angle =  Math.atan(joystickY / joystickX);
-         double magnitude = Math.pow(joystickX, 2) + Math.pow(joystickY, joystickX);
-        
     }
 }

@@ -16,7 +16,7 @@ public interface TurretIO {
 
     public default void setTurretVoltage (double volts) {}
 
-    public default void setTurretPosition (float angle) {}
+    public default void setTurretPosition (double angle) {}
 
     public default void setTurretPositionWithController (double joystickX, double joystickY) {}
 }
