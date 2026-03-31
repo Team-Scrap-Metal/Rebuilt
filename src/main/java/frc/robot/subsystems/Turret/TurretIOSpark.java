@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.Shooter.ShooterConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -116,5 +117,11 @@ public class TurretIOSpark implements TurretIO {
     public void setTurretPosition (float angle) {
         System.out.println("Turret position set to: " + Target_Pose.get());
         m_turretClosedLoopController.setSetpoint(Target_Pose.get(), ControlType.kPosition);
+    }
+    @Override
+    public void setTurretPositionWithController(double joystickX, double joystickY) {
+         double angle =  Math.atan(joystickY / joystickX);
+         double magnitude = Math.pow(joystickX, 2) + Math.pow(joystickY, joystickX);
+        
     }
 }

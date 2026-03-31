@@ -52,6 +52,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final CommandXboxController m_auxiliaryController = 
+      new CommandXboxController(OperatorConstants.kAuxiliaryControllerPort);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -191,6 +193,12 @@ public class RobotContainer {
             () -> -m_driverController.getLeftY(),
             () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()));
+    m_turret.setDefaultCommand(
+      m_turret.setTurretPositionWithController(
+        m_auxiliaryController.getLeftX(),
+        m_auxiliaryController.getLeftY()
+      )
+    );
 
     // Lock to 0° when A button is held
     m_driverController
@@ -215,7 +223,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-
   }
 
   /**
