@@ -112,4 +112,5 @@ public class ShooterIOSpark implements ShooterIO {
         System.out.println("Shooter rpm set to: " + rpm);
         m_shooterMotor.getClosedLoopController().setSetpoint(rpm, ControlType.kVelocity);
     }
+  
 }

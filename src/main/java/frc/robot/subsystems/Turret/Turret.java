@@ -9,11 +9,15 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
+
+import java.util.function.DoubleSupplier;
+
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -58,19 +62,29 @@ public class Turret extends SubsystemBase {
   public void setTurretPosition(double angle) {
     m_io.setTurretPosition(angle);
   }
+  public void zeroEncoder () {
+    m_io.zeroEncoder();
+  }
 
-  public Command setTurretPositionWithController(Turret turret, double joystickX, double joystickY) {
+  public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY) {
     return Commands.run(
       () -> {
-        double angle =  Math.atan2(joystickY, joystickX);
-        double magnitude = Math.sqrt(Math.pow(joystickX, 2) + Math.pow(joystickY, 2));
+        double x = joystickX.getAsDouble();
+        double y = joystickY.getAsDouble();
+        System.out.println("JstickX: " + x + " JstickY: " + y);
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         System.out.println("Angle: " + angle + "\n");
         System.out.println("Magnitude: " + magnitude + "\n");
         if(magnitude > 0.1) {
-        setTurretPosition(angle);
+          setTurretPosition(angle);
         }
       },
       turret
       );
   }
+
+  // public void targetHub (Pose2d pose) {
+    
+  // }
 }

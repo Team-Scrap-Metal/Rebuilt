@@ -194,11 +194,12 @@ public class RobotContainer {
             () -> -m_driverController.getLeftY(),
             () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()));
+  
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
           m_turret,
-          m_auxiliaryController.getLeftX(),
-          m_auxiliaryController.getLeftY()
+          () -> m_auxiliaryController.getLeftX(),
+          () -> m_auxiliaryController.getLeftY()
       )
     );
 
@@ -236,7 +237,7 @@ public class RobotContainer {
         .a()
         .onTrue(
           Commands.runOnce (
-            () -> m_turret.setTurretPosition(10)
+             () -> m_turret.zeroEncoder()
           )
         );
     }

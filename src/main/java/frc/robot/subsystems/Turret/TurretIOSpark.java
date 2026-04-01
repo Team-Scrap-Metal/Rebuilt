@@ -115,7 +115,11 @@ public class TurretIOSpark implements TurretIO {
     }
     @Override
     public void setTurretPosition (double angle) {
-        System.out.println("Turret position set to: " + Target_Pose.get());
-        m_turretClosedLoopController.setSetpoint(Target_Pose.get(), ControlType.kPosition);
+        System.out.println("Turret position set to: " + angle);
+        m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
+    }
+    @Override
+    public void zeroEncoder() {
+        m_turretEncoder.setPosition(0);
     }
 }
