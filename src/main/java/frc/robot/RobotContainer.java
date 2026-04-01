@@ -14,6 +14,7 @@ import frc.robot.subsystems.Drive.ModuleIOSim;
 import frc.robot.subsystems.Drive.ModuleIOReal;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -28,8 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Feeder.*;
 import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
-import frc.robot.subsystems.Turret.*;
-import frc.robot.commands.Shoot;
+import frc.robot.commands.Feed;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -42,7 +42,7 @@ public class RobotContainer {
   private final Feeder m_feeder;
   private final Spindexer m_spindexer;
   private final Shooter m_shooter;
-  private final Turret m_turret;
+  // private final Turret m_turret;
 
 
   private final Drive drive;
@@ -54,6 +54,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -62,7 +63,7 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
-        m_turret = new Turret(new TurretIOSpark());
+        // m_turret = new Turret(new TurretIOSpark());
         
 
         drive =
@@ -78,7 +79,7 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_turret = new Turret(new TurretIOSim());
+        // m_turret = new Turret(new TurretIOSim());
         
 
         drive =
@@ -94,7 +95,7 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_turret = new Turret(new TurretIOSim());
+        // m_turret = new Turret(new TurretIOSim());
 
         drive =
           new Drive(
@@ -140,9 +141,23 @@ public class RobotContainer {
   private void configureBindings() {
 
     m_driverController
+      .leftTrigger()
+      .onTrue(
+          new  InstantCommand(
+            () ->
+            // m_shooter.shootFromDistance(m_shooter.getHubDistance())
+            m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+          )
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter)));
+    m_driverController
       .rightTrigger()
       .onTrue(
-        new Shoot(m_feeder, m_spindexer, m_shooter)
+          new Feed(m_feeder, m_spindexer)
       )
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
@@ -152,11 +167,9 @@ public class RobotContainer {
         new InstantCommand(
           () ->
             m_spindexer.setSpindexerPercent(0),
-            m_spindexer),
-        new InstantCommand(
-          () ->
-            m_shooter.setShooterPercent(0),
-            m_shooter)));
+            m_spindexer)
+        )
+      );
 
 
         // Default command, normal field-relative drive

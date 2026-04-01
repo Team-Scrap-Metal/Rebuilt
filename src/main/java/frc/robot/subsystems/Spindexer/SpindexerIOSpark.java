@@ -4,13 +4,13 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class SpindexerIOSpark implements SpindexerIO {
@@ -18,10 +18,10 @@ public class SpindexerIOSpark implements SpindexerIO {
     private final RelativeEncoder m_spindexerEncoder;
 
     public SpindexerIOSpark() {
-        m_spindexerMotor = new SparkMax(SpindexerConstants.CAN_ID, MotorType.kBrushless);
+        m_spindexerMotor = new SparkFlex(SpindexerConstants.CAN_ID, MotorType.kBrushless);
         m_spindexerEncoder = m_spindexerMotor.getEncoder();
 
-        var motorConfig = new SparkMaxConfig();
+        var motorConfig = new SparkFlexConfig();
         motorConfig
             .inverted(SpindexerConstants.INVERTED)
             .idleMode(IdleMode.kCoast)

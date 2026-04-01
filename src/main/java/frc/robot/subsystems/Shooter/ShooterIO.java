@@ -7,6 +7,7 @@ public interface ShooterIO {
     public static class ShooterIOInputs {
         public double shooterAppliedVolts = 0;
         public double shooterVelocityRadPerSec = 0;
+        public double shooterVelocityRPM = 0;
         public double shooterPosition = 0;
         public double shooterAppliedCurrent = 0;
     }
@@ -14,4 +15,6 @@ public interface ShooterIO {
     public default void updateInputs (ShooterIOInputs inputs) {}
 
     public default void setShooterVoltage (double volts) {}
+
+    public default void setShooterRPM (double rpm) {}
 }
