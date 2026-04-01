@@ -59,15 +59,18 @@ public class Turret extends SubsystemBase {
     m_io.setTurretPosition(angle);
   }
 
-  public Command setTurretPositionWithController(double joystickX, double joystickY) {
+  public Command setTurretPositionWithController(Turret turret, double joystickX, double joystickY) {
     return Commands.run(
       () -> {
         double angle =  Math.atan2(joystickY, joystickX);
-        double magnitude = Math.pow(joystickX, 2) + Math.pow(joystickY, joystickX);
-
-        if (magnitude > .2) {
-          setTurretPosition(angle);
+        double magnitude = Math.sqrt(Math.pow(joystickX, 2) + Math.pow(joystickY, 2));
+        System.out.println("Angle: " + angle + "\n");
+        System.out.println("Magnitude: " + magnitude + "\n");
+        if(magnitude > 0.1) {
+        setTurretPosition(angle);
         }
-      });
+      },
+      turret
+      );
   }
 }

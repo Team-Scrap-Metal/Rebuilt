@@ -196,6 +196,7 @@ public class RobotContainer {
             () -> -m_driverController.getRightX()));
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
+          m_turret,
           m_auxiliaryController.getLeftX(),
           m_auxiliaryController.getLeftY()
       )
@@ -224,7 +225,23 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-  }
+     m_auxiliaryController
+        .y()
+        .onTrue(
+            Commands.runOnce (
+             () -> m_turret.setTurretPosition(40)
+            )
+        );
+        m_auxiliaryController
+        .a()
+        .onTrue(
+          Commands.runOnce (
+            () -> m_turret.setTurretPosition(10)
+          )
+        );
+    }
+   
+            
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
