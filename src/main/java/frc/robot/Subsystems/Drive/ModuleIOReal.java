@@ -80,15 +80,15 @@ public class ModuleIOReal implements ModuleIO {
   private CANcoder absoluteEncoder;
 
   // Queue inputs from odometry thread
-  private final Queue<Double> timestampQueue;
+//   private final Queue<Double> timestampQueue;
 
   private final StatusSignal<Angle> drivePosition;
-  private final Queue<Double> drivePositionQueue;
+//   private final Queue<Double> drivePositionQueue;
   private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Voltage> driveAppliedVolts;
   private final StatusSignal<Current> driveCurrent;
 
-  private final Queue<Double> turnPositionQueue;
+//   private final Queue<Double> turnPositionQueue;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -202,13 +202,13 @@ public class ModuleIOReal implements ModuleIO {
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     // Create odometry queues
-    timestampQueue = odometryThread.getInstance().makeTimestampQueue();
+    // timestampQueue = odometryThread.getInstance().makeTimestampQueue();
   
     var drivePos = driveTalon.getPosition();
-    drivePositionQueue =
-        odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
-    turnPositionQueue =
-        odometryThread.getInstance().registerSignal(turnSpark, ()-> absoluteEncoder.getAbsolutePosition().getValueAsDouble());
+    // drivePositionQueue =
+    //     odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
+    // turnPositionQueue =
+    //     odometryThread.getInstance().registerSignal(turnSpark, ()-> absoluteEncoder.getAbsolutePosition().getValueAsDouble());
 
     drivePosition = driveTalon.getPosition();
     driveVelocity = driveTalon.getVelocity();
@@ -266,17 +266,17 @@ public class ModuleIOReal implements ModuleIO {
             absoluteTurnPosition = inputs.turnPosition;
     
     // Update odometry inputs
-    inputs.odometryTimestamps =
-        timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryTurnPositions =
-        turnPositionQueue.stream()
-            .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
-            .toArray(Rotation2d[]::new);
-    timestampQueue.clear();
+    // inputs.odometryTimestamps =
+    //     timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+    // inputs.odometryDrivePositionsRad =
+    //     drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+    // inputs.odometryTurnPositions =
+    //     turnPositionQueue.stream()
+    //         .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
+    //         .toArray(Rotation2d[]::new);
+    // timestampQueue.clear();
     // drivePositionQueue.clear();
-    turnPositionQueue.clear();
+    // turnPositionQueue.clear();
   }
 
   @Override
