@@ -25,11 +25,12 @@ public class Module {
 
   private final Alert driveDisconnectedAlert;
   private final Alert turnDisconnectedAlert;
-  private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
+  private SwerveModulePosition odometryPosition;
 
   public Module(ModuleIO io, int index) {
     this.io = io;
     this.index = index;
+    odometryPosition = new SwerveModulePosition();
     driveDisconnectedAlert =
         new Alert(
             "Disconnected drive motor on module " + Integer.toString(index) + ".",
@@ -44,13 +45,19 @@ public class Module {
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
     // Calculate positions for odometry
-    int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-    odometryPositions = new SwerveModulePosition[sampleCount];
-    for (int i = 0; i < sampleCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
-      Rotation2d angle = inputs.odometryTurnPositions[i];
-      odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-    }
+    // int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
+    // odometryPositions = new SwerveModulePosition[sampleCount];
+    // for (int i = 0; i < sampleCount; i++) {
+    //   double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
+    //   Rotation2d angle = inputs.odometryTurnPositions[i];
+    //   odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+    // }
+
+    odometryPosition =
+      new SwerveModulePosition(
+        inputs.drivePositionRad * wheelRadiusMeters,
+        inputs.turnPosition
+      );
 
     // Update alerts
     driveDisconnectedAlert.set(!inputs.driveConnected);
@@ -107,8 +114,8 @@ public class Module {
   }
 
   /** Returns the module positions received this cycle. */
-  public SwerveModulePosition[] getOdometryPositions() {
-    return odometryPositions;
+  public SwerveModulePosition getOdometryPosition() {
+    return odometryPosition;
   }
 
   /** Returns the timestamps of the samples received this cycle. */

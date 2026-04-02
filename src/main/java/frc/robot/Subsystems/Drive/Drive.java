@@ -44,6 +44,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
@@ -66,6 +67,9 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
+  private LoggedNetworkNumber[] ksInputs;
+  private LoggedNetworkNumber[] kvInputs;
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -78,6 +82,9 @@ public class Drive extends SubsystemBase {
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
 
+    ksInputs = new LoggedNetworkNumber[4];
+    kvInputs = new LoggedNetworkNumber[4];
+
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
@@ -85,21 +92,21 @@ public class Drive extends SubsystemBase {
     // odometryThread.getInstance().start();
 
     // Configure AutoBuilder for PathPlanner
-    // AutoBuilder.configure(
-    //     this::getPose,
-    //     this::setPose,
-    //     this::getChassisSpeeds,
-    //     this::runVelocity,
-    //     new PPHolonomicDriveController(
-    //         new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-    //     ppConfig,
-    //     () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-    //     this);
-    // Pathfinding.setPathfinder(new LocalADStarAK());
-    // PathPlannerLogging.setLogActivePathCallback(
-    //     (activePath) -> {
-    //       Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
-    //     });
+    AutoBuilder.configure(
+        this::getPose,
+        this::setPose,
+        this::getChassisSpeeds,
+        this::runVelocity,
+        new PPHolonomicDriveController(
+            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+        ppConfig,
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        this);
+    Pathfinding.setPathfinder(new LocalADStarAK());
+    PathPlannerLogging.setLogActivePathCallback(
+        (activePath) -> {
+          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+        });
 
 
     // Configure SysId
@@ -124,6 +131,7 @@ public class Drive extends SubsystemBase {
     }
     odometryLock.unlock();
 
+    
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
       for (var module : modules) {
@@ -138,27 +146,41 @@ public class Drive extends SubsystemBase {
     }
 
     // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
-    for (int i = 0; i < sampleCount; i++) {
+    // double[] sampleTimestamps =
+    //     modules[0].getOdometryTimestamps(); // All signals are sampled together
+    // int sampleCount = sampleTimestamps.length;
+    // for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
+      // SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+      // SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+      // for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+      //   modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+      //   moduleDeltas[moduleIndex] =
+      //       new SwerveModulePosition(
+      //           modulePositions[moduleIndex].distanceMeters
+      //               - lastModulePositions[moduleIndex].distanceMeters,
+      //           modulePositions[moduleIndex].angle);
+      //   lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+      // }
+
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-      }
 
+      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPosition();
+        moduleDeltas[moduleIndex] = 
+          new SwerveModulePosition(
+            modulePositions[moduleIndex].distanceMeters
+              - lastModulePositions[moduleIndex].distanceMeters,
+            modulePositions[moduleIndex].angle);
+        
+            lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+
+      }
       // Update gyro angle
       if (gyroInputs.connected) {
         // Use the real gyro angle
-        rawGyroRotation = gyroInputs.odometryYawPositions[i];
+        rawGyroRotation = gyroInputs.yawPosition;
       } else {
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
@@ -166,13 +188,12 @@ public class Drive extends SubsystemBase {
       }
 
       // Apply update
-      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      poseEstimator.update(rawGyroRotation, modulePositions);
+
+      // Update gyro alert
+      gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
     }
-
-    // Update gyro alert
-    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-  }
-
   /**
    * Runs the drive at the desired velocity.
    *

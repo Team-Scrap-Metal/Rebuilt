@@ -210,7 +210,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return m_shooter.runFullSysId();
-    // return autoChooser.get();
+    // return m_shooter.runFullSysId();
+    return autoChooser.get();
   }
 }

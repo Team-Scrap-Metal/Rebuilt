@@ -54,6 +54,8 @@ import static frc.robot.Subsystems.Drive.DriveConstants.*;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
  * and duty cycle absolute encoder.
@@ -83,12 +85,12 @@ public class ModuleIOReal implements ModuleIO {
 //   private final Queue<Double> timestampQueue;
 
   private final StatusSignal<Angle> drivePosition;
-//   private final Queue<Double> drivePositionQueue;
+  // private final Queue<Double> drivePositionQueue;
   private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Voltage> driveAppliedVolts;
   private final StatusSignal<Current> driveCurrent;
 
-//   private final Queue<Double> turnPositionQueue;
+  // private final Queue<Double> turnPositionQueue;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -268,9 +270,10 @@ public class ModuleIOReal implements ModuleIO {
     // Update odometry inputs
     // inputs.odometryTimestamps =
     //     timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryDrivePositionsRad =
-    //     drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryTurnPositions =
+    // inputs.odometryDrivePositionRad =
+    //     driveTalon.getPosition().getValueAsDouble();
+        // drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+    // inputs.odometryTurnPosition =
     //     turnPositionQueue.stream()
     //         .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
     //         .toArray(Rotation2d[]::new);
