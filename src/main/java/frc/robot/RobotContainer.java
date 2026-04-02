@@ -29,6 +29,9 @@ import frc.robot.subsystems.Feeder.*;
 import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
 import frc.robot.subsystems.Turret.*;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
+import frc.robot.subsystems.Vision.VisionIOLimelight;
 import frc.robot.commands.Shoot;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -43,6 +46,7 @@ public class RobotContainer {
   private final Spindexer m_spindexer;
   private final Shooter m_shooter;
   private final Turret m_turret;
+  private final Vision m_vision;
 
 
   private final Drive drive;
@@ -64,14 +68,15 @@ public class RobotContainer {
         m_shooter = new Shooter(new ShooterIOSpark());
         m_turret = new Turret(new TurretIOSpark());
         
-
+        
         drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOReal(0),
-                new ModuleIOReal(1),
-                new ModuleIOReal(2),
-                new ModuleIOReal(3));
+        new Drive(
+          new GyroIOPigeon2(),
+          new ModuleIOReal(0),
+          new ModuleIOReal(1),
+          new ModuleIOReal(2),
+          new ModuleIOReal(3));
+          m_vision = new Vision(new VisionIO() 
         break;
 
       case SIM:
