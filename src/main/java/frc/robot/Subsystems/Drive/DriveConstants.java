@@ -30,18 +30,18 @@ public class DriveConstants {
 
   
   public static final boolean[] driveInverted = new boolean[] {
-    false,
-    false,
-    false,
-    false
+    true,
+    true,
+    true,
+    true
   };
 
   // Zeroed rotation values for each module, see setup instructions
   // TODO: zero module values
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.728);
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-2.489);
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-1.594);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(-2.815);
 
   //TODO: can IDs
   // Device CAN IDs
@@ -81,8 +81,8 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.07;
-  public static final double driveKv = 0.12; //Lizard reccomended feedforward and PID :P
+  public static final double driveKs = 0.0;
+  public static final double driveKv = 0.0; //Lizard reccomended feedforward and PID :P
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -100,7 +100,7 @@ public class DriveConstants {
   public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 0.2;
+  public static final double turnKp = 0.0;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

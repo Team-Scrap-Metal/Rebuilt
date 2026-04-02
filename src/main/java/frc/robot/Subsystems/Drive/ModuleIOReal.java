@@ -183,6 +183,7 @@ public class ModuleIOReal implements ModuleIO {
         driveFeedForward.setKs(driveKs);
         driveFeedForward.setKv(driveKv);
         steePIDController.setPID(turnKp, 0.0, turnKd);
+        steePIDController.enableContinuousInput(-Math.PI, Math.PI);
         // .p
     // turnConfig
     //     .signals
@@ -260,7 +261,7 @@ public class ModuleIOReal implements ModuleIO {
     
     new Rotation2d(MathUtil.angleModulus(
         Units.rotationsToRadians(
-            absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).plus(absoluteEncoderOffset);
+            absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(absoluteEncoderOffset);
             
             absoluteTurnPosition = inputs.turnPosition;
     
@@ -304,6 +305,9 @@ public class ModuleIOReal implements ModuleIO {
       MathUtil.inputModulus(
           rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
     System.out.println(setpoint);
-     turnSpark.setVoltage(steePIDController.calculate(absoluteTurnPosition.getRadians(), setpoint));
+    turnSpark.setVoltage(
+        steePIDController
+            .calculate(absoluteTurnPosition.getRadians(), 0)
+            );
   }
 }
