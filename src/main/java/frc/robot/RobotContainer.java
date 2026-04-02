@@ -27,6 +27,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Feeder.*;
+import frc.robot.subsystems.Intake.Roller.*;
+import frc.robot.subsystems.Intake.Drum.*;
 import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
 import frc.robot.commands.Feed;
@@ -42,6 +44,8 @@ public class RobotContainer {
   private final Feeder m_feeder;
   private final Spindexer m_spindexer;
   private final Shooter m_shooter;
+  private final Drum m_drum;
+  private final Roller m_roller;
   // private final Turret m_turret;
 
 
@@ -63,6 +67,8 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
+        m_drum = new Drum(new DrumIOSpark());
+        m_roller = new Roller(new RollerIOSpark());
         // m_turret = new Turret(new TurretIOSpark());
         
 
@@ -79,6 +85,8 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
         // m_turret = new Turret(new TurretIOSim());
         
 
@@ -95,6 +103,8 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
         // m_turret = new Turret(new TurretIOSim());
 
         drive =
@@ -171,7 +181,20 @@ public class RobotContainer {
         )
       );
 
-
+    m_driverController
+      .leftBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumIntake(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller),
+        )
+      )
         // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
