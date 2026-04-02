@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -35,5 +39,15 @@ public final class Constants {
   }
 
   public static double MAX_VOLTAGE = 12;
+
+      /** Get Alliance (Blue, Red, Null) */
+    public static final Optional<Alliance> getAlliance() {
+      return DriverStation.getAlliance();
+    }
+
+    public static final boolean isAllianceRed() {
+
+      return DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? true : false;
+    }
 
 }

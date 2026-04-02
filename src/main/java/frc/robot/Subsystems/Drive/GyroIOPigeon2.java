@@ -25,8 +25,8 @@ import java.util.Queue;
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon = new Pigeon2(pigeonCanId);
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
-  private final Queue<Double> yawPositionQueue;
-  private final Queue<Double> yawTimestampQueue;
+  // private final Queue<Double> yawPositionQueue;
+  // private final Queue<Double> yawTimestampQueue;
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
@@ -35,11 +35,10 @@ public class GyroIOPigeon2 implements GyroIO {
     yaw.setUpdateFrequency(odometryFrequency);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
-    yawTimestampQueue = odometryThread.getInstance().makeTimestampQueue();
+    // yawTimestampQueue = odometryThread.getInstance().makeTimestampQueue();
     var yawClone = yaw.clone(); // Status signals are not thread-safe
-    yawPositionQueue =
-        odometryThread.getInstance()
-            .registerSignal(() -> yawClone.refresh().getValueAsDouble());
+    // yawPositionQueue =
+    //     yawClone.refresh().getValueAsDouble();
   }
 
   @Override
@@ -48,13 +47,13 @@ public class GyroIOPigeon2 implements GyroIO {
     inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
-    inputs.odometryYawTimestamps =
-        yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryYawPositions =
-        yawPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromDegrees(value))
-            .toArray(Rotation2d[]::new);
-    yawTimestampQueue.clear();
-    yawPositionQueue.clear();
+    // inputs.odometryYawTimestamps =
+    //     yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+    // inputs.odometryYawPositions =
+    //     yawPositionQueue.stream()
+    //         .map((Double value) -> Rotation2d.fromDegrees(value))
+    //         .toArray(Rotation2d[]::new);
+    // yawTimestampQueue.clear();
+    // yawPositionQueue.clear();
   }
 }
