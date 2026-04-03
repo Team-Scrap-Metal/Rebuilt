@@ -93,9 +93,11 @@ public class Turret extends SubsystemBase {
       double angle = Math.toDegrees(Math.atan2(y, x));
       double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
       double rAngle = pose2d.getRotation().getDegrees();
-      double new_angle = angle - rAngle;
+      System.out.println("Robot Angle: " + rAngle);
       // equals the angle minus the rotation
-      setTurretPosition(new_angle);
+      if (magnitude > 0.2) {
+      setTurretPosition(angle);
+      }
     },
     turret
     );
