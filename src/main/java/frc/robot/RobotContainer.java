@@ -192,9 +192,45 @@ public class RobotContainer {
           new InstantCommand(
             () ->
               m_roller.runRoller(),
-              m_roller),
-        )
-      )
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
+    m_driverController
+      .rightBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumLaunch(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
+
+
         // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
