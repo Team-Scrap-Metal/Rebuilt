@@ -41,7 +41,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Shoot;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -176,33 +175,34 @@ public class RobotContainer {
 
 
         // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -m_driverController.getLeftY(),
-            () -> -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()));
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -m_driverController.getLeftY(),
+    //         () -> -m_driverController.getLeftX(),
+    //         () -> -m_driverController.getRightX()));
   
     m_turret.setDefaultCommand(
-      m_turret.setTurretPositionWithController(
+      m_turret.setTurretPositionFieldOriented(
           m_turret,
           () -> m_auxiliaryController.getLeftX(),
-          () -> m_auxiliaryController.getLeftY()
+          () -> m_auxiliaryController.getLeftY(),
+          drive.getPose()
       )
     );
 
     // Lock to 0° when A button is held
-    m_driverController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -m_driverController.getLeftY(),
-                () -> -m_driverController.getLeftX(),
-                () -> Rotation2d.kZero));
+    // m_driverController
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -m_driverController.getLeftY(),
+    //             () -> -m_driverController.getLeftX(),
+    //             () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     m_driverController
@@ -221,6 +221,7 @@ public class RobotContainer {
              () -> m_turret.setTurretPosition(40)
             )
         );
+        /** Zero Turret Encoder */
         m_auxiliaryController
         .a()
         .onTrue(

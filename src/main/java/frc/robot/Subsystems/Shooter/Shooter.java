@@ -22,11 +22,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
-<<<<<<< HEAD:src/main/java/frc/robot/subsystems/Shooter/Shooter.java
-import frc.robot.subsystems.Shooter.ShooterConstants.*;
-=======
+import frc.robot.Subsystems.Shooter.ShooterConstants.*;
 import frc.robot.Subsystems.Shooter.ShooterIOInputsAutoLogged;
->>>>>>> DRIVE-TECH:src/main/java/frc/robot/Subsystems/Shooter/Shooter.java
+
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO m_io;

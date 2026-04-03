@@ -85,6 +85,21 @@ public class Turret extends SubsystemBase {
       );
   }
 
+  public Command setTurretPositionFieldOriented(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Pose2d pose2d) {
+    return Commands.run ( () -> {
+      double x = joystickX.getAsDouble();
+      double y = joystickY.getAsDouble();
+      System.out.println("JstickX: " + x + " JstickY: " + y);
+      double angle = Math.toDegrees(Math.atan2(y, x));
+      double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+      double rAngle = pose2d.getRotation().getDegrees();
+      double new_angle = angle - rAngle;
+      // equals the angle minus the rotation
+      setTurretPosition(new_angle);
+    },
+    turret
+    );
+  }
   // public void targetHub (Pose2d pose) {
     
   // }

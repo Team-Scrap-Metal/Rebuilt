@@ -1,8 +1,5 @@
-<<<<<<< HEAD:src/main/java/frc/robot/subsystems/Turret/TurretIOSpark.java
-  package frc.robot.subsystems.Turret;
-=======
+
 package frc.robot.Subsystems.Turret;
->>>>>>> DRIVE-TECH:src/main/java/frc/robot/Subsystems/Turret/TurretIOSpark.java
 
 import java.io.OutputStream;
 
@@ -22,7 +19,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
-import frc.robot.subsystems.Shooter.ShooterConstants;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -122,6 +119,11 @@ public class TurretIOSpark implements TurretIO {
         System.out.println("Turret position set to: " + angle);
         m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
     }
+    // @Override
+    // public void setTurretPositionFieldOriented (double angle) {
+    //     System.out.println("Turret position set to: " + angle);
+    //     m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
+    // }
     @Override
     public void zeroEncoder() {
         m_turretEncoder.setPosition(0);
