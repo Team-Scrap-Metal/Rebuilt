@@ -60,31 +60,6 @@ public class Module {
 
     
 
-    if (newKP != lastKP || newKI != lastKI || newKD != lastKD 
-    || newKS != lastKS || newKV != lastKV) {
-
-      var config = new SparkMaxConfig();
-
-      config
-          .closedLoop
-              .p(newKP)
-              .i(newKI)
-              .d(newKD)
-              .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
-          .feedForward
-              .kS(newKS)
-              .kV(newKV);
-              // .kA(ShooterConstants.KA);
-
-      m_shooterMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-
-      lastKP = newKP;
-      lastKI = newKI;
-      lastKD = newKD;
-      lastKS = newKS;
-      lastKV = newKV;
-  }
-
     odometryPosition =
       new SwerveModulePosition(
         inputs.drivePositionRad * wheelRadiusMeters,
@@ -101,7 +76,7 @@ public class Module {
     System.out.println("runnsetpoint");
     // Optimize velocity setpoint
     state.optimize(getAngle());
-    state.cosineScale(inputs.turnPosition);
+    state.cosineScale(getAngle());
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);

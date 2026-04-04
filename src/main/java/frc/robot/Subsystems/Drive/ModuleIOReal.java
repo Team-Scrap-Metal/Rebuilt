@@ -8,6 +8,7 @@
 package frc.robot.Subsystems.Drive;
 
 import frc.robot.util.SparkUtil;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 import frc.robot.util.PhoenixUtil;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -36,8 +37,11 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -61,15 +65,31 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * and duty cycle absolute encoder.
  */
 public class ModuleIOReal implements ModuleIO {
+
+  private final LoggedNetworkNumber DriveKpInput;
+  private final LoggedNetworkNumber DriveKdInput;
+  private final LoggedNetworkNumber DriveKsInput;
+  private final LoggedNetworkNumber DriveKvInput;
+
+  private final LoggedNetworkNumber TurnKpInput;
+  private final LoggedNetworkNumber TurnKdInput;
+
+  private final double lastDriveKp;
+  private final double lastDriveKd;
+  private final double lastDriveKs;
+  private final double lastDriveKv;
+  private final double lastTurnKp;
+  private final double lastTurnKd;
+
   private final Rotation2d zeroRotation;
 
   // Hardware objects
   private final TalonFX driveTalon;
   private final SparkBase turnSpark;
   private final Rotation2d absoluteEncoderOffset;
-  private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(0, 0, 0);
-  private final PIDController drivePIDController = new PIDController(0, 0, 0);
-  private final PIDController steePIDController = new PIDController(0, 0, 0);
+  private final SimpleMotorFeedforward driveFeedForward;
+  private final PIDController drivePIDController;
+  private final PIDController steerPIDController;
   private Rotation2d absoluteTurnPosition;
 
   // Voltage control requests
@@ -146,6 +166,25 @@ public class ModuleIOReal implements ModuleIO {
             default -> new Rotation2d();
         };
 
+    DriveKpInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKp", DriveConstants.driveKp[module]);
+    DriveKdInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKd", DriveConstants.driveKd[module]);
+    DriveKsInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKs", DriveConstants.driveKs[module]);
+    DriveKvInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKv", DriveConstants.driveKv[module]);   
+
+    TurnKpInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_TKp", DriveConstants.turnKp[module]);
+    TurnKdInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_TKd", DriveConstants.turnKd[module]);
+
+    lastDriveKp = DriveConstants.driveKp[module];
+    lastDriveKd = DriveConstants.driveKd[module];
+    lastDriveKs = DriveConstants.driveKs[module];
+    lastDriveKv = DriveConstants.driveKv[module];
+    lastTurnKp = DriveConstants.turnKp[module];
+    lastTurnKd = DriveConstants.turnKd[module];
+
+    drivePIDController = new PIDController(DriveConstants.driveKp[module], 0, DriveConstants.driveKd[module]);
+    driveFeedForward = new SimpleMotorFeedforward(DriveConstants.driveKs[module], DriveConstants.driveKv[module]);
+    steerPIDController = new PIDController(DriveConstants.turnKp[module], 0, DriveConstants.turnKd[module]);
+
     // turnEncoder = turnSpark.getAbsoluteEncoder();
     // driveController = driveTalon.getClosedLoopController();
     // turnController = turnSpark.getClosedLoopController();
@@ -181,11 +220,11 @@ public class ModuleIOReal implements ModuleIO {
         .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
         .pid(0.0, 0.0, 0.0);
         
-        drivePIDController.setPID(driveKp, 0.0, driveKd);
-        driveFeedForward.setKs(driveKs);
-        driveFeedForward.setKv(driveKv);
-        steePIDController.setPID(turnKp, 0.0, turnKd);
-        steePIDController.enableContinuousInput(-Math.PI, Math.PI);
+        drivePIDController.setPID(driveKp[module], 0.0, driveKd[module]);
+        driveFeedForward.setKs(driveKs[module]);
+        driveFeedForward.setKv(driveKv[module]);
+        steerPIDController.setPID(turnKp[module], 0.0, turnKd[module]);
+        steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
         // .p
     // turnConfig
     //     .signals
@@ -309,8 +348,42 @@ public class ModuleIOReal implements ModuleIO {
           rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
     System.out.println(setpoint);
     turnSpark.setVoltage(
-        steePIDController
-            .calculate(absoluteTurnPosition.getRadians(), 0)
+        steerPIDController
+            .calculate(absoluteTurnPosition.getRadians(), rotation.getRadians())
             );
+  }
+
+  public void updatePidInputs() {
+    double newDKp = DriveKpInput.get();
+    double newDKd = DriveKdInput.get();
+    double newDKs = DriveKsInput.get();
+    double newDKv = DriveKvInput.get();
+    double newTKp = TurnKpInput.get();
+    double newTKd = TurnKdInput.get();
+
+    if (newDKp != lastDriveKp || newDKd != lastDriveKd 
+        || newDKs != lastDriveKs || newDKv != lastDriveKv) {
+
+        var config = new SparkMaxConfig();
+
+        config
+            .closedLoop
+                .p(newDKp)
+                .i(0)
+                .d(newDKd)
+            .feedForward
+                .kS(newDKs)
+                .kV(newDKv);
+                // .kA(ShooterConstants.KA);
+
+        m_shooterMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        lastKP = newDKp;
+        lastKI = newTKp;
+        lastKD = newDKd;
+        lastKS = newDKs;
+        lastKV = newDKv;
+    }
+
   }
 }
