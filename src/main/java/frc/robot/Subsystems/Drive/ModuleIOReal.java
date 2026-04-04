@@ -213,18 +213,18 @@ public class ModuleIOReal implements ModuleIO {
     //     .positionConversionFactor(turnEncoderPositionFactor)
     //     .velocityConversionFactor(turnEncoderVelocityFactor)
     //     .averageDepth(2);
-    turnConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kNoSensor)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-        .pid(0.0, 0.0, 0.0);
+    // turnConfig
+    //     .closedLoop
+    //     .feedbackSensor(FeedbackSensor.kNoSensor)
+    //     .positionWrappingEnabled(true)
+    //     .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
+    //     .pid(0.0, 0.0, 0.0);
         
-        drivePIDController.setPID(driveKp[module], 0.0, driveKd[module]);
-        driveFeedForward.setKs(driveKs[module]);
-        driveFeedForward.setKv(driveKv[module]);
-        steerPIDController.setPID(turnKp[module], 0.0, turnKd[module]);
-        steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    drivePIDController.setPID(driveKp[module], 0.0, driveKd[module]);
+    driveFeedForward.setKs(driveKs[module]);
+    driveFeedForward.setKv(driveKv[module]);
+    steerPIDController.setPID(turnKp[module], 0.0, turnKd[module]);
+    steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
         // .p
     // turnConfig
     //     .signals
@@ -245,7 +245,6 @@ public class ModuleIOReal implements ModuleIO {
     // Create odometry queues
     // timestampQueue = odometryThread.getInstance().makeTimestampQueue();
   
-    var drivePos = driveTalon.getPosition();
     // drivePositionQueue =
     //     odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
     // turnPositionQueue =
@@ -299,13 +298,13 @@ public class ModuleIOReal implements ModuleIO {
     SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
     inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
     inputs.turnPosition =
+      new Rotation2d(MathUtil.angleModulus(
+          Units.rotationsToRadians(
+              absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(absoluteEncoderOffset);
+              
+    absoluteTurnPosition = inputs.turnPosition;
     
-    new Rotation2d(MathUtil.angleModulus(
-        Units.rotationsToRadians(
-            absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(absoluteEncoderOffset);
-            
-            absoluteTurnPosition = inputs.turnPosition;
-    
+    updatePidInputs();
     // Update odometry inputs
     // inputs.odometryTimestamps =
     //     timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
@@ -335,8 +334,10 @@ public class ModuleIOReal implements ModuleIO {
 @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-        driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
-        drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    
+    driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
+      drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    
     // driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
   
@@ -361,29 +362,17 @@ public class ModuleIOReal implements ModuleIO {
     double newTKp = TurnKpInput.get();
     double newTKd = TurnKdInput.get();
 
-    if (newDKp != lastDriveKp || newDKd != lastDriveKd 
-        || newDKs != lastDriveKs || newDKv != lastDriveKv) {
-
-        var config = new SparkMaxConfig();
-
-        config
-            .closedLoop
-                .p(newDKp)
-                .i(0)
-                .d(newDKd)
-            .feedForward
-                .kS(newDKs)
-                .kV(newDKv);
-                // .kA(ShooterConstants.KA);
-
-        m_shooterMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-
-        lastKP = newDKp;
-        lastKI = newTKp;
-        lastKD = newDKd;
-        lastKS = newDKs;
-        lastKV = newDKv;
+    if (newDKp != lastDriveKp || newDKd != lastDriveKd) {
+        drivePIDController.setPID(newDKp, 0, newDKd);
     }
 
+    if (newDKs != lastDriveKs || newDKd != lastDriveKs) {
+      driveFeedForward.setKs(newDKs);
+      driveFeedForward.setKv(newDKv);
+    }
+
+    if (newTKp != lastDriveKp || newTKd != newDKd) {
+      steerPIDController.setPID(newDKp, 0, newTKd);
+    }
   }
 }

@@ -70,7 +70,7 @@ public class PoseEstimator extends SubsystemBase {
   /**
    * @return the current pose in a Pose2d
    */
-  public Pose2d getCurrentPose2d() {
+  public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
   /**
