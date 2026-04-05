@@ -40,6 +40,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Shoot;
+import frc.robot.util.PathPlanner;
+import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -54,6 +56,8 @@ public class RobotContainer {
   private final Shooter m_shooter;
   private final Turret m_turret;
 
+  private final PathPlanner m_pathplanner;
+//   private final PoseEstimator m_poseEstimator;
 
   private final Drive drive;
   
@@ -115,6 +119,8 @@ public class RobotContainer {
               new ModuleIO() {});
         break;
     }
+
+    m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
         // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

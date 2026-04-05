@@ -74,12 +74,12 @@ public class ModuleIOReal implements ModuleIO {
   private final LoggedNetworkNumber TurnKpInput;
   private final LoggedNetworkNumber TurnKdInput;
 
-  private final double lastDriveKp;
-  private final double lastDriveKd;
-  private final double lastDriveKs;
-  private final double lastDriveKv;
-  private final double lastTurnKp;
-  private final double lastTurnKd;
+  private double lastDriveKp;
+  private double lastDriveKd;
+  private double lastDriveKs;
+  private double lastDriveKv;
+  private double lastTurnKp;
+  private double lastTurnKd;
 
   private final Rotation2d zeroRotation;
 
@@ -346,8 +346,9 @@ public class ModuleIOReal implements ModuleIO {
       // System.out.println("Turn position: " + rotation);
       double setpoint =
       MathUtil.inputModulus(
-          rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
+          rotation.minus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
     System.out.println(setpoint);
+    System.out.println("P value " + steerPIDController.getP());
     turnSpark.setVoltage(
         steerPIDController
             .calculate(absoluteTurnPosition.getRadians(), rotation.getRadians())
@@ -363,16 +364,25 @@ public class ModuleIOReal implements ModuleIO {
     double newTKd = TurnKdInput.get();
 
     if (newDKp != lastDriveKp || newDKd != lastDriveKd) {
-        drivePIDController.setPID(newDKp, 0, newDKd);
+      drivePIDController.setPID(newDKp, 0, newDKd);
+
+      lastDriveKp = newDKp;
+      lastDriveKd = newDKd;
     }
 
-    if (newDKs != lastDriveKs || newDKd != lastDriveKs) {
+    if (newDKs != lastDriveKs || newDKv != lastDriveKv) {
       driveFeedForward.setKs(newDKs);
       driveFeedForward.setKv(newDKv);
+
+      lastDriveKs = newDKs;
+      lastDriveKv = newDKv;
     }
 
-    if (newTKp != lastDriveKp || newTKd != newDKd) {
-      steerPIDController.setPID(newDKp, 0, newTKd);
+    if (newTKp != lastTurnKp || newTKd != lastTurnKd) {
+      steerPIDController.setPID(newTKp, 0, newTKd);
+
+      lastTurnKp = newTKp;
+      lastTurnKd = newTKd;
     }
   }
 }

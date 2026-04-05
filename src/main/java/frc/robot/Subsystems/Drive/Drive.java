@@ -312,6 +312,14 @@ public class Drive extends SubsystemBase {
     poseEstimator.resetPose(pose);
   }
 
+  public Rotation2d getRawGyroRotation() {
+    return rawGyroRotation;
+  }
+
+  public PoseEstimator getPoseEstimator() {
+    return poseEstimator;
+  }
+
   /** Adds a new timestamped vision measurement. */
   // public void addVisionMeasurement(
   //     Pose2d visionRobotPoseMeters,
