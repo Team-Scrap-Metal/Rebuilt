@@ -30,18 +30,22 @@ public class DriveConstants {
 
   
   public static final boolean[] driveInverted = new boolean[] {
-    true,
-    true,
-    true,
-    true
+    false,
+    false,
+    false,
+    false
   };
 
   // Zeroed rotation values for each module, see setup instructions
   // TODO: zero module values
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.728);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-2.489);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-1.594);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(-2.815);
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.523);
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.663);
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(1.525);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(0.319);
+  // public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.728);
+  // public static final Rotation2d frontRightZeroRotation = new Rotation2d(-2.489);
+  // public static final Rotation2d backLeftZeroRotation = new Rotation2d(-1.594);
+  // public static final Rotation2d backRightZeroRotation = new Rotation2d(-2.815);
 
   //TODO: can IDs
   // Device CAN IDs
@@ -92,16 +96,16 @@ public class DriveConstants {
     0.0
   };
   public static final double[] driveKs = new double[] {
-    0.0,
-    0.0,
-    0.0,
-    0.0
+    0.22,
+    0.22,
+    0.22,
+    0.22
   };
   public static final double[] driveKv = new double[] {
-    0.0,
-    0.0,
-    0.0,
-    0.0
+    0.108,
+    0.108,
+    0.108,
+    0.108
   }; 
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
@@ -134,8 +138,8 @@ public class DriveConstants {
   };
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;
-  public static final double turnPIDMinInput = 0; // Radians
-  public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
+  public static final double turnPIDMinInput = -Math.PI; // Radians
+  public static final double turnPIDMaxInput = Math.PI; // Radians
 
   // PathPlanner configuration
   public static final double robotMassKg = 74.088;

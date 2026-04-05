@@ -52,12 +52,14 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
@@ -118,6 +120,7 @@ public class ModuleIOReal implements ModuleIO {
   private final Debouncer turnConnectedDebounce =
       new Debouncer(0.5, Debouncer.DebounceType.kFalling);
 
+  private final int m_module;
   public ModuleIOReal(int module) {
     zeroRotation =
         switch (module) {
@@ -165,6 +168,7 @@ public class ModuleIOReal implements ModuleIO {
             case 3 ->  backRightZeroRotation;
             default -> new Rotation2d();
         };
+    m_module = module;
 
     DriveKpInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKp", DriveConstants.driveKp[module]);
     DriveKdInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKd", DriveConstants.driveKd[module]);
@@ -277,8 +281,8 @@ public class ModuleIOReal implements ModuleIO {
     // Update drive inputs
     SparkUtil.sparkStickyFault = false;
     inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
-    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
-    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
+    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble()) / driveMotorReduction;
+    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / driveMotorReduction;
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
@@ -344,11 +348,17 @@ public class ModuleIOReal implements ModuleIO {
   @Override
   public void setTurnPosition(Rotation2d rotation) {
       // System.out.println("Turn position: " + rotation);
-      double setpoint =
-      MathUtil.inputModulus(
-          rotation.minus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
-    System.out.println(setpoint);
-    System.out.println("P value " + steerPIDController.getP());
+    // double setpoint =
+    //   MathUtil.inputModulus(
+    //       rotation.minus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
+    // double setpoint = rotation.minus(zeroRotation).getRadians();
+    // double setpoint = MathUtil.angleModulus(rotation.getRadians() - zeroRotation.getRadians());
+    double setpoint = rotation.getRadians() - zeroRotation.getRadians();
+    // System.out.println("Current position " + absoluteTurnPosition.getRadians());
+    Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_zeroed", setpoint);
+    Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_raw", rotation.getRadians());
+    Logger.recordOutput("/Drive/Module_" + m_module + "_zero", zeroRotation);
+
     turnSpark.setVoltage(
         steerPIDController
             .calculate(absoluteTurnPosition.getRadians(), setpoint)
@@ -380,9 +390,10 @@ public class ModuleIOReal implements ModuleIO {
 
     if (newTKp != lastTurnKp || newTKd != lastTurnKd) {
       steerPIDController.setPID(newTKp, 0, newTKd);
-
+SmartDashboard.putNumber("TurnKP", steerPIDController.getP());
       lastTurnKp = newTKp;
       lastTurnKd = newTKd;
+      
     }
   }
 }
