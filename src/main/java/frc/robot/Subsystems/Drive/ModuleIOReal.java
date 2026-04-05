@@ -300,7 +300,7 @@ public class ModuleIOReal implements ModuleIO {
     inputs.turnPosition =
       new Rotation2d(MathUtil.angleModulus(
           Units.rotationsToRadians(
-              absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(absoluteEncoderOffset);
+              absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(zeroRotation);
               
     absoluteTurnPosition = inputs.turnPosition;
     
