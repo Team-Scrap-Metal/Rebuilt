@@ -336,7 +336,7 @@ public class ModuleIOReal implements ModuleIO {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
     
     driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
-      drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
     
     // driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
@@ -351,7 +351,7 @@ public class ModuleIOReal implements ModuleIO {
     System.out.println("P value " + steerPIDController.getP());
     turnSpark.setVoltage(
         steerPIDController
-            .calculate(absoluteTurnPosition.getRadians(), rotation.getRadians())
+            .calculate(absoluteTurnPosition.getRadians(), setpoint)
             );
   }
 
