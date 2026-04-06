@@ -227,13 +227,41 @@ public class RobotContainer {
     //          () -> m_turret.setTurretPosition(40)
     //         )
     //     );
+    // m_driverController
+    //   .y()
+    //   .onTrue(
+    //     Commands.runOnce (
+    //       () -> m_pivot.setPivotPosition(-10)
+    //     )
+    //   );
+
     m_driverController
-      .y()
+      .povUp()
       .onTrue(
-        Commands.runOnce (
-          () -> m_pivot.setPivotPosition(-10)
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(6),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(0),
+          m_pivot
         )
       );
+    m_driverController
+      .povDown()
+      .onTrue(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(-6),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(0),
+          m_pivot
+        )
+      );
+    
         /** Zero Turret Encoder */
         // m_auxiliaryController
         // .a()
