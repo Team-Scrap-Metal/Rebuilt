@@ -301,10 +301,10 @@ public class ModuleIOReal implements ModuleIO {
         (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
     SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
     inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
-    inputs.turnPosition =
-      new Rotation2d(MathUtil.angleModulus(
+    inputs.turnPosition = 
+      new Rotation2d(
           Units.rotationsToRadians(
-              absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(zeroRotation);
+              absoluteEncoder.getAbsolutePosition().getValueAsDouble())).minus(zeroRotation);
               
     absoluteTurnPosition = inputs.turnPosition;
     
@@ -352,16 +352,16 @@ public class ModuleIOReal implements ModuleIO {
     //   MathUtil.inputModulus(
     //       rotation.minus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
     // double setpoint = rotation.minus(zeroRotation).getRadians();
-    // double setpoint = MathUtil.angleModulus(rotation.getRadians() - zeroRotation.getRadians());
-    double setpoint = rotation.getRadians() - zeroRotation.getRadians();
+    // double setpoint = MathUtil.angleModulus(rotation.getRadians() - zeroRotation.getRadians())
+    // double setpoint = rotation.getRadians() - zeroRotation.getRadians();
     // System.out.println("Current position " + absoluteTurnPosition.getRadians());
-    Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_zeroed", setpoint);
-    Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_raw", rotation.getRadians());
-    Logger.recordOutput("/Drive/Module_" + m_module + "_zero", zeroRotation);
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_zeroed", setpoint);
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_raw", rotation.getRadians());
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_zero", zeroRotation);
 
     turnSpark.setVoltage(
         steerPIDController
-            .calculate(absoluteTurnPosition.getRadians(), setpoint)
+            .calculate(absoluteTurnPosition.getRadians(), MathUtil.angleModulus(rotation.getRadians()))
             );
   }
 

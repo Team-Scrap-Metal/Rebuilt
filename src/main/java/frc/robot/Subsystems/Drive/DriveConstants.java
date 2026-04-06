@@ -96,16 +96,16 @@ public class DriveConstants {
     0.0
   };
   public static final double[] driveKs = new double[] {
-    0.22,
-    0.22,
-    0.22,
-    0.22
+    0.179,
+    0.179,
+    0.179,
+    0.179
   };
   public static final double[] driveKv = new double[] {
-    0.108,
-    0.108,
-    0.108,
-    0.108
+    0.11,
+    0.11,
+    0.11,
+    0.11
   }; 
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
@@ -113,7 +113,7 @@ public class DriveConstants {
   public static final double driveSimKv = 0.0789;
 
   // Turn motor configuration
-  public static final boolean turnInverted = false;
+  public static final boolean turnInverted = true;
   public static final int turnMotorCurrentLimit = 20;
   public static final double turnMotorReduction = 18.75 / 1;
   public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
@@ -125,16 +125,16 @@ public class DriveConstants {
 
   // Turn PID configuration
   public static final double[] turnKp = new double[] {
-    0.0,
-    0.0,
-    0.0,
-    0.0
+    5.95,
+    5.95,
+    5.95,
+    5.95
   };
   public static final double[] turnKd = new double[] {
-    0.0,
-    0.0,
-    0.0,
-    0.0
+    0.1,
+    0.1,
+    0.1,
+    0.1
   };
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;
