@@ -5,13 +5,27 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Subsystems.Drive.Drive;
+import frc.robot.Subsystems.Drive.GyroIO;
+import frc.robot.Subsystems.Drive.GyroIOPigeon2;
+import frc.robot.Subsystems.Drive.ModuleIO;
+import frc.robot.Subsystems.Drive.ModuleIOReal;
+import frc.robot.Subsystems.Drive.ModuleIOSim;
+import frc.robot.Subsystems.Feeder.*;
+import frc.robot.Subsystems.Shooter.*;
+import frc.robot.Subsystems.Spindexer.*;
+import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Drive.Drive;
+import frc.robot.Subsystems.Drive.GyroIO;
+import frc.robot.Subsystems.Drive.GyroIOPigeon2;
+import frc.robot.Subsystems.Drive.ModuleIO;
+import frc.robot.Subsystems.Drive.ModuleIOReal;
+import frc.robot.Subsystems.Drive.ModuleIOSim;
+import frc.robot.Subsystems.Feeder.*;
+import frc.robot.Subsystems.Shooter.*;
+import frc.robot.Subsystems.Spindexer.*;
+import frc.robot.Subsystems.Turret.*;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Drive.Drive;
-import frc.robot.subsystems.Drive.GyroIO;
-import frc.robot.subsystems.Drive.GyroIOPigeon2;
-import frc.robot.subsystems.Drive.ModuleIO;
-import frc.robot.subsystems.Drive.ModuleIOSim;
-import frc.robot.subsystems.Drive.ModuleIOReal;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -32,6 +46,9 @@ import frc.robot.subsystems.Intake.Drum.*;
 import frc.robot.subsystems.Spindexer.*;
 import frc.robot.subsystems.Shooter.*;
 import frc.robot.commands.Feed;
+import frc.robot.commands.Shoot;
+import frc.robot.util.PathPlanner;
+import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -42,12 +59,14 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
  */
 public class RobotContainer {
   private final Feeder m_feeder;
-  private final Spindexer m_spindexer;
+  // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
   private final Drum m_drum;
   private final Roller m_roller;
   // private final Turret m_turret;
 
+  private final PathPlanner m_pathplanner;
+//   private final PoseEstimator m_poseEstimator;
 
   private final Drive drive;
   
@@ -65,7 +84,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         m_feeder = new Feeder(new FeederIOSpark());
-        m_spindexer = new Spindexer(new SpindexerIOSpark());
+        // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
         m_drum = new Drum(new DrumIOSpark());
         m_roller = new Roller(new RollerIOSpark());
@@ -83,7 +102,7 @@ public class RobotContainer {
 
       case SIM:
         m_feeder = new Feeder(new FeederIOSim());
-        m_spindexer = new Spindexer(new SpindexerIOSim());
+        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
@@ -101,7 +120,7 @@ public class RobotContainer {
 
       default:
         m_feeder = new Feeder(new FeederIOSim());
-        m_spindexer = new Spindexer(new SpindexerIOSim());
+        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
@@ -116,6 +135,8 @@ public class RobotContainer {
               new ModuleIO() {});
         break;
     }
+
+    m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
         // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -235,8 +256,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
+            () -> m_driverController.getLeftX(),
             () -> -m_driverController.getLeftY(),
-            () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()));
 
     // Lock to 0° when A button is held
@@ -272,7 +293,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return m_shooter.runFullSysId();
-    // return autoChooser.get();
+    // return m_shooter.runFullSysId();
+    return autoChooser.get();
   }
 }
