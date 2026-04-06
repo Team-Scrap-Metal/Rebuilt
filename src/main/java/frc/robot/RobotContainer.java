@@ -28,6 +28,7 @@ import frc.robot.Subsystems.Turret.*;
 import frc.robot.commands.DriveCommands;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -39,6 +40,12 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.Feeder.*;
+import frc.robot.subsystems.Intake.Roller.*;
+import frc.robot.subsystems.Intake.Drum.*;
+import frc.robot.subsystems.Spindexer.*;
+import frc.robot.subsystems.Shooter.*;
+import frc.robot.commands.Feed;
 import frc.robot.commands.Shoot;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
@@ -54,7 +61,9 @@ public class RobotContainer {
   private final Feeder m_feeder;
   // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
-  private final Turret m_turret;
+  private final Drum m_drum;
+  private final Roller m_roller;
+  // private final Turret m_turret;
 
   private final PathPlanner m_pathplanner;
 //   private final PoseEstimator m_poseEstimator;
@@ -68,6 +77,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -76,7 +86,9 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
-        m_turret = new Turret(new TurretIOSpark());
+        m_drum = new Drum(new DrumIOSpark());
+        m_roller = new Roller(new RollerIOSpark());
+        // m_turret = new Turret(new TurretIOSpark());
         
 
         drive =
@@ -92,7 +104,9 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_turret = new Turret(new TurretIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
+        // m_turret = new Turret(new TurretIOSim());
         
 
         drive =
@@ -108,7 +122,9 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_turret = new Turret(new TurretIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
+        // m_turret = new Turret(new TurretIOSim());
 
         drive =
           new Drive(
@@ -155,24 +171,85 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    // m_driverController
-    //   .rightTrigger()
-    //   .onTrue(
-    //     new Shoot(m_feeder, m_spindexer, m_shooter)
-    //   )
-    //   .onFalse(new ParallelCommandGroup(
-    //     new InstantCommand(
-    //       () ->
-    //         m_feeder.setFeederPercent(0),
-    //         m_feeder),
-    //     new InstantCommand(
-    //       () ->
-    //         m_spindexer.setSpindexerPercent(0),
-    //         m_spindexer),
-    //     new InstantCommand(
-    //       () ->
-    //         m_shooter.setShooterPercent(0),
-    //         m_shooter)));
+    m_driverController
+      .leftTrigger()
+      .onTrue(
+          new  InstantCommand(
+            () ->
+            // m_shooter.shootFromDistance(m_shooter.getHubDistance())
+            m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+          )
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter)));
+    m_driverController
+      .rightTrigger()
+      .onTrue(
+          new Feed(m_feeder, m_spindexer)
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_feeder.setFeederPercent(0),
+            m_feeder),
+        new InstantCommand(
+          () ->
+            m_spindexer.setSpindexerPercent(0),
+            m_spindexer)
+        )
+      );
+
+    m_driverController
+      .leftBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumIntake(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
+    m_driverController
+      .rightBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumLaunch(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
 
 
         // Default command, normal field-relative drive

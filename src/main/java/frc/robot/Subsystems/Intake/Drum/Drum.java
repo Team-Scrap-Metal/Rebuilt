@@ -5,6 +5,7 @@
 package frc.robot.Subsystems.Intake.Drum;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,6 +17,8 @@ import frc.robot.Subsystems.Intake.Drum.DrumIOInputsAutoLogged;
 public class Drum extends SubsystemBase {
   private final DrumIO m_io;
   private final DrumIOInputsAutoLogged m_inputs = new DrumIOInputsAutoLogged();
+  private final LoggedNetworkNumber speedLaunchPercentInput = new LoggedNetworkNumber("/Tuning/DrumLaunchPercent", DrumConstants.LAUNCHING_DRUM_PERCENT);
+  private final LoggedNetworkNumber speedIntakePercentInput = new LoggedNetworkNumber("/Tuning/DrumIntakePercent", DrumConstants.INTAKING_DRUM_PERCENT);
 
   public Drum(DrumIO io) {
     System.out.println("[Init] Creating Drum");
@@ -56,10 +59,18 @@ public class Drum extends SubsystemBase {
   // }
 
   public void drumIntake() {
-    setDrumPercent(DrumConstants.INTAKING_DRUM_PERCENT);
+    setDrumPercent(getTunedIntakePercent());
   }
 
   public void drumLaunch() {
-    setDrumPercent(DrumConstants.LAUNCHING_DRUM_PERCENT);
+    setDrumPercent(getTunedLaunchPercent());
+  }
+
+  public int getTunedIntakePercent() {
+    return (int)speedIntakePercentInput.getAsDouble();
+  }
+
+  public int getTunedLaunchPercent() {
+    return (int)speedLaunchPercentInput.getAsDouble();
   }
 }

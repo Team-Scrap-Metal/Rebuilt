@@ -17,24 +17,20 @@ import frc.robot.Subsystems.Spindexer.SpindexerConstants;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class Shoot extends ParallelCommandGroup {
+public class Feed extends ParallelCommandGroup {
   /** Creates a new Shoot. */
-  public Shoot(Feeder feeder, Spindexer spindexer, Shooter shooter) {
+  public Feed(Feeder feeder, Spindexer spindexer) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
         new InstantCommand(
           () ->
-            feeder.setFeederPercent(FeederConstants.FEEDING_PERCENT),
+            feeder.setFeederPercent(feeder.getTunedPercent()),
             feeder),
         new InstantCommand(
           () ->
-            spindexer.setSpindexerPercent(SpindexerConstants.INDEXING_PERCENT),
-            spindexer),
-        new InstantCommand(
-          () ->
-            shooter.setShooterPercent(ShooterConstants.SHOOTING_PERCENT),
-            shooter)
+            spindexer.setSpindexerPercent(spindexer.getTunedPercent()),
+            spindexer)
     );
   }
 }
