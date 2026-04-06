@@ -76,7 +76,8 @@ public class RobotContainer {
           new ModuleIOReal(1),
           new ModuleIOReal(2),
           new ModuleIOReal(3));
-          m_vision = new Vision(new VisionIO() 
+          
+        m_vision = new Vision(new VisionIO());
         break;
 
       case SIM:

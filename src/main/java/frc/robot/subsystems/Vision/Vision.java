@@ -140,7 +140,7 @@ public class Vision extends SubsystemBase {
     allRobotPoses.addAll(robotPoses);
     allRobotPosesAccepted.addAll(robotPosesAccepted);
     allRobotPosesRejected.addAll(robotPosesRejected);
-  }
+  
 
     // Log summary data
     Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
