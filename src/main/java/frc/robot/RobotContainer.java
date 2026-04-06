@@ -12,6 +12,8 @@ import frc.robot.Subsystems.Drive.ModuleIO;
 import frc.robot.Subsystems.Drive.ModuleIOReal;
 import frc.robot.Subsystems.Drive.ModuleIOSim;
 import frc.robot.Subsystems.Feeder.*;
+import frc.robot.Subsystems.Intake.Drum.*;
+import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
@@ -40,13 +42,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.Feeder.*;
-import frc.robot.subsystems.Intake.Roller.*;
-import frc.robot.subsystems.Intake.Drum.*;
-import frc.robot.subsystems.Spindexer.*;
-import frc.robot.subsystems.Shooter.*;
 import frc.robot.commands.Feed;
-import frc.robot.commands.Shoot;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -63,6 +59,7 @@ public class RobotContainer {
   private final Shooter m_shooter;
   private final Drum m_drum;
   private final Roller m_roller;
+  private final Spindexer m_spindexer;
   // private final Turret m_turret;
 
   private final PathPlanner m_pathplanner;
@@ -89,7 +86,7 @@ public class RobotContainer {
         m_drum = new Drum(new DrumIOSpark());
         m_roller = new Roller(new RollerIOSpark());
         // m_turret = new Turret(new TurretIOSpark());
-        
+        m_spindexer = new Spindexer(new SpindexerIOSpark());
 
         drive =
             new Drive(
@@ -107,7 +104,7 @@ public class RobotContainer {
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
         // m_turret = new Turret(new TurretIOSim());
-        
+        m_spindexer = new Spindexer(new SpindexerIOSim());
 
         drive =
           new Drive(
@@ -125,6 +122,7 @@ public class RobotContainer {
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
         // m_turret = new Turret(new TurretIOSim());
+        m_spindexer = new Spindexer(new SpindexerIOSim());
 
         drive =
           new Drive(
