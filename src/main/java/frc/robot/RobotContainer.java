@@ -25,6 +25,7 @@ import frc.robot.Subsystems.Feeder.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -54,6 +55,7 @@ public class RobotContainer {
   // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
   private final Turret m_turret;
+  private final Pivot m_pivot;
 
 
 
@@ -78,6 +80,7 @@ public class RobotContainer {
         // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
         m_turret = new Turret(new TurretIOSpark());
+        m_pivot = new Pivot(new PivotIOSpark());
         
 
         drive =
@@ -94,6 +97,7 @@ public class RobotContainer {
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
         m_turret = new Turret(new TurretIOSim());
+        m_pivot = new Pivot(new PivotIOSim());
         
 
         drive =
@@ -110,6 +114,7 @@ public class RobotContainer {
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
         m_turret = new Turret(new TurretIOSim());
+        m_pivot = new Pivot(new PivotIOSim());
 
         drive =
           new Drive(
@@ -214,6 +219,48 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    //  m_auxiliaryController
+    //     .y()
+    //     .onTrue(
+    //         Commands.runOnce (
+    //          () -> m_turret.setTurretPosition(40)
+    //         )
+    //     );
+    // m_driverController
+    //   .y()
+    //   .onTrue(
+    //     Commands.runOnce (
+    //       () -> m_pivot.setPivotPosition(-10)
+    //     )
+    //   );
+
+    m_driverController
+      .povUp()
+      .onTrue(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(6),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(0),
+          m_pivot
+        )
+      );
+    m_driverController
+      .povDown()
+      .onTrue(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(-6),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotVoltage(0),
+          m_pivot
+        )
+      );
+    
     /** Zero Turret Encoder */
     m_auxiliaryController
         .b()
