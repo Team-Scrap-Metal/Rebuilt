@@ -17,6 +17,9 @@ import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Vision.Vision;
+import frc.robot.Subsystems.Vision.VisionIO;
+import frc.robot.Subsystems.Vision.VisionIOLimelight;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIO;
 import frc.robot.Subsystems.Drive.GyroIOPigeon2;
@@ -45,14 +48,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Feed;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
-import frc.robot.subsystems.Feeder.*;
-import frc.robot.subsystems.Spindexer.*;
-import frc.robot.subsystems.Shooter.*;
-import frc.robot.subsystems.Turret.*;
-import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIO;
-import frc.robot.subsystems.Vision.VisionIOLimelight;
-import frc.robot.commands.Shoot;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -105,7 +100,10 @@ public class RobotContainer {
           new ModuleIOReal(2),
           new ModuleIOReal(3));
           
-        m_vision = new Vision(new VisionIO());
+        m_vision =
+            new Vision(
+                drive.getPoseEstimator()::addVisionMeasurement,
+                new VisionIOLimelight(drive::getRotation));
         break;
 
       case SIM:
@@ -124,6 +122,13 @@ public class RobotContainer {
               new ModuleIOSim(),
               new ModuleIOSim(),
               new ModuleIOSim());
+
+        m_vision = null;
+        // m_vision =
+        //   new Vision(
+        //       drive.getPoseEstimator()::addVisionMeasurement,
+        //       new VisionIOSim(drive::getRotation));
+
         break;
 
       default:
@@ -142,6 +147,8 @@ public class RobotContainer {
               new ModuleIO() {},
               new ModuleIO() {},
               new ModuleIO() {});
+
+        m_vision = null;
         break;
     }
 

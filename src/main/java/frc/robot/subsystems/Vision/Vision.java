@@ -5,9 +5,7 @@
 // license that can be found in the LICENSE file
 // at the root directory of this project.
 
-package frc.robot.subsystems.Vision;
-
-import static frc.robot.subsystems.Vision.VisionConstants.*;
+package frc.robot.Subsystems.Vision;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -19,7 +17,10 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Vision.VisionIO.PoseObservationType;
+import frc.robot.Subsystems.Vision.VisionIO.PoseObservationType;
+
+import static frc.robot.Subsystems.Vision.VisionConstants.*;
+
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -61,7 +62,7 @@ public class Vision extends SubsystemBase {
     List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
     // Update disconnected alert
-    disconnectedAlerts.set(!inputs.connected);
+    disconnectedAlert.set(!inputs.connected);
 
     // Initialize logging values
     List<Pose3d> tagPoses = new LinkedList<>();
