@@ -17,8 +17,8 @@ import frc.robot.Subsystems.Intake.Drum.DrumIOInputsAutoLogged;
 public class Drum extends SubsystemBase {
   private final DrumIO m_io;
   private final DrumIOInputsAutoLogged m_inputs = new DrumIOInputsAutoLogged();
-  private final LoggedNetworkNumber speedLaunchPercentInput = new LoggedNetworkNumber("/Tuning/DrumIntakePercent", DrumConstants.INTAKING_DRUM_PERCENT);
-  private final LoggedNetworkNumber speedIntakePercentInput = new LoggedNetworkNumber("/Tuning/DrumLaunchPercent", DrumConstants.LAUNCHING_DRUM_PERCENT);
+  private final LoggedNetworkNumber speedLaunchPercentInput = new LoggedNetworkNumber("/Tuning/DrumLaunchPercent", DrumConstants.LAUNCHING_DRUM_PERCENT);
+  private final LoggedNetworkNumber speedIntakePercentInput = new LoggedNetworkNumber("/Tuning/DrumIntakePercent", DrumConstants.INTAKING_DRUM_PERCENT);
 
   public Drum(DrumIO io) {
     System.out.println("[Init] Creating Drum");

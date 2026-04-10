@@ -39,7 +39,7 @@ public class PoseEstimator extends SubsystemBase {
     poseEstimator =
         new SwerveDrivePoseEstimator(
             new SwerveDriveKinematics(DriveConstants.moduleTranslations),
-            drive.getRotation(),
+            drive.getRawGyroRotation(),
             drive.getModulePositions(),
             new Pose2d(new Translation2d(), new Rotation2d()),
             stateStandardDevs,
@@ -52,7 +52,7 @@ public class PoseEstimator extends SubsystemBase {
   public void periodic() {
     // When ran on the real robot it would overload the command scheduler, causing input delay from
     // joystick to driving
-    field2d.setRobotPose(getCurrentPose2d());
+    field2d.setRobotPose(getPose());
     poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRotation(), drive.getModulePositions());
 
@@ -70,7 +70,7 @@ public class PoseEstimator extends SubsystemBase {
   /**
    * @return the current pose in a Pose2d
    */
-  public Pose2d getCurrentPose2d() {
+  public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
   /**

@@ -12,6 +12,8 @@ import frc.robot.Subsystems.Drive.ModuleIO;
 import frc.robot.Subsystems.Drive.ModuleIOReal;
 import frc.robot.Subsystems.Drive.ModuleIOSim;
 import frc.robot.Subsystems.Feeder.*;
+import frc.robot.Subsystems.Intake.Drum.*;
+import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
@@ -42,6 +44,9 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.Feed;
+import frc.robot.util.PathPlanner;
+import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
@@ -54,10 +59,15 @@ public class RobotContainer {
   private final Feeder m_feeder;
   // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
+  private final Drum m_drum;
+  private final Roller m_roller;
+  private final Spindexer m_spindexer;
   private final Turret m_turret;
   private final Pivot m_pivot;
 
 
+  private final PathPlanner m_pathplanner;
+//   private final PoseEstimator m_poseEstimator;
 
   private final Drive drive;
   
@@ -79,9 +89,11 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
+        m_drum = new Drum(new DrumIOSpark());
+        m_roller = new Roller(new RollerIOSpark());
         m_turret = new Turret(new TurretIOSpark());
         m_pivot = new Pivot(new PivotIOSpark());
-        
+        m_spindexer = new Spindexer(new SpindexerIOSpark());
 
         drive =
             new Drive(
@@ -96,9 +108,11 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
         m_turret = new Turret(new TurretIOSim());
         m_pivot = new Pivot(new PivotIOSim());
-        
+        m_spindexer = new Spindexer(new SpindexerIOSim());
 
         drive =
           new Drive(
@@ -111,9 +125,11 @@ public class RobotContainer {
 
       default:
         m_feeder = new Feeder(new FeederIOSim());
-        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
+        m_drum = new Drum(new DrumIOSim());
+        m_roller = new Roller(new RollerIOSim());
         m_turret = new Turret(new TurretIOSim());
+        m_spindexer = new Spindexer(new SpindexerIOSim());
         m_pivot = new Pivot(new PivotIOSim());
 
         drive =
@@ -125,6 +141,8 @@ public class RobotContainer {
               new ModuleIO() {});
         break;
     }
+
+    m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
         // Set up auto routines
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -159,33 +177,94 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    // m_driverController
-    //   .rightTrigger()
-    //   .onTrue(
-    //     new Shoot(m_feeder, m_spindexer, m_shooter)
-    //   )
-    //   .onFalse(new ParallelCommandGroup(
-    //     new InstantCommand(
-    //       () ->
-    //         m_feeder.setFeederPercent(0),
-    //         m_feeder),
-    //     new InstantCommand(
-    //       () ->
-    //         m_spindexer.setSpindexerPercent(0),
-    //         m_spindexer),
-    //     new InstantCommand(
-    //       () ->
-    //         m_shooter.setShooterPercent(0),
-    //         m_shooter)));
+    m_driverController
+      .leftTrigger()
+      .onTrue(
+          new  InstantCommand(
+            () ->
+            // m_shooter.shootFromDistance(m_shooter.getHubDistance())
+            m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+          )
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter)));
+    m_driverController
+      .rightTrigger()
+      .onTrue(
+          new Feed(m_feeder, m_spindexer)
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_feeder.setFeederPercent(0),
+            m_feeder),
+        new InstantCommand(
+          () ->
+            m_spindexer.setSpindexerPercent(0),
+            m_spindexer)
+        )
+      );
+
+    m_driverController
+      .leftBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumIntake(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
+    m_driverController
+      .rightBumper()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.drumLaunch(),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.runRoller(),
+              m_roller)
+        ))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () ->
+              m_drum.setDrumPercent(0),
+              m_drum),
+          new InstantCommand(
+            () ->
+              m_roller.setRollerPercent(0),
+              m_roller)
+          ));
 
 
         // Default command, normal field-relative drive
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> -m_driverController.getLeftY(),
-    //         () -> -m_driverController.getLeftX(),
-    //         () -> -m_driverController.getRightX()));
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> m_driverController.getLeftX(),
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getRightX()));
   
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
@@ -196,18 +275,7 @@ public class RobotContainer {
       )
     );
 
-    // Lock to 0° when A button is held
-    // m_driverController
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -m_driverController.getLeftY(),
-    //             () -> -m_driverController.getLeftX(),
-    //             () -> Rotation2d.kZero));
 
-    // Switch to X pattern when X button is pressed
-    // m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     m_driverController
@@ -219,20 +287,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    //  m_auxiliaryController
-    //     .y()
-    //     .onTrue(
-    //         Commands.runOnce (
-    //          () -> m_turret.setTurretPosition(40)
-    //         )
-    //     );
-    // m_driverController
-    //   .y()
-    //   .onTrue(
-    //     Commands.runOnce (
-    //       () -> m_pivot.setPivotPosition(-10)
-    //     )
-    //   );
 
     m_driverController
       .povUp()
@@ -287,7 +341,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return m_shooter.runFullSysId();
-    // return autoChooser.get();
+    // return m_shooter.runFullSysId();
+    return autoChooser.get();
   }
 }

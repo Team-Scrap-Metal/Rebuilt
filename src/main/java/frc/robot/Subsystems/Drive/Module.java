@@ -13,10 +13,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Subsystems.Drive.ModuleIOInputsAutoLogged;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import org.littletonrobotics.junction.Logger;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class Module {
   private final ModuleIO io;
@@ -25,11 +30,12 @@ public class Module {
 
   private final Alert driveDisconnectedAlert;
   private final Alert turnDisconnectedAlert;
-  private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
+  private SwerveModulePosition odometryPosition;
 
   public Module(ModuleIO io, int index) {
     this.io = io;
     this.index = index;
+    odometryPosition = new SwerveModulePosition();
     driveDisconnectedAlert =
         new Alert(
             "Disconnected drive motor on module " + Integer.toString(index) + ".",
@@ -44,13 +50,21 @@ public class Module {
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
     // Calculate positions for odometry
-    int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-    odometryPositions = new SwerveModulePosition[sampleCount];
-    for (int i = 0; i < sampleCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
-      Rotation2d angle = inputs.odometryTurnPositions[i];
-      odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-    }
+    // int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
+    // odometryPositions = new SwerveModulePosition[sampleCount];
+    // for (int i = 0; i < sampleCount; i++) {
+    //   double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
+    //   Rotation2d angle = inputs.odometryTurnPositions[i];
+    //   odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+    // }
+
+    
+
+    odometryPosition =
+      new SwerveModulePosition(
+        inputs.drivePositionRad * wheelRadiusMeters,
+        inputs.turnPosition
+      );
 
     // Update alerts
     driveDisconnectedAlert.set(!inputs.driveConnected);
@@ -62,7 +76,7 @@ public class Module {
     System.out.println("runnsetpoint");
     // Optimize velocity setpoint
     state.optimize(getAngle());
-    state.cosineScale(inputs.turnPosition);
+    state.cosineScale(getAngle());
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);
@@ -107,8 +121,8 @@ public class Module {
   }
 
   /** Returns the module positions received this cycle. */
-  public SwerveModulePosition[] getOdometryPositions() {
-    return odometryPositions;
+  public SwerveModulePosition getOdometryPosition() {
+    return odometryPosition;
   }
 
   /** Returns the timestamps of the samples received this cycle. */

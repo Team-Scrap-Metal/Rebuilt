@@ -8,6 +8,7 @@
 package frc.robot.Subsystems.Drive;
 
 import frc.robot.util.SparkUtil;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 import frc.robot.util.PhoenixUtil;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -36,8 +37,11 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -48,26 +52,46 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
  * and duty cycle absolute encoder.
  */
 public class ModuleIOReal implements ModuleIO {
+
+  private final LoggedNetworkNumber DriveKpInput;
+  private final LoggedNetworkNumber DriveKdInput;
+  private final LoggedNetworkNumber DriveKsInput;
+  private final LoggedNetworkNumber DriveKvInput;
+
+  private final LoggedNetworkNumber TurnKpInput;
+  private final LoggedNetworkNumber TurnKdInput;
+
+  private double lastDriveKp;
+  private double lastDriveKd;
+  private double lastDriveKs;
+  private double lastDriveKv;
+  private double lastTurnKp;
+  private double lastTurnKd;
+
   private final Rotation2d zeroRotation;
 
   // Hardware objects
   private final TalonFX driveTalon;
   private final SparkBase turnSpark;
   private final Rotation2d absoluteEncoderOffset;
-  private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(0, 0, 0);
-  private final PIDController drivePIDController = new PIDController(0, 0, 0);
-  private final PIDController steePIDController = new PIDController(0, 0, 0);
+  private final SimpleMotorFeedforward driveFeedForward;
+  private final PIDController drivePIDController;
+  private final PIDController steerPIDController;
   private Rotation2d absoluteTurnPosition;
 
   // Voltage control requests
@@ -83,12 +107,12 @@ public class ModuleIOReal implements ModuleIO {
 //   private final Queue<Double> timestampQueue;
 
   private final StatusSignal<Angle> drivePosition;
-//   private final Queue<Double> drivePositionQueue;
+  // private final Queue<Double> drivePositionQueue;
   private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Voltage> driveAppliedVolts;
   private final StatusSignal<Current> driveCurrent;
 
-//   private final Queue<Double> turnPositionQueue;
+  // private final Queue<Double> turnPositionQueue;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -96,6 +120,7 @@ public class ModuleIOReal implements ModuleIO {
   private final Debouncer turnConnectedDebounce =
       new Debouncer(0.5, Debouncer.DebounceType.kFalling);
 
+  private final int m_module;
   public ModuleIOReal(int module) {
     zeroRotation =
         switch (module) {
@@ -143,6 +168,26 @@ public class ModuleIOReal implements ModuleIO {
             case 3 ->  backRightZeroRotation;
             default -> new Rotation2d();
         };
+    m_module = module;
+
+    DriveKpInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKp", DriveConstants.driveKp[module]);
+    DriveKdInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKd", DriveConstants.driveKd[module]);
+    DriveKsInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKs", DriveConstants.driveKs[module]);
+    DriveKvInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_DKv", DriveConstants.driveKv[module]);   
+
+    TurnKpInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_TKp", DriveConstants.turnKp[module]);
+    TurnKdInput = new LoggedNetworkNumber("/Tuning/Drive/Module_" + module + "_TKd", DriveConstants.turnKd[module]);
+
+    lastDriveKp = DriveConstants.driveKp[module];
+    lastDriveKd = DriveConstants.driveKd[module];
+    lastDriveKs = DriveConstants.driveKs[module];
+    lastDriveKv = DriveConstants.driveKv[module];
+    lastTurnKp = DriveConstants.turnKp[module];
+    lastTurnKd = DriveConstants.turnKd[module];
+
+    drivePIDController = new PIDController(DriveConstants.driveKp[module], 0, DriveConstants.driveKd[module]);
+    driveFeedForward = new SimpleMotorFeedforward(DriveConstants.driveKs[module], DriveConstants.driveKv[module]);
+    steerPIDController = new PIDController(DriveConstants.turnKp[module], 0, DriveConstants.turnKd[module]);
 
     // turnEncoder = turnSpark.getAbsoluteEncoder();
     // driveController = driveTalon.getClosedLoopController();
@@ -172,18 +217,18 @@ public class ModuleIOReal implements ModuleIO {
     //     .positionConversionFactor(turnEncoderPositionFactor)
     //     .velocityConversionFactor(turnEncoderVelocityFactor)
     //     .averageDepth(2);
-    turnConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kNoSensor)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-        .pid(0.0, 0.0, 0.0);
+    // turnConfig
+    //     .closedLoop
+    //     .feedbackSensor(FeedbackSensor.kNoSensor)
+    //     .positionWrappingEnabled(true)
+    //     .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
+    //     .pid(0.0, 0.0, 0.0);
         
-        drivePIDController.setPID(driveKp, 0.0, driveKd);
-        driveFeedForward.setKs(driveKs);
-        driveFeedForward.setKv(driveKv);
-        steePIDController.setPID(turnKp, 0.0, turnKd);
-        steePIDController.enableContinuousInput(-Math.PI, Math.PI);
+    drivePIDController.setPID(driveKp[module], 0.0, driveKd[module]);
+    driveFeedForward.setKs(driveKs[module]);
+    driveFeedForward.setKv(driveKv[module]);
+    steerPIDController.setPID(turnKp[module], 0.0, turnKd[module]);
+    steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
         // .p
     // turnConfig
     //     .signals
@@ -204,7 +249,6 @@ public class ModuleIOReal implements ModuleIO {
     // Create odometry queues
     // timestampQueue = odometryThread.getInstance().makeTimestampQueue();
   
-    var drivePos = driveTalon.getPosition();
     // drivePositionQueue =
     //     odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
     // turnPositionQueue =
@@ -237,8 +281,8 @@ public class ModuleIOReal implements ModuleIO {
     // Update drive inputs
     SparkUtil.sparkStickyFault = false;
     inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
-    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
-    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
+    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble()) / driveMotorReduction;
+    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / driveMotorReduction;
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
@@ -257,20 +301,21 @@ public class ModuleIOReal implements ModuleIO {
         (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
     SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
     inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
-    inputs.turnPosition =
+    inputs.turnPosition = 
+      new Rotation2d(
+          Units.rotationsToRadians(
+              absoluteEncoder.getAbsolutePosition().getValueAsDouble())).minus(zeroRotation);
+              
+    absoluteTurnPosition = inputs.turnPosition;
     
-    new Rotation2d(MathUtil.angleModulus(
-        Units.rotationsToRadians(
-            absoluteEncoder.getAbsolutePosition().getValueAsDouble()))).minus(absoluteEncoderOffset);
-            
-            absoluteTurnPosition = inputs.turnPosition;
-    
+    updatePidInputs();
     // Update odometry inputs
     // inputs.odometryTimestamps =
     //     timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryDrivePositionsRad =
-    //     drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryTurnPositions =
+    // inputs.odometryDrivePositionRad =
+    //     driveTalon.getPosition().getValueAsDouble();
+        // drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+    // inputs.odometryTurnPosition =
     //     turnPositionQueue.stream()
     //         .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
     //         .toArray(Rotation2d[]::new);
@@ -293,21 +338,62 @@ public class ModuleIOReal implements ModuleIO {
 @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-        driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
-        drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    
+    driveTalon.setVoltage(driveFeedForward.calculate(velocityRadPerSec) + 
+    drivePIDController.calculate(Units.rotationsToRadians(driveVelocity.getValueAsDouble()), velocityRadPerSec));
+    
     // driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
   
   @Override
   public void setTurnPosition(Rotation2d rotation) {
       // System.out.println("Turn position: " + rotation);
-      double setpoint =
-      MathUtil.inputModulus(
-          rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
-    System.out.println(setpoint);
+    // double setpoint =
+    //   MathUtil.inputModulus(
+    //       rotation.minus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
+    // double setpoint = rotation.minus(zeroRotation).getRadians();
+    // double setpoint = MathUtil.angleModulus(rotation.getRadians() - zeroRotation.getRadians())
+    // double setpoint = rotation.getRadians() - zeroRotation.getRadians();
+    // System.out.println("Current position " + absoluteTurnPosition.getRadians());
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_zeroed", setpoint);
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_setpoint_raw", rotation.getRadians());
+    // Logger.recordOutput("/Drive/Module_" + m_module + "_zero", zeroRotation);
+
     turnSpark.setVoltage(
-        steePIDController
-            .calculate(absoluteTurnPosition.getRadians(), 0)
+        steerPIDController
+            .calculate(absoluteTurnPosition.getRadians(), MathUtil.angleModulus(rotation.getRadians()))
             );
+  }
+
+  public void updatePidInputs() {
+    double newDKp = DriveKpInput.get();
+    double newDKd = DriveKdInput.get();
+    double newDKs = DriveKsInput.get();
+    double newDKv = DriveKvInput.get();
+    double newTKp = TurnKpInput.get();
+    double newTKd = TurnKdInput.get();
+
+    if (newDKp != lastDriveKp || newDKd != lastDriveKd) {
+      drivePIDController.setPID(newDKp, 0, newDKd);
+
+      lastDriveKp = newDKp;
+      lastDriveKd = newDKd;
+    }
+
+    if (newDKs != lastDriveKs || newDKv != lastDriveKv) {
+      driveFeedForward.setKs(newDKs);
+      driveFeedForward.setKv(newDKv);
+
+      lastDriveKs = newDKs;
+      lastDriveKv = newDKv;
+    }
+
+    if (newTKp != lastTurnKp || newTKd != lastTurnKd) {
+      steerPIDController.setPID(newTKp, 0, newTKd);
+SmartDashboard.putNumber("TurnKP", steerPIDController.getP());
+      lastTurnKp = newTKp;
+      lastTurnKd = newTKd;
+      
+    }
   }
 }

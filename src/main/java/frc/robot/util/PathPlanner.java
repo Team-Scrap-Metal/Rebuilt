@@ -32,7 +32,7 @@ public class PathPlanner extends SubsystemBase {
 
     SmartDashboard.putString("Running PathPlanner", "running");
     AutoBuilder.configure(
-        pose::getCurrentPose2d,
+        pose::getPose,
         pose::resetPose,
         drive::getChassisSpeeds,
         drive::runVelocity,
