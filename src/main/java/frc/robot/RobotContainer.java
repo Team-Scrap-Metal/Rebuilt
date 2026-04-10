@@ -292,12 +292,12 @@ public class RobotContainer {
       .povUp()
       .onTrue(
         new InstantCommand(()->
-          m_pivot.setPivotVoltage(6),
+          m_pivot.runPivot(true),
           m_pivot
         ))
       .onFalse(
         new InstantCommand(()->
-          m_pivot.setPivotVoltage(0),
+          m_pivot.setPivotPercent(0),
           m_pivot
         )
       );
@@ -305,12 +305,12 @@ public class RobotContainer {
       .povDown()
       .onTrue(
         new InstantCommand(()->
-          m_pivot.setPivotVoltage(-6),
+          m_pivot.runPivot(false),
           m_pivot
         ))
       .onFalse(
         new InstantCommand(()->
-          m_pivot.setPivotVoltage(0),
+          m_pivot.setPivotPercent(0),
           m_pivot
       ));
 
