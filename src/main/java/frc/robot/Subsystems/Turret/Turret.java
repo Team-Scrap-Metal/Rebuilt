@@ -10,6 +10,7 @@ import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -67,7 +68,7 @@ public class Turret extends SubsystemBase {
     m_io.zeroEncoder();
   }
 
-  public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY) {
+  public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Rotation2d robotRotation) {
     return Commands.run(
       () -> {
         double x = joystickX.getAsDouble();
@@ -78,29 +79,17 @@ public class Turret extends SubsystemBase {
         System.out.println("Angle: " + angle + "\n");
         System.out.println("Magnitude: " + magnitude + "\n");
         if(magnitude > 0.1) {
-          setTurretPosition(angle);
+          setTurretPositionFieldOriented(angle, robotRotation);
         }
       },
       turret
       );
   }
 
-  public Command setTurretPositionFieldOriented(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Pose2d pose2d) {
-    return Commands.run ( () -> {
-      double x = joystickX.getAsDouble();
-      double y = joystickY.getAsDouble();
-      System.out.println("JstickX: " + x + " JstickY: " + y);
-      double angle = Math.toDegrees(Math.atan2(y, x));
-      double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-      double rAngle = pose2d.getRotation().getDegrees();
-      System.out.println("Robot Angle: " + rAngle);
-      // equals the angle minus the rotation
-      if (magnitude > 0.2) {
-      setTurretPosition(angle);
-      }
-    },
-    turret
-    );
+  public void setTurretPositionFieldOriented(double angle, Rotation2d robotRot) {
+    var calculatedAngle = angle - robotRot.getDegrees();
+
+    setTurretPosition(calculatedAngle);
   }
   // public void targetHub (Pose2d pose) {
     
