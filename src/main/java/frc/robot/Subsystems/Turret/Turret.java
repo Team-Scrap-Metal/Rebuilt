@@ -91,6 +91,10 @@ public class Turret extends SubsystemBase {
 
     setTurretPosition(calculatedAngle);
   }
+                                   
+  public void setTurretPositionWithCoordinates(double fieldTargetX, double targetFieldY, Rotation2d robotRot) {
+
+  }
   // public void targetHub (Pose2d pose) {
     
   // }
