@@ -258,8 +258,15 @@ public class RobotContainer {
         new InstantCommand(()->
           m_pivot.setPivotVoltage(0),
           m_pivot
-        )
-      );
+      ));
+
+    m_driverController
+      .a()
+      .onTrue(
+        new InstantCommand(
+          () -> m_pivot.togglePassiveDown(),
+          m_pivot
+      ));
     
     /** Zero Turret Encoder */
     m_auxiliaryController

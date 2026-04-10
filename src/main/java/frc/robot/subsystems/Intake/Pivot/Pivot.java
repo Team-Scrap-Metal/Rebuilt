@@ -17,6 +17,7 @@ import frc.robot.Constants;
 public class Pivot extends SubsystemBase {
   private final PivotIO m_io;
   private final PivotIOInputsAutoLogged m_inputs = new PivotIOInputsAutoLogged();
+  private boolean m_passiveToggled = false;
   
   public Pivot(PivotIO io) {
     System.out.println("[Init] Creating Pivot");
@@ -47,18 +48,16 @@ public class Pivot extends SubsystemBase {
     m_io.setPivotPosition(angle);
   }
 
-  // public void runPivot () {
-  //   switch (PivotConstants.currentState) {
-  //     case INTAKING:
-  //       setPivotPercent(PivotConstants.INTAKING_DRUM_PERCENT);
-  //       break;
-  //     case LAUNCHING:
-  //       setPivotPercent(PivotConstants.LAUNCHING_DRUM_PERCENT);
-  //       break;
-  //     default:
-  //       setPivotPercent(PivotConstants.INTAKING_DRUM_PERCENT);
-  //   }
-  // }
+  /**
+   * Run pivot at default speeds
+   * @param up Set to true to run pivot up
+   */
+  public void runPivot (boolean up) {
+    setPivotPercent(up ? PivotConstants.PIVOTING_PERCENT : -PivotConstants.PIVOTING_PERCENT);
+  }
 
- 
+  public void togglePassiveDown () {
+    m_passiveToggled = !m_passiveToggled;
+    setPivotPercent(m_passiveToggled ? -PivotConstants.PASSIVE_PERCENT : 0);
+  }
 }

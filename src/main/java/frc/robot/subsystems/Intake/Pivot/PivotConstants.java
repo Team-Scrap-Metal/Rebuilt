@@ -16,4 +16,6 @@ public final class PivotConstants {
     public static final double PIVOT_STARTING_ANGLE = -10;
     public static final double MAX_VELOCITY = 0.8;
     public static final double MAX_ACCELERATION = 0.4;
+    public static final int PIVOTING_PERCENT = 50;
+    public static final int PASSIVE_PERCENT = 25;
 }
