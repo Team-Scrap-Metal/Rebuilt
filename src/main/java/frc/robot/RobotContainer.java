@@ -36,6 +36,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -43,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Feed;
+import frc.robot.commands.ZeroAll;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -282,6 +284,10 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
+    disabled().onTrue(
+      new ZeroAll(drive, m_feeder, m_drum, m_roller, m_shooter, m_spindexer)
+    );
+
   }
 
   /**
@@ -293,5 +299,9 @@ public class RobotContainer {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
     return autoChooser.get();
+  }
+
+  private static Trigger disabled() {
+    return new Trigger(DriverStation::isDisabled);
   }
 }
