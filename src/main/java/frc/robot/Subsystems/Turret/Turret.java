@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,6 +25,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import frc.robot.Constants;
 import frc.robot.Subsystems.Turret.TurretIOInputsAutoLogged;
+import frc.robot.Subsystems.Turret.TurretConstants.*;
 
 public class Turret extends SubsystemBase {
   private final TurretIO m_io;
@@ -92,8 +94,25 @@ public class Turret extends SubsystemBase {
     setTurretPosition(calculatedAngle);
   }
                                    
-  public void setTurretPositionWithCoordinates(double fieldTargetX, double targetFieldY, Rotation2d robotRot) {
+  public void setTurretPositionWithCoordinates(Translation2d targetCoordinates, Pose2d robotPose) {
+    // 1. Get turret position in field coordinates
+    Translation2d turretPosFieldRelative = robotPose.getTranslation()
+        .plus(TurretConstants.TURRET_POSITION_ROBOT_RELATIVE_M.rotateBy(robotPose.getRotation()));
 
+    // 2. Vector from turret to target
+    Translation2d turretToTarget = targetCoordinates.minus(turretPosFieldRelative);
+
+    // 3. Field-relative angle to target
+    Rotation2d fieldAngle = turretToTarget.getAngle();
+
+    // 4. Convert to robot-relative
+    Rotation2d angleRobotRelative = fieldAngle.minus(robotPose.getRotation());
+
+    setTurretPosition(angleRobotRelative.getDegrees());
+  }
+
+  public void targetHub(Pose2d robotPose) {
+    setTurretPositionWithCoordinates(TurretConstants.HUB_POSITION_M, robotPose);
   }
   // public void targetHub (Pose2d pose) {
     

@@ -78,7 +78,7 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kAuxiliaryControllerPort);
 
   // Dashboard inputs
-  // private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
@@ -144,8 +144,8 @@ public class RobotContainer {
 
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
-        // Set up auto routines
-    // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    // Set up auto routines
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // // Set up SysId routines
     // autoChooser.addOption(
@@ -180,17 +180,23 @@ public class RobotContainer {
     m_driverController
       .leftTrigger()
       .onTrue(
-          new  InstantCommand(
+        new ParallelCommandGroup(
+          new InstantCommand(
             () ->
             // m_shooter.shootFromDistance(m_shooter.getHubDistance())
-            m_shooter.setShooterRPM(m_shooter.getTunedRPM())
-          )
-      )
+            m_shooter.setShooterRPM(m_shooter.getTunedRPM())), 
+          new InstantCommand(
+            () -> m_turret.targetHub(drive.getPose()),
+            m_turret)))
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
           () ->
             m_shooter.setShooterPercent(0),
-            m_shooter)));
+            m_shooter),
+        new InstantCommand(
+          () -> m_turret.setTurretPercent(0),
+          m_turret
+        )));
     m_driverController
       .rightTrigger()
       .onTrue(
