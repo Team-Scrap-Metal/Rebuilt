@@ -28,5 +28,5 @@ public final class TurretConstants {
         = new Translation2d(Units.inchesToMeters(-4.85), Units.inchesToMeters(-8.6)); // center-to-center from center of spindexer shaft -> center of turret
 
     public static final Translation2d HUB_POSITION_M 
-        = new Translation2d(1,1); // TODO: update
+        = new Translation2d(4.62534, 4.03479); // TODO: update
 }
