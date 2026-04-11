@@ -180,23 +180,15 @@ public class RobotContainer {
     m_driverController
       .leftTrigger()
       .onTrue(
-        new ParallelCommandGroup(
           new InstantCommand(
             () ->
             // m_shooter.shootFromDistance(m_shooter.getHubDistance())
-            m_shooter.setShooterRPM(m_shooter.getTunedRPM())), 
-          new InstantCommand(
-            () -> m_turret.targetHub(drive.getPose()),
-            m_turret)))
-      .onFalse(new ParallelCommandGroup(
+            m_shooter.setShooterRPM(m_shooter.getTunedRPM())))
+      .onFalse(
         new InstantCommand(
           () ->
             m_shooter.setShooterPercent(0),
-            m_shooter),
-        new InstantCommand(
-          () -> m_turret.setTurretPercent(0),
-          m_turret
-        )));
+            m_shooter));
     m_driverController
       .rightTrigger()
       .onTrue(
@@ -281,6 +273,17 @@ public class RobotContainer {
       )
     );
 
+    m_driverController
+      .leftTrigger()
+      .whileTrue(
+        Commands.run(
+          () -> m_turret.targetHub(drive.getPose()),
+          m_turret))
+      .onFalse(
+        new InstantCommand(
+          () -> m_turret.setTurretPercent(0),
+          m_turret
+        ));
 
 
     // Reset gyro to 0° when B button is pressed
