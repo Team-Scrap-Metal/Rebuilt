@@ -254,8 +254,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
+            () -> m_driverController.getLeftY(),
             () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getLeftY(),
             () -> -m_driverController.getRightX()));
 
     // Lock to 0° when A button is held
@@ -269,7 +269,7 @@ public class RobotContainer {
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     m_driverController
