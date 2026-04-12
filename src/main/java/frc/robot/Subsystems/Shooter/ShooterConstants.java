@@ -25,5 +25,5 @@ public final class ShooterConstants {
     // public static final int SHOOTING_PERCENT = 30;
 
     /*** Target RPM to score while flush with hub ***/
-    public static final int RPM_FROM_HUB = 500;
+    public static final int RPM_FROM_HUB = 1850;
 }

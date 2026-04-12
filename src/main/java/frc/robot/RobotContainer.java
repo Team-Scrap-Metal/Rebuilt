@@ -380,7 +380,13 @@ public class RobotContainer {
         new InstantCommand(
           () -> m_shooter.shootFromHub(),
           m_shooter
-        ));
+        ))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
 
   }
 
