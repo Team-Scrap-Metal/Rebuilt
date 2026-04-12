@@ -101,6 +101,14 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/VelocitySetpointRPM", rpm);
     m_io.setShooterRPM(rpm);
   }
+
+  public void shootFromHub () {
+    double rpm = ShooterConstants.RPM_FROM_HUB;
+
+    setShooterRPM(rpm);
+  }
+
+
   public int getHubDistance() {
     return (int)shootDistanceInput.getAsDouble();
   }

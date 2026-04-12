@@ -374,6 +374,14 @@ public class RobotContainer {
           m_feeder
         ));
 
+    m_auxController
+      .leftTrigger()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootFromHub(),
+          m_shooter
+        ));
+
   }
 
   /**
