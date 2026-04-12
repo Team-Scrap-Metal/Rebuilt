@@ -339,9 +339,15 @@ public class RobotContainer {
              () -> m_turret.zeroEncoder()
           )
         );
-    }
-   
-            
+
+    m_auxiliaryController
+      .leftBumper()
+      .onTrue(
+        new InstantCommand(
+          () -> m_turret.toggleManualControl(),
+          m_turret
+        ));
+    }        
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

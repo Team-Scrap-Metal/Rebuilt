@@ -31,17 +31,17 @@ public class Turret extends SubsystemBase {
   private final TurretIO m_io;
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final LoggedNetworkNumber something = new LoggedNetworkNumber("/Tuning/Turret/something", 200);
+  
+  private boolean manualControlToggle = TurretConstants.TURRET_DEFAULT_MANUAL_CONTROL;
 
   private final MutVoltage m_appliedVoltage;
   private final MutAngle m_angle;
-
 
   public Turret (TurretIO io) {
     System.out.println("[Init] Creating Turret");
     this.m_io = io;
     m_appliedVoltage = Volts.mutable(0);
     m_angle = Radians.mutable(0);
-    
   }
 
   @Override
@@ -113,6 +113,10 @@ public class Turret extends SubsystemBase {
 
   public void targetHub(Pose2d robotPose) {
     setTurretPositionWithCoordinates(TurretConstants.HUB_POSITION_M, robotPose);
+  }
+
+  public void toggleManualControl () {
+    manualControlToggle = !manualControlToggle;
   }
   // public void targetHub (Pose2d pose) {
     

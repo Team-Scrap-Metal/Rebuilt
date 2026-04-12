@@ -23,6 +23,7 @@ public final class TurretConstants {
     public static final boolean BACKWARD_SOFT_LIMIT_ENABLED = true;
     public static final double FORWARD_SOFT_LIMIT = 86;
     public static final double BACKWARD_SOFT_LIMIT = -60;
+    public static final boolean TURRET_DEFAULT_MANUAL_CONTROL = false;
     
     public static final Translation2d TURRET_POSITION_ROBOT_RELATIVE_M 
         = new Translation2d(Units.inchesToMeters(-4.85), Units.inchesToMeters(-8.6)); // center-to-center from center of spindexer shaft -> center of turret
