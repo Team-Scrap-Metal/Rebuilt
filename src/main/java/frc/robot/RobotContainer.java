@@ -278,11 +278,11 @@ public class RobotContainer {
         .b()
         .onTrue(
             Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+                    () -> drive.zeroHeading()));
+        //                 drive.setPose(
+        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        //             drive)
+        //         .ignoringDisable(true));
 
     // Reverse feeding when x is pressed
     m_driverController
