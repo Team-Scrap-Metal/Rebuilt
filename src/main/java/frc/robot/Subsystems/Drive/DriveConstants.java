@@ -125,13 +125,13 @@ public class DriveConstants {
 
   // Turn PID configuration
   public static final double[] turnKp = new double[] {
-    5.95,
+    5.78,
     5.95,
     5.95,
     5.95
   };
   public static final double[] turnKd = new double[] {
-    0.1,
+    0.12,
     0.1,
     0.1,
     0.1
