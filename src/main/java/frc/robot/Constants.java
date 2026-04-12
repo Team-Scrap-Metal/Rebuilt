@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static class OperatorConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
-    public static final int kDriverControllerPort = 0;
+    public static final int AUX_CONTROLLER_PORT = 1;
   }
 
   public static final Mode simMode = Mode.SIM;

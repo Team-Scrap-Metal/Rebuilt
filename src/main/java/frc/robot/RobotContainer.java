@@ -69,7 +69,9 @@ public class RobotContainer {
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+      new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandXboxController m_auxController =
+      new CommandXboxController(OperatorConstants.AUX_CONTROLLER_PORT);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -281,6 +283,96 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    // Reverse feeding when x is pressed
+    m_driverController
+      .x()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_feeder.runReverse(),
+            m_feeder
+          ),
+          new InstantCommand(
+            () -> m_spindexer.runReverse(),
+            m_spindexer
+          ),
+          new InstantCommand(
+            () -> m_shooter.runReverse(),
+            m_shooter
+          )
+        )
+      ).onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_feeder.setFeederPercent(0),
+            m_feeder
+          ),
+          new InstantCommand(
+            () -> m_spindexer.setSpindexerPercent(0),
+            m_spindexer
+          ),
+          new InstantCommand(
+            () -> m_shooter.setShooterPercent(0),
+            m_shooter)));
+    
+    // Aux reverse bindings
+    m_auxController
+      .povUp()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.runReverse(),
+          m_shooter))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        ));
+
+    m_auxController
+      .povDown()
+      .onTrue(
+        new InstantCommand(
+          () -> m_spindexer.runReverse(),
+          m_spindexer))
+      .onFalse(
+        new InstantCommand(
+          () -> m_spindexer.setSpindexerPercent(0),
+          m_spindexer
+        ));
+
+    m_auxController
+      .povLeft()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.runReverse(),
+            m_drum
+          ),
+          new InstantCommand(
+            () -> m_roller.runReverse(),
+            m_roller
+          )))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.setDrumPercent(0),
+            m_drum),
+          new InstantCommand(
+            () -> m_roller.setRollerPercent(0),
+            m_roller)));
+
+    m_auxController
+      .povRight()
+      .onTrue(
+        new InstantCommand(
+          () -> m_feeder.runReverse(),
+          m_feeder))
+      .onFalse(
+        new InstantCommand(
+          () -> m_feeder.setFeederPercent(0),
+          m_feeder
+        ));
 
   }
 
