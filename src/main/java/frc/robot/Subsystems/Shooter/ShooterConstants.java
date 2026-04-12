@@ -10,9 +10,9 @@ public final class ShooterConstants {
     public static final int SHOOTING_SPEED_RPM = 100;
     public static final double MAX_OUTPUT = 1;
     public static final double MIN_OUTPUT = -1;
-    public static final double KP = 0.0;
+    public static final double KP = 0.0002;
     public static final double KI = 0.0;
-    public static final double KD = 0.0;
+    public static final double KD = 0.03;
     public static final double KS = 0.185;
     public static final double KV = 0.00211;
     public static final double SHOOTER_ANGLE = 19.11;
