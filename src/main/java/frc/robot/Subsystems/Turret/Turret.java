@@ -24,6 +24,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import frc.robot.Constants;
+import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Turret.TurretIOInputsAutoLogged;
 import frc.robot.Subsystems.Turret.TurretConstants.*;
 
@@ -70,7 +71,7 @@ public class Turret extends SubsystemBase {
     m_io.zeroEncoder();
   }
 
-  public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Rotation2d robotRotation) {
+  public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Drive drive) {
     return Commands.run(
       () -> {
         double x = joystickX.getAsDouble();
@@ -81,16 +82,17 @@ public class Turret extends SubsystemBase {
         System.out.println("Angle: " + angle + "\n");
         System.out.println("Magnitude: " + magnitude + "\n");
         if(magnitude > 0.1) {
-          setTurretPositionFieldOriented(angle, robotRotation);
+          setTurretPositionFieldOriented(angle, drive);
         }
       },
       turret
       );
   }
 
-  public void setTurretPositionFieldOriented(double angle, Rotation2d robotRot) {
-    var calculatedAngle = angle - robotRot.getDegrees();
+  public void setTurretPositionFieldOriented(double angle, Drive drive) {
+    var calculatedAngle = angle - drive.getRawGyroRotation().getDegrees();
 
+    Logger.recordOutput("Turret/FieldOrientedAngle", calculatedAngle);
     setTurretPosition(calculatedAngle);
   }
                                    

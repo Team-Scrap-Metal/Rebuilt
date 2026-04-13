@@ -3,6 +3,7 @@ package frc.robot.Subsystems.Turret;
 
 import java.io.OutputStream;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.revrobotics.PersistMode;
@@ -19,7 +20,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
-import frc.robot.Subsystems.Shooter.ShooterConstants;
+import frc.robot.Subsystems.Turret.TurretConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -35,11 +36,11 @@ public class TurretIOSpark implements TurretIO {
     private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Turret/TurretKS", TurretConstants.kS);
     private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Turret/TurretKV", TurretConstants.kV);
     private final LoggedNetworkNumber Target_Pose = new LoggedNetworkNumber("/Tuning/Turret/SetPoint", 0);
-    private double lastKP = ShooterConstants.KP;
-    private double lastKI = ShooterConstants.KI;
-    private double lastKD = ShooterConstants.KD;
-    private double lastKS = ShooterConstants.KS;
-    private double lastKV = ShooterConstants.KV;
+    private double lastKP = TurretConstants.kP;
+    private double lastKI = TurretConstants.kI;
+    private double lastKD = TurretConstants.kD;
+    private double lastKS = TurretConstants.kS;
+    private double lastKV = TurretConstants.kV;
 
     public TurretIOSpark() {
         m_turretMotor = new SparkMax(TurretConstants.CAN_ID, MotorType.kBrushless);
@@ -71,15 +72,14 @@ public class TurretIOSpark implements TurretIO {
 
         m_turretMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    
-        
+        m_turretEncoder.setPosition(TurretConstants.STARTING_ANGLE);
     }
 
     @Override
     public void updateInputs(TurretIOInputs inputs) {
         inputs.turretAppliedVolts = m_turretMotor.getAppliedOutput() * m_turretMotor.getBusVoltage();
         inputs.turretVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_turretEncoder.getVelocity());
-        inputs.turretPosition = Units.radiansToDegrees(m_turretEncoder.getPosition());
+        inputs.turretPosition = m_turretEncoder.getPosition();
         inputs.turretAppliedCurrent = m_turretMotor.getOutputCurrent();
         double newKP = kP.get();
         double newKI = kI.get();
@@ -95,7 +95,7 @@ public class TurretIOSpark implements TurretIO {
                     .p(newKP)
                     .i(newKI)
                     .d(newKD)
-                    .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
+                    .outputRange(TurretConstants.kMinOutput, TurretConstants.kMaxOutput)
                 .feedForward
                     .kS(newKS)
                     .kV(newKV);
@@ -117,6 +117,7 @@ public class TurretIOSpark implements TurretIO {
     @Override
     public void setTurretPosition (double angle) {
         System.out.println("Turret position set to: " + angle);
+        Logger.recordOutput("Turret/SetpointPosition", angle);
         m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
     }
     // @Override

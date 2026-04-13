@@ -16,13 +16,14 @@ public final class TurretConstants {
     public static final double kS = 0.2;
     public static final double kV = 0.2;
     public static final double kA = 0;
-    public static final double kMinOutput = 0;
-    public static final double kMaxOutput = 0;
+    public static final double kMinOutput = -0.2;
+    public static final double kMaxOutput = 0.2;
     public static final double POSITION_CONVERSION_FACTOR = 360 / GEAR_RATIO;
+
     public static final boolean FORWARD_SOFT_LIMIT_ENABLED = true;
     public static final boolean BACKWARD_SOFT_LIMIT_ENABLED = true;
-    public static final double FORWARD_SOFT_LIMIT = 86;
-    public static final double BACKWARD_SOFT_LIMIT = -60;
+    public static final double FORWARD_SOFT_LIMIT = 180;
+    public static final double BACKWARD_SOFT_LIMIT = -180;
     public static final boolean TURRET_DEFAULT_MANUAL_CONTROL = false;
     
     public static final Translation2d TURRET_POSITION_ROBOT_RELATIVE_M 
@@ -30,4 +31,6 @@ public final class TurretConstants {
 
     public static final Translation2d HUB_POSITION_M 
         = new Translation2d(4.62534, 4.03479); // TODO: update
+
+    public static final double STARTING_ANGLE = -90;
 }
