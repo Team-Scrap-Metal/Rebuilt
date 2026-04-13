@@ -17,6 +17,9 @@ import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Vision.Vision;
+import frc.robot.Subsystems.Vision.VisionIO;
+import frc.robot.Subsystems.Vision.VisionIOLimelight;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIO;
 import frc.robot.Subsystems.Drive.GyroIOPigeon2;
@@ -61,6 +64,7 @@ public class RobotContainer {
   private final Roller m_roller;
   private final Spindexer m_spindexer;
   // private final Turret m_turret;
+  private final Vision m_vision;
 
   private final PathPlanner m_pathplanner;
 //   private final PoseEstimator m_poseEstimator;
@@ -91,12 +95,17 @@ public class RobotContainer {
         m_spindexer = new Spindexer(new SpindexerIOSpark());
 
         drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOReal(0),
-                new ModuleIOReal(1),
-                new ModuleIOReal(2),
-                new ModuleIOReal(3));
+        new Drive(
+          new GyroIOPigeon2(),
+          new ModuleIOReal(0),
+          new ModuleIOReal(1),
+          new ModuleIOReal(2),
+          new ModuleIOReal(3));
+          
+        m_vision =
+            new Vision(
+                drive.getPoseEstimator()::addVisionMeasurement,
+                new VisionIOLimelight(drive::getRawGyroRotation));
         break;
 
       case SIM:
@@ -115,6 +124,13 @@ public class RobotContainer {
               new ModuleIOSim(),
               new ModuleIOSim(),
               new ModuleIOSim());
+
+        m_vision = null;
+        // m_vision =
+        //   new Vision(
+        //       drive.getPoseEstimator()::addVisionMeasurement,
+        //       new VisionIOSim(drive::getRotation));
+
         break;
 
       default:
@@ -133,6 +149,8 @@ public class RobotContainer {
               new ModuleIO() {},
               new ModuleIO() {},
               new ModuleIO() {});
+
+        m_vision = null;
         break;
     }
 

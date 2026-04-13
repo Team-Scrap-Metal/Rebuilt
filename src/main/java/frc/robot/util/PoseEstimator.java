@@ -1,5 +1,10 @@
 package frc.robot.util;
 
+import org.littletonrobotics.junction.Logger;
+
+// import java.util.logging.Logger;
+
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -7,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -14,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.DriveConstants;
+import frc.robot.Subsystems.Vision.Vision.VisionConsumer;
 
 /** This class handels the odometry and locates the robots current position */
 public class PoseEstimator extends SubsystemBase {
@@ -23,7 +30,7 @@ public class PoseEstimator extends SubsystemBase {
    */
   public static Vector<N3> stateStandardDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
-  public static Vector<N3> visionStandardDevs = VecBuilder.fill(0.5, 0.5, 9999999);
+  public static Vector<N3> visionStandardDevs = VecBuilder.fill(0.1, 0.1, 9999999);
 
   private SwerveDrivePoseEstimator poseEstimator;
   private Drive drive;
@@ -33,6 +40,7 @@ public class PoseEstimator extends SubsystemBase {
   public PoseEstimator(Drive drive) {
 
     field2d = new Field2d();
+    field2d.setRobotPose(new Pose2d(new Translation2d(0,0), new Rotation2d(0)));
     SmartDashboard.putData(field2d);
     this.drive = drive;
 
@@ -54,7 +62,7 @@ public class PoseEstimator extends SubsystemBase {
     // joystick to driving
     field2d.setRobotPose(getPose());
     poseEstimator.updateWithTime(
-        Timer.getFPGATimestamp(), drive.getRotation(), drive.getModulePositions());
+        Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
     // System.out.println(mt1.tagCount);
     // System.out.println(mt1.pose);
@@ -86,5 +94,14 @@ public class PoseEstimator extends SubsystemBase {
    */
   public Rotation2d getRotation() {
     return poseEstimator.getEstimatedPosition().getRotation();
+  }
+
+  public void addVisionMeasurement(
+      Pose2d visionRobotPoseMeters,
+      double timestampSeconds,
+      Matrix<N3, N1> visionMeasurementStdDevs) {
+      Logger.recordOutput("Vision/VisionPose", visionRobotPoseMeters);
+    poseEstimator.addVisionMeasurement(
+        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 }
