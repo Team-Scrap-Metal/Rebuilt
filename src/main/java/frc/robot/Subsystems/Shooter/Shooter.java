@@ -93,10 +93,22 @@ public class Shooter extends SubsystemBase {
     m_io.setShooterVoltage(((double)percent) / 100 * 12);
   }
 
+  public void runReverse () {
+    setShooterPercent(-100);
+  }
+
   public void setShooterRPM (double rpm) {
     Logger.recordOutput("Shooter/VelocitySetpointRPM", rpm);
     m_io.setShooterRPM(rpm);
   }
+
+  public void shootFromHub () {
+    double rpm = ShooterConstants.RPM_FROM_HUB;
+
+    setShooterRPM(rpm);
+  }
+
+
   public int getHubDistance() {
     return (int)shootDistanceInput.getAsDouble();
   }

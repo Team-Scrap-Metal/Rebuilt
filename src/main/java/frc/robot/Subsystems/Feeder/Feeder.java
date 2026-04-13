@@ -45,4 +45,9 @@ public class Feeder extends SubsystemBase {
   public int getTunedPercent() {
     return (int)speedPercentInput.getAsDouble();
   }
+
+  public void runReverse () {
+    setFeederPercent(-getTunedPercent());
+  }
+
 }
