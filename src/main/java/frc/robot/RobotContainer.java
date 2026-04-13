@@ -105,7 +105,7 @@ public class RobotContainer {
         m_vision =
             new Vision(
                 drive.getPoseEstimator()::addVisionMeasurement,
-                new VisionIOLimelight(drive::getRotation));
+                new VisionIOLimelight(drive::getRawGyroRotation));
         break;
 
       case SIM:

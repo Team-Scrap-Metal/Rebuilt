@@ -117,6 +117,10 @@ public class Shooter extends SubsystemBase {
     return shootRpmInput.getAsDouble();
   }
 
+  public void shootAtTuned() {
+    setShooterRPM(getTunedRPM());
+  }
+
   public void shootFromDistance (double distance) {
     double heightDiff = (ShooterConstants.HUB_HEIGHT_IN - ShooterConstants.SHOOTER_HEIGHT_IN) * 0.0254;
     double angleRad = Math.toRadians(ShooterConstants.SHOOTER_ANGLE);

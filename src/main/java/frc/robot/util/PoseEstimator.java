@@ -1,5 +1,9 @@
 package frc.robot.util;
 
+import org.littletonrobotics.junction.Logger;
+
+// import java.util.logging.Logger;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -26,7 +30,7 @@ public class PoseEstimator extends SubsystemBase {
    */
   public static Vector<N3> stateStandardDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
-  public static Vector<N3> visionStandardDevs = VecBuilder.fill(0.5, 0.5, 9999999);
+  public static Vector<N3> visionStandardDevs = VecBuilder.fill(0.1, 0.1, 9999999);
 
   private SwerveDrivePoseEstimator poseEstimator;
   private Drive drive;
@@ -36,6 +40,7 @@ public class PoseEstimator extends SubsystemBase {
   public PoseEstimator(Drive drive) {
 
     field2d = new Field2d();
+    field2d.setRobotPose(new Pose2d(new Translation2d(0,0), new Rotation2d(0)));
     SmartDashboard.putData(field2d);
     this.drive = drive;
 
@@ -57,7 +62,7 @@ public class PoseEstimator extends SubsystemBase {
     // joystick to driving
     field2d.setRobotPose(getPose());
     poseEstimator.updateWithTime(
-        Timer.getFPGATimestamp(), drive.getRotation(), drive.getModulePositions());
+        Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
     // System.out.println(mt1.tagCount);
     // System.out.println(mt1.pose);
@@ -95,6 +100,7 @@ public class PoseEstimator extends SubsystemBase {
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
       Matrix<N3, N1> visionMeasurementStdDevs) {
+      Logger.recordOutput("Vision/VisionPose", visionRobotPoseMeters);
     poseEstimator.addVisionMeasurement(
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
