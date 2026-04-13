@@ -84,10 +84,10 @@ public class DriveConstants {
 
   // Drive PID configuration
   public static final double[] driveKp = new double[] {
+      0.005,
       0.0,
       0.0,
-      0.0,
-      0.0
+      0.02
   };
   public static final double[] driveKd = new double[] {
     0.0,
@@ -102,10 +102,10 @@ public class DriveConstants {
     0.179
   };
   public static final double[] driveKv = new double[] {
-    0.11,
-    0.11,
-    0.11,
-    0.11
+    0.12,
+    0.12,
+    0.12,
+    0.21
   }; 
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
