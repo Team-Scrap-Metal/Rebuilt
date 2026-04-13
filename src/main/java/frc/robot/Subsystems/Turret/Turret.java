@@ -120,6 +120,10 @@ public class Turret extends SubsystemBase {
   public void toggleManualControl () {
     manualControlToggle = !manualControlToggle;
   }
+
+  public void setBrake(boolean brake) {
+    m_io.setBrake(brake);
+  }
   // public void targetHub (Pose2d pose) {
     
   // }

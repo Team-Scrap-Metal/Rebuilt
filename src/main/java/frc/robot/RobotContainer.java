@@ -267,8 +267,8 @@ public class RobotContainer {
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
           m_turret,
-          () -> -m_auxiliaryController.getLeftY(),
           () -> -m_auxiliaryController.getLeftX(),
+          () -> m_auxiliaryController.getLeftY(),
           drive
       )
     );
@@ -358,5 +358,9 @@ public class RobotContainer {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
     return autoChooser.get();
+  }
+
+  public void disabledInit() {
+    m_turret.setBrake(false);
   }
 }

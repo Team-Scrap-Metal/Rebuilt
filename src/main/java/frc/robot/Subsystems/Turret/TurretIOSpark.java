@@ -42,15 +42,17 @@ public class TurretIOSpark implements TurretIO {
     private double lastKS = TurretConstants.kS;
     private double lastKV = TurretConstants.kV;
 
+    private SparkMaxConfig motorConfig = new SparkMaxConfig();
+
+
     public TurretIOSpark() {
         m_turretMotor = new SparkMax(TurretConstants.CAN_ID, MotorType.kBrushless);
         m_turretEncoder = (SparkRelativeEncoder) m_turretMotor.getEncoder();
         m_turretClosedLoopController = m_turretMotor.getClosedLoopController();
     
-        var motorConfig = new SparkMaxConfig();
         motorConfig
             .inverted(TurretConstants.INVERTED)
-            .idleMode(IdleMode.kCoast)
+            .idleMode(IdleMode.kBrake   )
             .smartCurrentLimit(TurretConstants.CURRENT_LIMIT)
         .closedLoop
             .p(TurretConstants.kP)
@@ -128,5 +130,12 @@ public class TurretIOSpark implements TurretIO {
     @Override
     public void zeroEncoder() {
         m_turretEncoder.setPosition(0);
+    }
+
+    @Override
+    public void setBrake(boolean brake) {
+        motorConfig.idleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+
+        m_turretMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 }

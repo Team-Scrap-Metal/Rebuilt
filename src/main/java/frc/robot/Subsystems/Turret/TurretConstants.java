@@ -32,5 +32,5 @@ public final class TurretConstants {
     public static final Translation2d HUB_POSITION_M 
         = new Translation2d(4.62534, 4.03479); // TODO: update
 
-    public static final double STARTING_ANGLE = -90;
+    public static final double STARTING_ANGLE = 0;
 }

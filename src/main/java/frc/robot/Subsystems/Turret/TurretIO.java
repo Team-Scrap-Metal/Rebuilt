@@ -23,4 +23,6 @@ public interface TurretIO {
     // public default void setTurretPositionFieldOriented(double ) {}
 
     public default void setTurretPositionWithController (double joystickX, double joystickY) {}
+
+    public default void setBrake(boolean brake) {}
 }
