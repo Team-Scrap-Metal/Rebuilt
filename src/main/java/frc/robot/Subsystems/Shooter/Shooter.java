@@ -24,12 +24,15 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Shooter.ShooterIOInputsAutoLogged;
 import frc.robot.Subsystems.Shooter.ShooterConstants.*;
+import frc.robot.util.BestFitLine;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO m_io;
   private final ShooterIOInputsAutoLogged m_inputs = new ShooterIOInputsAutoLogged();
   private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub", 15);
   private final LoggedNetworkNumber shootRpmInput = new LoggedNetworkNumber("/Tuning/ShooterRPM", 100);
+
+  private final BestFitLine m_distanceBestFit;
 
     private final MutVoltage m_appliedVoltage;
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
@@ -42,6 +45,8 @@ public class Shooter extends SubsystemBase {
   public Shooter(ShooterIO io) {
     System.out.println("[Init] Creating Shooter");
     m_io = io;
+
+    m_distanceBestFit = new BestFitLine(ShooterConstants.BEST_FIT_X_VALUES_M, ShooterConstants.BEST_FIT_RPM_VALUES);
 
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
     m_appliedVoltage = Volts.mutable(0);
@@ -109,8 +114,8 @@ public class Shooter extends SubsystemBase {
   }
 
 
-  public int getHubDistance() {
-    return (int)shootDistanceInput.getAsDouble();
+  public double getHubDistance() {
+    return (double)shootDistanceInput.getAsDouble();
   }
 
   public double getTunedRPM() {
@@ -121,37 +126,45 @@ public class Shooter extends SubsystemBase {
     setShooterRPM(getTunedRPM());
   }
 
-  public int getRPMForDistance(double distance) {
-    
+  /**
+   * Rev shooter for distance to hub
+   * @param distance meters from shooter center to hub center
+   */
+  public void revForDistance(double distance) {
+    distance = getHubDistance();
+    var target_rpm = m_distanceBestFit.getBestFit(distance);
+
+
+    setShooterRPM(target_rpm);
   }
 
-  public void shootFromDistance (double distance) {
-    double heightDiff = (ShooterConstants.HUB_HEIGHT_IN - ShooterConstants.SHOOTER_HEIGHT_IN) * 0.0254;
-    double angleRad = Math.toRadians(ShooterConstants.SHOOTER_ANGLE);
+  // public void shootFromDistance (double distance) {
+  //   double heightDiff = (ShooterConstants.HUB_HEIGHT_IN - ShooterConstants.SHOOTER_HEIGHT_IN) * 0.0254;
+  //   double angleRad = Math.toRadians(ShooterConstants.SHOOTER_ANGLE);
 
-    double denominatorPart = distance * Math.tan(angleRad) - heightDiff;
+  //   double denominatorPart = distance * Math.tan(angleRad) - heightDiff;
 
-    if (denominatorPart <= 0) {
-      System.out.println("Can't shoot");  
-      System.out.println("Denom: " + denominatorPart);  
-      return;
-    }
-    var targetVelocity = 
-      ShooterConstants.SHOOTER_VELOCITY_COEFFICIENT
-      *
-      Math.sqrt(
-        (ShooterConstants.GRAVITY_CONSTANT * Math.pow(distance, 2.0))
-        /
-        (2*Math.pow(Math.cos(Math.toRadians(ShooterConstants.SHOOTER_ANGLE)), 2)*(distance*Math.tan(Math.toRadians(ShooterConstants.SHOOTER_ANGLE))-(ShooterConstants.HUB_HEIGHT_IN*0.0254-ShooterConstants.SHOOTER_HEIGHT_IN*0.0254)))
-      );
+  //   if (denominatorPart <= 0) {
+  //     System.out.println("Can't shoot");  
+  //     System.out.println("Denom: " + denominatorPart);  
+  //     return;
+  //   }
+  //   var targetVelocity = 
+  //     ShooterConstants.SHOOTER_VELOCITY_COEFFICIENT
+  //     *
+  //     Math.sqrt(
+  //       (ShooterConstants.GRAVITY_CONSTANT * Math.pow(distance, 2.0))
+  //       /
+  //       (2*Math.pow(Math.cos(Math.toRadians(ShooterConstants.SHOOTER_ANGLE)), 2)*(distance*Math.tan(Math.toRadians(ShooterConstants.SHOOTER_ANGLE))-(ShooterConstants.HUB_HEIGHT_IN*0.0254-ShooterConstants.SHOOTER_HEIGHT_IN*0.0254)))
+  //     );
     
-    var targetAsRadians = targetVelocity / ShooterConstants.WHEEL_RADIUS_M;
+  //   var targetAsRadians = targetVelocity / ShooterConstants.WHEEL_RADIUS_M;
 
-    Logger.recordOutput("Shooter/VelocitySetpointRPS", targetAsRadians);
+  //   Logger.recordOutput("Shooter/VelocitySetpointRPS", targetAsRadians);
 
-    System.out.println("shoot from distance: " + targetAsRadians);
-    setShooterRPM(targetAsRadians * 30/Math.PI);
-  }
+  //   System.out.println("shoot from distance: " + targetAsRadians);
+  //   setShooterRPM(targetAsRadians * 30/Math.PI);
+  // }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.quasistatic(direction);

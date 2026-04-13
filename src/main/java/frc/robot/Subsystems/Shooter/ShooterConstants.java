@@ -1,5 +1,7 @@
 package frc.robot.Subsystems.Shooter;
 
+import edu.wpi.first.math.util.Units;
+
 public final class ShooterConstants {
     public static final int CAN_ID = 5;
     public static final int FOLLOWER_CAN_ID = 6;
@@ -26,4 +28,17 @@ public final class ShooterConstants {
 
     /*** Target RPM to score while flush with hub ***/
     public static final int RPM_FROM_HUB = 1850;
+
+    public static final double[] BEST_FIT_X_VALUES_M = new double[] {
+        Units.inchesToMeters(66),
+        Units.inchesToMeters(106.25),
+        Units.inchesToMeters(153.5),
+        Units.inchesToMeters(202)
+    };
+    public static final double[] BEST_FIT_RPM_VALUES = new double[] {
+        1800,
+        2200,
+        2400,
+        2680
+    };
 }

@@ -194,8 +194,8 @@ public class RobotContainer {
       .onTrue(
           new  InstantCommand(
             () ->
-            // m_shooter.shootFromDistance(m_shooter.getHubDistance())
-            m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+            m_shooter.revForDistance(m_shooter.getHubDistance())
+            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
           )
       )
       .onFalse(new ParallelCommandGroup(
