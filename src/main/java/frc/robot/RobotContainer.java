@@ -193,8 +193,8 @@ public class RobotContainer {
       .leftTrigger()
       .onTrue(
           new  InstantCommand(
-            () ->
-            m_shooter.revForDistance(m_shooter.getHubDistance())
+            () -> m_shooter.shootAtHub(drive),
+            m_shooter
             // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
           )
       )
@@ -406,6 +406,21 @@ public class RobotContainer {
         )
       );
 
+    // TODO: TEMP CODE REMOVE BEFORE UTAH
+    m_auxController
+      .rightTrigger()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootAtTuned(),
+          m_shooter
+        )
+      )
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
   }
 
   /**

@@ -11,6 +11,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
@@ -23,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants;
+import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Shooter.ShooterIOInputsAutoLogged;
 import frc.robot.Subsystems.Shooter.ShooterConstants.*;
 import frc.robot.util.BestFitLine;
@@ -142,6 +145,32 @@ public class Shooter extends SubsystemBase {
     var target_rpm = m_distanceRpmTable.get(distance);
 
     setShooterRPM(target_rpm);
+  }
+
+
+  public void shootAtPosition(Translation2d target, Pose2d robotPose) {
+    Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
+
+    double distanceToHub = launcherPositionFieldRelative.getDistance(target);
+
+    revForDistance(distanceToHub);
+  }
+
+  public void shootAtHub(Drive drive) {
+    Translation2d hubPosition = Constants.HUB_POSITION_M;
+    Pose2d robotPose = drive.getPose();
+
+    shootAtPosition(hubPosition, robotPose);
+  }
+
+  /**
+   * @return The field-relative position of the center of the launcher
+   */
+  private Translation2d getLauncherPose(Pose2d robotPose) {
+    return robotPose.getTranslation()
+        .plus(
+          Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
+          .rotateBy(robotPose.getRotation()));
   }
 
   // public void shootFromDistance (double distance) {
