@@ -33,7 +33,7 @@ public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final LoggedNetworkNumber something = new LoggedNetworkNumber("/Tuning/Turret/something", 200);
   
-  private boolean manualControlToggle = TurretConstants.TURRET_DEFAULT_MANUAL_CONTROL;
+  private boolean manualControlToggle;
 
   private final MutVoltage m_appliedVoltage;
   private final MutAngle m_angle;
@@ -43,6 +43,9 @@ public class Turret extends SubsystemBase {
     this.m_io = io;
     m_appliedVoltage = Volts.mutable(0);
     m_angle = Radians.mutable(0);
+
+    manualControlToggle = TurretConstants.TURRET_DEFAULT_MANUAL_CONTROL;
+    Logger.recordOutput("Turret/ManualControlToggled", manualControlToggle);
   }
 
   @Override
@@ -125,6 +128,7 @@ public class Turret extends SubsystemBase {
 
   public void toggleManualControl () {
     manualControlToggle = !manualControlToggle;
+    Logger.recordOutput("Turret/ManualControlToggled", manualControlToggle);
   }
 
   public void setBrake(boolean brake) {
