@@ -122,7 +122,8 @@ public class Turret extends SubsystemBase {
     setTurretPosition(angleRobotRelative.getDegrees());
   }
 
-  public void targetHub(Pose2d robotPose) {
+  public void targetHub(Drive drive) {
+    Pose2d robotPose = drive.getPose();
     setTurretPositionWithCoordinates(Constants.HUB_POSITION_M, robotPose);
   }
 

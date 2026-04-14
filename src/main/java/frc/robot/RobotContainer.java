@@ -194,38 +194,15 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> m_driverController.getLeftY(),
+            () -> m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()));
 
-    m_driverController
-      .leftTrigger()
-      .onTrue(
-          new  InstantCommand(
-            () -> m_shooter.shootAtHub(drive),
-            m_shooter
-            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
-          )
-      )
-      .onFalse(new ParallelCommandGroup(
-        new InstantCommand(
-          () ->
-            m_shooter.setShooterPercent(0),
-            m_shooter)));
-    m_driverController
-      .rightTrigger()
-      .onTrue(
-          new Feed(m_feeder, m_spindexer)
-      )
-      .onFalse(new ParallelCommandGroup(
-        new InstantCommand(
-          () ->
-            m_feeder.setFeederPercent(0),
-            m_feeder),
-        new InstantCommand(
-          () ->
-            m_spindexer.setSpindexerPercent(0),
-            m_spindexer)
-        )
-      );
-
+    // Intake
     m_driverController
       .leftBumper()
       .onTrue(
@@ -250,6 +227,33 @@ public class RobotContainer {
               m_roller.setRollerPercent(0),
               m_roller)
           ));
+
+    // Ready shoot - spin up shooter and aim turret at hub
+    m_driverController
+      .leftTrigger()
+      .onTrue(
+          new InstantCommand(
+            () -> m_shooter.shootAtHub(drive),
+            m_shooter
+            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+          )
+        )
+      .whileTrue(
+        Commands.run(
+          () -> m_turret.targetHub(drive),
+          m_turret)
+          )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter),
+        new InstantCommand(
+          () -> m_turret.setTurretPercent(0),
+          m_turret
+        )));
+
+    // Intake launch
     m_driverController
       .rightBumper()
       .onTrue(
@@ -275,47 +279,34 @@ public class RobotContainer {
               m_roller)
           ));
 
-
-        // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> m_driverController.getLeftY(),
-            () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()));
-  
-    m_turret.setDefaultCommand(
-      m_turret.setTurretPositionWithController(
-          m_turret,
-          () -> -m_auxController.getLeftY(),
-          () -> m_auxController.getLeftX(),
-          drive
+    // Shoot - feed spun up shooter
+    m_driverController
+      .rightTrigger()
+      .onTrue(
+          new Feed(m_feeder, m_spindexer)
       )
-    );
-
-    m_driverController
-      .leftTrigger()
-      .whileTrue(
-        Commands.run(
-          () -> m_turret.targetHub(drive.getPose()),
-          m_turret))
-      .onFalse(
+      .onFalse(new ParallelCommandGroup(
         new InstantCommand(
-          () -> m_turret.setTurretPercent(0),
-          m_turret
-        ));
-
-
-    // Reset gyro to 0° when B button is pressed
+          () ->
+            m_feeder.setFeederPercent(0),
+            m_feeder),
+        new InstantCommand(
+          () ->
+            m_spindexer.setSpindexerPercent(0),
+            m_spindexer)
+        )
+      );
+  
+    // toggle passive intake down
     m_driverController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () -> drive.zeroHeading()));
-        //                 drive.setPose(
-        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-        //             drive)
-        //         .ignoringDisable(true));
+      .a()
+      .onTrue(
+        new InstantCommand(
+          () -> m_pivot.togglePassiveDown(),
+          m_pivot
+      ));
+
+    // TODO: Add binding to toggle passing/scoring 
 
     // Reverse feeding when x is pressed
     m_driverController
@@ -348,79 +339,8 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_shooter.setShooterPercent(0),
             m_shooter)));
-    
-    // Aux reverse bindings
-    m_auxController
-      .povUp()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.runReverse(),
-          m_shooter))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        ));
 
-    m_auxController
-      .povDown()
-      .onTrue(
-        new InstantCommand(
-          () -> m_spindexer.runReverse(),
-          m_spindexer))
-      .onFalse(
-        new InstantCommand(
-          () -> m_spindexer.setSpindexerPercent(0),
-          m_spindexer
-        ));
-
-    m_auxController
-      .povLeft()
-      .onTrue(
-        new ParallelCommandGroup(
-          new InstantCommand(
-            () -> m_drum.runReverse(),
-            m_drum
-          ),
-          new InstantCommand(
-            () -> m_roller.runReverse(),
-            m_roller
-          )))
-      .onFalse(
-        new ParallelCommandGroup(
-          new InstantCommand(
-            () -> m_drum.setDrumPercent(0),
-            m_drum),
-          new InstantCommand(
-            () -> m_roller.setRollerPercent(0),
-            m_roller)));
-
-    m_auxController
-      .povRight()
-      .onTrue(
-        new InstantCommand(
-          () -> m_feeder.runReverse(),
-          m_feeder))
-      .onFalse(
-        new InstantCommand(
-          () -> m_feeder.setFeederPercent(0),
-          m_feeder
-        ));
-
-    m_auxController
-      .leftTrigger()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.shootFromHub(),
-          m_shooter
-        ))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        )
-      );
-
+    // Intake pivoting up (stowing)/down (extending)
     m_driverController
       .povUp()
       .onTrue(
@@ -447,14 +367,50 @@ public class RobotContainer {
           m_pivot
       ));
 
+    // Reset heading
     m_driverController
-      .a()
+        .povLeft()
+        .onTrue(
+            Commands.runOnce(
+                    () -> drive.zeroHeading()));
+        //                 drive.setPose(
+        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        //             drive)
+        //         .ignoringDisable(true));
+
+    m_turret.setDefaultCommand(
+      m_turret.setTurretPositionWithController(
+          m_turret,
+          () -> -m_auxController.getLeftY(),
+          () -> m_auxController.getLeftX(),
+          drive
+      )
+    );
+
+    // Toggle manual/auto turret control
+    m_auxController
+      .leftBumper()
       .onTrue(
         new InstantCommand(
-          () -> m_pivot.togglePassiveDown(),
-          m_pivot
-      ));
-    
+          () -> m_turret.toggleManualControl(),
+          m_turret
+        ));
+
+    // Run static RPM to score when robot left is near-flush with hub
+    m_auxController
+      .leftTrigger()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootFromHub(),
+          m_shooter
+        ))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
+
     /** Zero Turret Encoder */
     m_auxController
         .b()
@@ -464,14 +420,68 @@ public class RobotContainer {
           )
         );
 
+    // Reverse shooter
     m_auxController
-      .leftBumper()
+      .povUp()
       .onTrue(
         new InstantCommand(
-          () -> m_turret.toggleManualControl(),
-          m_turret
+          () -> m_shooter.runReverse(),
+          m_shooter))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
         ));
-      // TODO: TEMP CODE REMOVE BEFORE UTAH
+
+    // reverse spindexer
+    m_auxController
+      .povDown()
+      .onTrue(
+        new InstantCommand(
+          () -> m_spindexer.runReverse(),
+          m_spindexer))
+      .onFalse(
+        new InstantCommand(
+          () -> m_spindexer.setSpindexerPercent(0),
+          m_spindexer
+        ));
+
+    // Reverse drum
+    m_auxController
+      .povLeft()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.runReverse(),
+            m_drum
+          ),
+          new InstantCommand(
+            () -> m_roller.runReverse(),
+            m_roller
+          )))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.setDrumPercent(0),
+            m_drum),
+          new InstantCommand(
+            () -> m_roller.setRollerPercent(0),
+            m_roller)));
+
+    // Reverse feeder
+    m_auxController
+      .povRight()
+      .onTrue(
+        new InstantCommand(
+          () -> m_feeder.runReverse(),
+          m_feeder))
+      .onFalse(
+        new InstantCommand(
+          () -> m_feeder.setFeederPercent(0),
+          m_feeder
+        ));
+    
+    // TODO: TEMP CODE REMOVE BEFORE UTAH
     m_auxController
       .rightTrigger()
       .onTrue(
