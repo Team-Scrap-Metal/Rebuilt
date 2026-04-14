@@ -48,22 +48,22 @@ public class PoseEstimator extends SubsystemBase {
     m_startingPoseChooser.addOption(
       "Left", 
       new Pose2d(
-        Units.inchesToMeters(158.6 - 7), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
-        Units.inchesToMeters(317.7 - 11.125), // flush with field wall
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB/2, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        Units.inchesToMeters(317.7) - DriveConstants.ROBOT_WIDTH_BTB/2, // flush with field wall
         Rotation2d.k180deg) // Intake facing driver station
       );
     m_startingPoseChooser.addDefaultOption(
       "Center", 
       new Pose2d(
-        Units.inchesToMeters(158.6 - 7) - DriveConstants.BUMPER_WIDTH_M, // bumpers flush with hub
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
         Units.inchesToMeters(317.7/2), // center of field
         Rotation2d.fromDegrees(-90)) // left robot side against hub
       );
     m_startingPoseChooser.addOption(
       "Right", 
       new Pose2d(
-        Units.inchesToMeters(158.6 - 7), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
-        Units.inchesToMeters(11.125), // flush with field wall
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
         Rotation2d.k180deg) // Intake facing driver station
       );
     

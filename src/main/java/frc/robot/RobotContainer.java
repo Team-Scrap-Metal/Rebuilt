@@ -39,6 +39,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -165,6 +166,20 @@ public class RobotContainer {
     }
 
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
+
+    NamedCommands.registerCommand("Intake", 
+      new ParallelCommandGroup(
+        new InstantCommand( () -> m_drum.drumIntake(), m_drum),
+        new InstantCommand( () -> m_roller.runRoller(), m_roller)
+      )
+    );
+
+    NamedCommands.registerCommand("ZeroIntake", 
+      new ParallelCommandGroup(
+        new InstantCommand( () -> m_drum.setDrumPercent(0), m_drum),
+        new InstantCommand( () -> m_roller.setRollerPercent(0), m_roller)
+      )
+    );
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -524,7 +539,7 @@ public class RobotContainer {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
     drive.getPoseEstimator().updateStartingPose();
-    
+
     return autoChooser.get();
   }
 

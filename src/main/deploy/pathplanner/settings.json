@@ -1,6 +1,6 @@
 {
   "robotWidth": 0.9,
-  "robotLength": 0.9,
+  "robotLength": 0.688975,
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [],
@@ -18,17 +18,18 @@
   "driveMotorType": "krakenX60",
   "driveCurrentLimit": 60.0,
   "wheelCOF": 1.2,
-  "flModuleX": 0.178,
-  "flModuleY": 0.286,
-  "frModuleX": 0.178,
-  "frModuleY": -0.286,
-  "blModuleX": -0.178,
-  "blModuleY": 0.286,
-  "brModuleX": -0.178,
-  "brModuleY": -0.286,
+  "flModuleX": 0.219,
+  "flModuleY": 0.327,
+  "frModuleX": 0.219,
+  "frModuleY": -0.327,
+  "blModuleX": -0.219,
+  "blModuleY": 0.327,
+  "brModuleX": -0.219,
+  "brModuleY": -0.327,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
   "robotFeatures": [
-    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.12319,\"y\":-0.21844},\"size\":{\"width\":0.3175,\"length\":0.28956},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}"
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.12319,\"y\":-0.21844},\"size\":{\"width\":0.318,\"length\":0.28956},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.447,\"y\":0.0},\"size\":{\"width\":0.7,\"length\":0.1},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}"
   ]
 }
