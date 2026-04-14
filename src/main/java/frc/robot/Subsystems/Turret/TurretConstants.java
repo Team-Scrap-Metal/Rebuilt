@@ -26,8 +26,5 @@ public final class TurretConstants {
     public static final double BACKWARD_SOFT_LIMIT = -180;
     public static final boolean TURRET_DEFAULT_MANUAL_CONTROL = false;
     
-    public static final Translation2d HUB_POSITION_M 
-        = new Translation2d(4.62534, 4.03479); // TODO: update
-
-    public static final double STARTING_ANGLE = 0;
+    public static final double STARTING_ANGLE = -90;
 }

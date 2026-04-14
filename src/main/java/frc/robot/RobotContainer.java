@@ -267,8 +267,8 @@ public class RobotContainer {
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
           m_turret,
-          () -> -m_auxiliaryController.getLeftX(),
-          () -> m_auxiliaryController.getLeftY(),
+          () -> -m_auxiliaryController.getLeftY(),
+          () -> m_auxiliaryController.getLeftX(),
           drive
       )
     );

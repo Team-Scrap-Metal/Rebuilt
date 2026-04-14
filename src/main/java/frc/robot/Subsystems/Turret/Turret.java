@@ -114,7 +114,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void targetHub(Pose2d robotPose) {
-    setTurretPositionWithCoordinates(TurretConstants.HUB_POSITION_M, robotPose);
+    setTurretPositionWithCoordinates(Constants.HUB_POSITION_M, robotPose);
   }
 
   public void toggleManualControl () {
