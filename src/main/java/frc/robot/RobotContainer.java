@@ -30,6 +30,7 @@ import frc.robot.Subsystems.Feeder.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -39,6 +40,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -63,8 +65,10 @@ public class RobotContainer {
   private final Drum m_drum;
   private final Roller m_roller;
   private final Spindexer m_spindexer;
-  // private final Turret m_turret;
+  private final Turret m_turret;
   private final Vision m_vision;
+  private final Pivot m_pivot;
+
 
   private final PathPlanner m_pathplanner;
 //   private final PoseEstimator m_poseEstimator;
@@ -91,7 +95,8 @@ public class RobotContainer {
         m_shooter = new Shooter(new ShooterIOSpark());
         m_drum = new Drum(new DrumIOSpark());
         m_roller = new Roller(new RollerIOSpark());
-        // m_turret = new Turret(new TurretIOSpark());
+        m_turret = new Turret(new TurretIOSpark());
+        m_pivot = new Pivot(new PivotIOSpark());
         m_spindexer = new Spindexer(new SpindexerIOSpark());
 
         drive =
@@ -114,7 +119,8 @@ public class RobotContainer {
         m_shooter = new Shooter(new ShooterIOSim());
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
-        // m_turret = new Turret(new TurretIOSim());
+        m_turret = new Turret(new TurretIOSim());
+        m_pivot = new Pivot(new PivotIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
 
         drive =
@@ -135,12 +141,12 @@ public class RobotContainer {
 
       default:
         m_feeder = new Feeder(new FeederIOSim());
-        // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
         m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
-        // m_turret = new Turret(new TurretIOSim());
+        m_turret = new Turret(new TurretIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
+        m_pivot = new Pivot(new PivotIOSim());
 
         drive =
           new Drive(
@@ -156,24 +162,24 @@ public class RobotContainer {
 
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
-        // Set up auto routines
+    // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // // Set up SysId routines
+    // autoChooser.addOption(
+    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     // Configure the trigger bindings
     configureBindings();
   }
@@ -277,19 +283,28 @@ public class RobotContainer {
             () -> m_driverController.getLeftY(),
             () -> m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()));
+  
+    m_turret.setDefaultCommand(
+      m_turret.setTurretPositionWithController(
+          m_turret,
+          () -> -m_auxController.getLeftY(),
+          () -> m_auxController.getLeftX(),
+          drive
+      )
+    );
 
-    // Lock to 0° when A button is held
     m_driverController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -m_driverController.getLeftY(),
-                () -> -m_driverController.getLeftX(),
-                () -> Rotation2d.kZero));
+      .leftTrigger()
+      .whileTrue(
+        Commands.run(
+          () -> m_turret.targetHub(drive.getPose()),
+          m_turret))
+      .onFalse(
+        new InstantCommand(
+          () -> m_turret.setTurretPercent(0),
+          m_turret
+        ));
 
-    // Switch to X pattern when X button is pressed
-    // m_driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     m_driverController
@@ -406,7 +421,57 @@ public class RobotContainer {
         )
       );
 
-    // TODO: TEMP CODE REMOVE BEFORE UTAH
+    m_driverController
+      .povUp()
+      .onTrue(
+        new InstantCommand(()->
+          m_pivot.runPivot(true),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotPercent(0),
+          m_pivot
+        )
+      );
+    m_driverController
+      .povDown()
+      .onTrue(
+        new InstantCommand(()->
+          m_pivot.runPivot(false),
+          m_pivot
+        ))
+      .onFalse(
+        new InstantCommand(()->
+          m_pivot.setPivotPercent(0),
+          m_pivot
+      ));
+
+    m_driverController
+      .a()
+      .onTrue(
+        new InstantCommand(
+          () -> m_pivot.togglePassiveDown(),
+          m_pivot
+      ));
+    
+    /** Zero Turret Encoder */
+    m_auxController
+        .b()
+        .onTrue(
+          Commands.runOnce (
+             () -> m_turret.zeroEncoder()
+          )
+        );
+
+    m_auxController
+      .leftBumper()
+      .onTrue(
+        new InstantCommand(
+          () -> m_turret.toggleManualControl(),
+          m_turret
+        ));
+      // TODO: TEMP CODE REMOVE BEFORE UTAH
     m_auxController
       .rightTrigger()
       .onTrue(
@@ -421,7 +486,7 @@ public class RobotContainer {
           m_shooter
         )
       );
-  }
+  }        
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -432,5 +497,9 @@ public class RobotContainer {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
     return autoChooser.get();
+  }
+
+  public void disabledInit() {
+    m_turret.setBrake(false);
   }
 }

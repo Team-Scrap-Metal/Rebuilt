@@ -9,11 +9,20 @@ public interface TurretIO {
         public double turretVelocityRadPerSec = 0;
         public double turretPosition = 0;
         public double turretAppliedCurrent = 0;
+        
     }
 
     public default void updateInputs (TurretIOInputs inputs) {}
 
     public default void setTurretVoltage (double volts) {}
 
-    public default void setTurretPosition (float angle) {}
+    public default void zeroEncoder () {}
+
+    public default void setTurretPosition (double angle) {}
+
+    // public default void setTurretPositionFieldOriented(double ) {}
+
+    public default void setTurretPositionWithController (double joystickX, double joystickY) {}
+
+    public default void setBrake(boolean brake) {}
 }
