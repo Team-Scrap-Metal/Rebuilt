@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
@@ -32,7 +33,8 @@ public class Shooter extends SubsystemBase {
   private final LoggedNetworkNumber shootDistanceInput = new LoggedNetworkNumber("/Tuning/DistanceToHub", 15);
   private final LoggedNetworkNumber shootRpmInput = new LoggedNetworkNumber("/Tuning/ShooterRPM", 100);
 
-  private final BestFitLine m_distanceBestFit;
+  // private final BestFitLine m_distanceBestFit;
+  private final InterpolatingDoubleTreeMap m_distanceRpmTable;
 
     private final MutVoltage m_appliedVoltage;
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
@@ -46,7 +48,11 @@ public class Shooter extends SubsystemBase {
     System.out.println("[Init] Creating Shooter");
     m_io = io;
 
-    m_distanceBestFit = new BestFitLine(ShooterConstants.BEST_FIT_X_VALUES_M, ShooterConstants.BEST_FIT_RPM_VALUES);
+    // m_distanceBestFit = new BestFitLine(ShooterConstants.BEST_FIT_X_VALUES_M, ShooterConstants.BEST_FIT_RPM_VALUES);
+    m_distanceRpmTable = new InterpolatingDoubleTreeMap();
+    for (int i = 0; i < ShooterConstants.BEST_FIT_X_VALUES_M.length; i++) {
+      m_distanceRpmTable.put(ShooterConstants.BEST_FIT_X_VALUES_M[i], ShooterConstants.BEST_FIT_RPM_VALUES[i]);
+    }
 
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
     m_appliedVoltage = Volts.mutable(0);
@@ -132,8 +138,8 @@ public class Shooter extends SubsystemBase {
    */
   public void revForDistance(double distance) {
     distance = getHubDistance();
-    var target_rpm = m_distanceBestFit.getBestFit(distance);
-
+    // var target_rpm = m_distanceBestFit.getBestFit(distance);
+    var target_rpm = m_distanceRpmTable.get(distance);
 
     setShooterRPM(target_rpm);
   }
