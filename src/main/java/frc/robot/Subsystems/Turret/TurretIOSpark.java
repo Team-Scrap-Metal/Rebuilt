@@ -1,6 +1,10 @@
+
 package frc.robot.Subsystems.Turret;
 
 import java.io.OutputStream;
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -8,33 +12,69 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkRelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Joystick;
+import frc.robot.Subsystems.Turret.TurretConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class TurretIOSpark implements TurretIO {
     private final SparkBase m_turretMotor;
-    private final RelativeEncoder m_turretEncoder;
-    private final SparkClosedLoopController m_ClosedLoopController;
+    private final SparkRelativeEncoder m_turretEncoder;
+    private final SparkClosedLoopController m_turretClosedLoopController;
+  
+    private final LoggedNetworkNumber kP = new LoggedNetworkNumber("/Tuning/Turret/TurretKP", TurretConstants.kP);
+    private final LoggedNetworkNumber kI = new LoggedNetworkNumber("/Tuning/Turret/TurretKI", TurretConstants.kI);
+    private final LoggedNetworkNumber kD = new LoggedNetworkNumber("/Tuning/Turret/TurretKD", TurretConstants.kD);
+    private final LoggedNetworkNumber kS = new LoggedNetworkNumber("/Tuning/Turret/TurretKS", TurretConstants.kS);
+    private final LoggedNetworkNumber kV = new LoggedNetworkNumber("/Tuning/Turret/TurretKV", TurretConstants.kV);
+    private final LoggedNetworkNumber Target_Pose = new LoggedNetworkNumber("/Tuning/Turret/SetPoint", 0);
+    private double lastKP = TurretConstants.kP;
+    private double lastKI = TurretConstants.kI;
+    private double lastKD = TurretConstants.kD;
+    private double lastKS = TurretConstants.kS;
+    private double lastKV = TurretConstants.kV;
+
+    private SparkMaxConfig motorConfig = new SparkMaxConfig();
+
+
     public TurretIOSpark() {
         m_turretMotor = new SparkMax(TurretConstants.CAN_ID, MotorType.kBrushless);
-        m_turretEncoder = m_turretMotor.getEncoder();
-        m_ClosedLoopController = m_turretMotor.getClosedLoopController();
-        var motorConfig = new SparkMaxConfig();
+        m_turretEncoder = (SparkRelativeEncoder) m_turretMotor.getEncoder();
+        m_turretClosedLoopController = m_turretMotor.getClosedLoopController();
+    
         motorConfig
             .inverted(TurretConstants.INVERTED)
-            .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(TurretConstants.CURRENT_LIMIT);
-        motorConfig.closedLoop
+            .idleMode(IdleMode.kBrake   )
+            .smartCurrentLimit(TurretConstants.CURRENT_LIMIT)
+        .closedLoop
             .p(TurretConstants.kP)
             .i(TurretConstants.kI)
             .d(TurretConstants.kD)
-            .outputRange(TurretConstants.kMinOutput, TurretConstants.kMaxOutput);
+            .outputRange(TurretConstants.kMinOutput, TurretConstants.kMaxOutput)
+        .feedForward
+            .kS(TurretConstants.kS)
+            .kV(TurretConstants.kV);
+        motorConfig
+        .encoder
+            .positionConversionFactor(TurretConstants.POSITION_CONVERSION_FACTOR);
+        motorConfig
+        .softLimit
+            .forwardSoftLimit(TurretConstants.FORWARD_SOFT_LIMIT)
+            .forwardSoftLimitEnabled(TurretConstants.FORWARD_SOFT_LIMIT_ENABLED)
+            .reverseSoftLimit(TurretConstants.BACKWARD_SOFT_LIMIT)
+            .reverseSoftLimitEnabled(TurretConstants.BACKWARD_SOFT_LIMIT_ENABLED);
+
         m_turretMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        m_turretEncoder.setPosition(TurretConstants.STARTING_ANGLE);
     }
 
     @Override
@@ -43,6 +83,33 @@ public class TurretIOSpark implements TurretIO {
         inputs.turretVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_turretEncoder.getVelocity());
         inputs.turretPosition = m_turretEncoder.getPosition();
         inputs.turretAppliedCurrent = m_turretMotor.getOutputCurrent();
+        double newKP = kP.get();
+        double newKI = kI.get();
+        double newKD = kD.get();
+        double newKS = kS.get();
+        double newKV = kV.get();
+         if (newKP != lastKP || newKI != lastKI || newKD != lastKD || newKS != lastKS || newKV != lastKV) {
+
+            var config = new SparkMaxConfig();
+
+            config
+                .closedLoop
+                    .p(newKP)
+                    .i(newKI)
+                    .d(newKD)
+                    .outputRange(TurretConstants.kMinOutput, TurretConstants.kMaxOutput)
+                .feedForward
+                    .kS(newKS)
+                    .kV(newKV);
+            m_turretMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+
+            lastKP = newKP;
+            lastKI = newKI;
+            lastKD = newKD;
+            lastKS = newKS;
+            lastKV = newKV;
+        }
+    
     }
 
     @Override
@@ -50,7 +117,25 @@ public class TurretIOSpark implements TurretIO {
         m_turretMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
     }
     @Override
-    public void setTurretPosition (float angle) {
+    public void setTurretPosition (double angle) {
+        System.out.println("Turret position set to: " + angle);
+        Logger.recordOutput("Turret/SetpointPosition", angle);
+        m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
+    }
+    // @Override
+    // public void setTurretPositionFieldOriented (double angle) {
+    //     System.out.println("Turret position set to: " + angle);
+    //     m_turretClosedLoopController.setSetpoint(angle, ControlType.kPosition);
+    // }
+    @Override
+    public void zeroEncoder() {
+        m_turretEncoder.setPosition(0);
+    }
 
+    @Override
+    public void setBrake(boolean brake) {
+        motorConfig.idleMode(brake ? IdleMode.kBrake : IdleMode.kCoast);
+
+        m_turretMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 }

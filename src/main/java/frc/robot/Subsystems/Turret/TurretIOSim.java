@@ -27,7 +27,7 @@ public class TurretIOSim implements TurretIO {
     public TurretIOSim() {
         m_motorSim =
             new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.005, TurretConstants.GEAR_RATIO),
+            LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.005, 1),
             DCMotor.getNEO(1));
     }
 
@@ -44,7 +44,7 @@ public class TurretIOSim implements TurretIO {
         m_motorSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
     }
     @Override
-    public void setTurretPosition(float angle) {
+    public void setTurretPosition(double angle) {
        m_motorSim.setAngle(angle); 
     }
 }
