@@ -53,7 +53,7 @@ public class Pivot extends SubsystemBase {
    * @param up Set to true to run pivot up
    */
   public void runPivot (boolean up) {
-    setPivotPercent(up ? PivotConstants.PIVOTING_PERCENT : -PivotConstants.PIVOTING_PERCENT);
+    setPivotPercent(up ? PivotConstants.PIVOTING_PERCENT : (int)(-PivotConstants.PIVOTING_PERCENT * PivotConstants.PIVOTING_DOWN_SCALING));
   }
 
   public void togglePassiveDown () {
