@@ -99,7 +99,7 @@ public class Turret extends SubsystemBase {
   public void setTurretPositionWithCoordinates(Translation2d targetCoordinates, Pose2d robotPose) {
     // 1. Get turret position in field coordinates
     Translation2d turretPosFieldRelative = robotPose.getTranslation()
-        .plus(TurretConstants.TURRET_POSITION_ROBOT_RELATIVE_M.rotateBy(robotPose.getRotation()));
+        .plus(Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M.rotateBy(robotPose.getRotation()));
 
     // 2. Vector from turret to target
     Translation2d turretToTarget = targetCoordinates.minus(turretPosFieldRelative);

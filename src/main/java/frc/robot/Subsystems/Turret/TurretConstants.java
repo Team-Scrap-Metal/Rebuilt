@@ -26,9 +26,6 @@ public final class TurretConstants {
     public static final double BACKWARD_SOFT_LIMIT = -180;
     public static final boolean TURRET_DEFAULT_MANUAL_CONTROL = false;
     
-    public static final Translation2d TURRET_POSITION_ROBOT_RELATIVE_M 
-        = new Translation2d(Units.inchesToMeters(-4.85), Units.inchesToMeters(-8.6)); // center-to-center from center of spindexer shaft -> center of turret
-
     public static final Translation2d HUB_POSITION_M 
         = new Translation2d(4.62534, 4.03479); // TODO: update
 
