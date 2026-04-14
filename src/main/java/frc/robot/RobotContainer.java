@@ -17,6 +17,9 @@ import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
 import frc.robot.Subsystems.Turret.*;
+import frc.robot.Subsystems.Vision.Vision;
+import frc.robot.Subsystems.Vision.VisionIO;
+import frc.robot.Subsystems.Vision.VisionIOLimelight;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.GyroIO;
 import frc.robot.Subsystems.Drive.GyroIOPigeon2;
@@ -63,6 +66,7 @@ public class RobotContainer {
   private final Roller m_roller;
   private final Spindexer m_spindexer;
   private final Turret m_turret;
+  private final Vision m_vision;
   private final Pivot m_pivot;
 
 
@@ -73,9 +77,9 @@ public class RobotContainer {
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  private final CommandXboxController m_auxiliaryController = 
-      new CommandXboxController(OperatorConstants.kAuxiliaryControllerPort);
+      new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandXboxController m_auxController =
+      new CommandXboxController(OperatorConstants.AUX_CONTROLLER_PORT);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -96,12 +100,17 @@ public class RobotContainer {
         m_spindexer = new Spindexer(new SpindexerIOSpark());
 
         drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOReal(0),
-                new ModuleIOReal(1),
-                new ModuleIOReal(2),
-                new ModuleIOReal(3));
+        new Drive(
+          new GyroIOPigeon2(),
+          new ModuleIOReal(0),
+          new ModuleIOReal(1),
+          new ModuleIOReal(2),
+          new ModuleIOReal(3));
+          
+        m_vision =
+            new Vision(
+                drive.getPoseEstimator()::addVisionMeasurement,
+                new VisionIOLimelight(drive::getRawGyroRotation));
         break;
 
       case SIM:
@@ -121,6 +130,13 @@ public class RobotContainer {
               new ModuleIOSim(),
               new ModuleIOSim(),
               new ModuleIOSim());
+
+        m_vision = null;
+        // m_vision =
+        //   new Vision(
+        //       drive.getPoseEstimator()::addVisionMeasurement,
+        //       new VisionIOSim(drive::getRotation));
+
         break;
 
       default:
@@ -139,6 +155,8 @@ public class RobotContainer {
               new ModuleIO() {},
               new ModuleIO() {},
               new ModuleIO() {});
+
+        m_vision = null;
         break;
     }
 
@@ -260,15 +278,15 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
+            () -> m_driverController.getLeftY(),
             () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getLeftY(),
             () -> -m_driverController.getRightX()));
   
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
           m_turret,
-          () -> -m_auxiliaryController.getLeftY(),
-          () -> m_auxiliaryController.getLeftX(),
+          () -> -m_auxController.getLeftY(),
+          () -> m_auxController.getLeftX(),
           drive
       )
     );
@@ -291,11 +309,115 @@ public class RobotContainer {
         .b()
         .onTrue(
             Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+                    () -> drive.zeroHeading()));
+        //                 drive.setPose(
+        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        //             drive)
+        //         .ignoringDisable(true));
+
+    // Reverse feeding when x is pressed
+    m_driverController
+      .x()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_feeder.runReverse(),
+            m_feeder
+          ),
+          new InstantCommand(
+            () -> m_spindexer.runReverse(),
+            m_spindexer
+          ),
+          new InstantCommand(
+            () -> m_shooter.runReverse(),
+            m_shooter
+          )
+        )
+      ).onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_feeder.setFeederPercent(0),
+            m_feeder
+          ),
+          new InstantCommand(
+            () -> m_spindexer.setSpindexerPercent(0),
+            m_spindexer
+          ),
+          new InstantCommand(
+            () -> m_shooter.setShooterPercent(0),
+            m_shooter)));
+    
+    // Aux reverse bindings
+    m_auxController
+      .povUp()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.runReverse(),
+          m_shooter))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        ));
+
+    m_auxController
+      .povDown()
+      .onTrue(
+        new InstantCommand(
+          () -> m_spindexer.runReverse(),
+          m_spindexer))
+      .onFalse(
+        new InstantCommand(
+          () -> m_spindexer.setSpindexerPercent(0),
+          m_spindexer
+        ));
+
+    m_auxController
+      .povLeft()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.runReverse(),
+            m_drum
+          ),
+          new InstantCommand(
+            () -> m_roller.runReverse(),
+            m_roller
+          )))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.setDrumPercent(0),
+            m_drum),
+          new InstantCommand(
+            () -> m_roller.setRollerPercent(0),
+            m_roller)));
+
+    m_auxController
+      .povRight()
+      .onTrue(
+        new InstantCommand(
+          () -> m_feeder.runReverse(),
+          m_feeder))
+      .onFalse(
+        new InstantCommand(
+          () -> m_feeder.setFeederPercent(0),
+          m_feeder
+        ));
+
+    m_auxController
+      .leftTrigger()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootFromHub(),
+          m_shooter
+        ))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
 
     m_driverController
       .povUp()
@@ -332,7 +454,7 @@ public class RobotContainer {
       ));
     
     /** Zero Turret Encoder */
-    m_auxiliaryController
+    m_auxController
         .b()
         .onTrue(
           Commands.runOnce (
@@ -340,7 +462,7 @@ public class RobotContainer {
           )
         );
 
-    m_auxiliaryController
+    m_auxController
       .leftBumper()
       .onTrue(
         new InstantCommand(

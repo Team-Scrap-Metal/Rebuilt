@@ -338,4 +338,8 @@ public class Drive extends SubsystemBase {
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
   }
+
+  public void zeroHeading(){
+    gyroIO.zeroHeading();
+  }
 }

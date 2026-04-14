@@ -10,12 +10,11 @@ public final class ShooterConstants {
     public static final int SHOOTING_SPEED_RPM = 100;
     public static final double MAX_OUTPUT = 1;
     public static final double MIN_OUTPUT = -1;
-    public static final double KP = 0.0004;
+    public static final double KP = 0.0002;
     public static final double KI = 0.0;
-    public static final double KD = 0.1;
-    public static final double KS = 0.22;
+    public static final double KD = 0.03;
+    public static final double KS = 0.185;
     public static final double KV = 0.00211;
-    // public static final double KA = 0.048625;
     public static final double SHOOTER_ANGLE = 19.11;
     public static final double HUB_HEIGHT_IN = 72.0;
     public static final double SHOOTER_HEIGHT_IN = 18.5;
@@ -24,4 +23,7 @@ public final class ShooterConstants {
 
     public static final double SHOOTER_VELOCITY_COEFFICIENT = 1;
     // public static final int SHOOTING_PERCENT = 30;
+
+    /*** Target RPM to score while flush with hub ***/
+    public static final int RPM_FROM_HUB = 1850;
 }

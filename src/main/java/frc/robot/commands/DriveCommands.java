@@ -95,8 +95,8 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+                      ? drive.getRawGyroRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRawGyroRotation()));
         },
         drive);
   }

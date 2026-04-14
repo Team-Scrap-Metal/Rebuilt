@@ -45,4 +45,8 @@ public class Spindexer extends SubsystemBase {
   public int getTunedPercent() {
     return (int)speedPercentInput.getAsDouble();
   }
+
+  public void runReverse () {
+    setSpindexerPercent(-getTunedPercent());
+  }
 }

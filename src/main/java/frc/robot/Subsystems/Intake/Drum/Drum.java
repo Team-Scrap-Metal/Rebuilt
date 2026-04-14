@@ -73,4 +73,9 @@ public class Drum extends SubsystemBase {
   public int getTunedLaunchPercent() {
     return (int)speedLaunchPercentInput.getAsDouble();
   }
+
+  public void runReverse () {
+    setDrumPercent(-getTunedIntakePercent());
+  }
+
 }

@@ -51,4 +51,7 @@ public class Roller extends SubsystemBase {
     return (int)speedPercentInput.getAsDouble();
   }
 
+  public void runReverse () {
+    setRollerPercent(-getTunedPercent());
+  }
 }
