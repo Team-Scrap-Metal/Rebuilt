@@ -145,4 +145,11 @@ public class PoseEstimator extends SubsystemBase {
       resetPose(visionRobotPoseMeters);
     }
   }
+
+  public void updateStartingPose () {
+    Pose2d newPose = m_startingPoseChooser.get();
+
+    field2d.setRobotPose(newPose);
+    poseEstimator.resetPose(newPose);
+  }
 }

@@ -33,6 +33,8 @@ import frc.robot.Subsystems.Turret.*;
 import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
+import java.time.Instant;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -44,6 +46,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -164,6 +168,19 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    autoChooser.addOption(
+      "8 Fuel Center Auto", 
+      new SequentialCommandGroup(
+        new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
+        new WaitCommand(1),
+        new Feed(m_feeder, m_spindexer),
+        new WaitCommand(10),
+        new ParallelCommandGroup(
+          new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
+          new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
+        )
+      ));
 
     // // Set up SysId routines
     // autoChooser.addOption(
@@ -506,6 +523,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
+    drive.getPoseEstimator().updateStartingPose();
+    
     return autoChooser.get();
   }
 
