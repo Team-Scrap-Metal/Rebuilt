@@ -198,15 +198,17 @@ public class RobotContainer {
     m_driverController
       .leftTrigger()
       .onTrue(
-          new InstantCommand(
-            () ->
-            // m_shooter.shootFromDistance(m_shooter.getHubDistance())
-            m_shooter.setShooterRPM(m_shooter.getTunedRPM())))
-      .onFalse(
+          new  InstantCommand(
+            () -> m_shooter.shootAtHub(drive),
+            m_shooter
+            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
+          )
+      )
+      .onFalse(new ParallelCommandGroup(
         new InstantCommand(
           () ->
             m_shooter.setShooterPercent(0),
-            m_shooter));
+            m_shooter)));
     m_driverController
       .rightTrigger()
       .onTrue(
@@ -469,7 +471,22 @@ public class RobotContainer {
           () -> m_turret.toggleManualControl(),
           m_turret
         ));
-    }        
+      // TODO: TEMP CODE REMOVE BEFORE UTAH
+    m_auxController
+      .rightTrigger()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootAtTuned(),
+          m_shooter
+        )
+      )
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
+  }        
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
