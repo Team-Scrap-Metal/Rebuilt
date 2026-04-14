@@ -1,6 +1,7 @@
 package frc.robot.util;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 // import java.util.logging.Logger;
 
@@ -14,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,15 +34,44 @@ public class PoseEstimator extends SubsystemBase {
 
   public static Vector<N3> visionStandardDevs = VecBuilder.fill(0.1, 0.1, 9999999);
 
+  private boolean visionResetsOdometry = true;
+
   private SwerveDrivePoseEstimator poseEstimator;
   private Drive drive;
   private Field2d field2d;
+
+  private LoggedDashboardChooser<Pose2d> m_startingPoseChooser;
+  private Pose2d m_oldPoseChooserValue;
 //   private LimelightHelpers.PoseEstimate mt1;
 
   public PoseEstimator(Drive drive) {
-
+    m_startingPoseChooser.addOption(
+      "Left", 
+      new Pose2d(
+        Units.inchesToMeters(158.6 - 7), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        Units.inchesToMeters(317.7 - 11.125), // flush with field wall
+        Rotation2d.k180deg) // Intake facing driver station
+      );
+    m_startingPoseChooser.addDefaultOption(
+      "Center", 
+      new Pose2d(
+        Units.inchesToMeters(158.6 - 7) - DriveConstants.BUMPER_WIDTH_M, // bumpers flush with hub
+        Units.inchesToMeters(317.7/2), // center of field
+        Rotation2d.fromDegrees(-90)) // left robot side against hub
+      );
+    m_startingPoseChooser.addOption(
+      "Right", 
+      new Pose2d(
+        Units.inchesToMeters(158.6 - 7), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        Units.inchesToMeters(11.125), // flush with field wall
+        Rotation2d.k180deg) // Intake facing driver station
+      );
+    
+    m_oldPoseChooserValue = m_startingPoseChooser.get();
+    
     field2d = new Field2d();
-    field2d.setRobotPose(new Pose2d(new Translation2d(0,0), new Rotation2d(0)));
+    field2d.setRobotPose(m_oldPoseChooserValue);
+
     SmartDashboard.putData(field2d);
     this.drive = drive;
 
@@ -61,6 +92,12 @@ public class PoseEstimator extends SubsystemBase {
     // When ran on the real robot it would overload the command scheduler, causing input delay from
     // joystick to driving
     field2d.setRobotPose(getPose());
+
+    if (m_oldPoseChooserValue != m_startingPoseChooser.get()) {
+      field2d.setRobotPose(m_startingPoseChooser.get());
+      poseEstimator.resetPose(m_startingPoseChooser.get());
+    }
+
     poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
@@ -87,7 +124,7 @@ public class PoseEstimator extends SubsystemBase {
    * @param currentPose2d
    */
   public void resetPose(Pose2d currentPose2d) {
-    poseEstimator.resetPosition(drive.getRotation(), drive.getModulePositions(), currentPose2d);
+    poseEstimator.resetPosition(drive.getRawGyroRotation(), drive.getModulePositions(), currentPose2d);
   }
   /**
    * @return the rotation in a Rotation2d in degrees
@@ -103,5 +140,9 @@ public class PoseEstimator extends SubsystemBase {
       Logger.recordOutput("Vision/VisionPose", visionRobotPoseMeters);
     poseEstimator.addVisionMeasurement(
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    
+    if (visionResetsOdometry && visionRobotPoseMeters != null) {
+      resetPose(visionRobotPoseMeters);
+    }
   }
 }

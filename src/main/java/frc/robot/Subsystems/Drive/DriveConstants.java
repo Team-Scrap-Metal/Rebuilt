@@ -157,4 +157,6 @@ public class DriveConstants {
               driveMotorCurrentLimit,
               1),
           moduleTranslations);
+
+  public static final double BUMPER_WIDTH_M = Units.inchesToMeters(2);
 }
