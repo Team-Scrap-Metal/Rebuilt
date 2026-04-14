@@ -74,6 +74,9 @@ public class Turret extends SubsystemBase {
   public Command setTurretPositionWithController(Turret turret, DoubleSupplier joystickX, DoubleSupplier joystickY, Drive drive) {
     return Commands.run(
       () -> {
+        if (!manualControlToggle) {
+          return;
+        }
         double x = joystickX.getAsDouble();
         double y = joystickY.getAsDouble();
         System.out.println("JstickX: " + x + " JstickY: " + y);
@@ -97,6 +100,9 @@ public class Turret extends SubsystemBase {
   }
                                    
   public void setTurretPositionWithCoordinates(Translation2d targetCoordinates, Pose2d robotPose) {
+    if (manualControlToggle) {
+      return;
+    }
     // 1. Get turret position in field coordinates
     Translation2d turretPosFieldRelative = robotPose.getTranslation()
         .plus(Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M.rotateBy(robotPose.getRotation()));
