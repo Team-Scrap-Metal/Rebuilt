@@ -44,6 +44,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -54,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Feed;
+import frc.robot.commands.ReadyShoot;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -197,14 +199,10 @@ public class RobotContainer {
     autoChooser.addDefaultOption(
       "8 Fuel Center Auto", 
       new SequentialCommandGroup(
-        new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
+        new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
+        new InstantCommand ( () -> m_shooter.shoot(drive), m_shooter),
         new WaitCommand(1),
-        new Feed(m_feeder, m_spindexer),
-        new WaitCommand(10),
-        new ParallelCommandGroup(
-          new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
-          new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
-        )
+        new Feed(m_feeder, m_spindexer)
       ));
 
     // // Set up SysId routines
@@ -273,18 +271,9 @@ public class RobotContainer {
     // Ready shoot - spin up shooter and aim turret at hub
     m_driverController
       .leftTrigger()
-      .onTrue(
-          new InstantCommand(
-            () -> m_shooter.shootAtHub(drive),
-            m_shooter
-            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
-          )
-        )
       .whileTrue(
-        Commands.run(
-          () -> m_turret.targetHub(drive),
-          m_turret)
-          )
+        new ReadyShoot(m_shooter, m_turret, drive, m_currentTargetingState == TargetState.PASSING)
+      )
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
           () ->
@@ -336,7 +325,7 @@ public class RobotContainer {
               m_spindexer
             )
           ),
-          new WaitCommand(0.5),
+          new WaitCommand(0.3),
           new Feed(m_feeder, m_spindexer)
       ))
       .onFalse(new ParallelCommandGroup(
@@ -359,8 +348,6 @@ public class RobotContainer {
           () -> m_pivot.togglePassiveDown(),
           m_pivot
       ));
-
-    // TODO: Add binding to toggle passing/scoring 
 
     // Reverse feeding when x is pressed
     m_driverController
@@ -441,29 +428,48 @@ public class RobotContainer {
       )
     );
 
+    m_auxController
+    .leftBumper()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        )));
+
+    m_auxController
+    .leftTrigger()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(0)
+        )));
+
+    m_auxController
+    .rightBumper()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        )));
+
+    m_auxController
+    .rightTrigger()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB)
+        )));
+
+
     // Toggle manual/auto turret control
     m_auxController
-      .leftBumper()
+      .a()
       .onTrue(
         new InstantCommand(
           () -> m_turret.toggleManualControl(),
           m_turret
         ));
 
-    // Run static RPM to score when robot left is near-flush with hub
-    m_auxController
-      .leftTrigger()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.shootFromHub(),
-          m_shooter
-        ))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        )
-      );
 
     /** Zero Turret Encoder */
     m_auxController
@@ -562,19 +568,57 @@ public class RobotContainer {
     // return m_shooter.runFullSysId();
     // drive.getPoseEstimator().updateStartingPose();
 
-    return new SequentialCommandGroup(
-        new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
-        new WaitCommand(2),
-        new Feed(m_feeder, m_spindexer)
-        // new WaitCommand(10),
-        // new ParallelCommandGroup(
-        //   new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
-        //   new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
-        // )
-      );
+    // return new SequentialCommandGroup(
+    //     new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
+    //     new WaitCommand(2),
+    //     new Feed(m_feeder, m_spindexer)
+    //     // new WaitCommand(10),
+    //     // new ParallelCommandGroup(
+    //     //   new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
+    //     //   new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
+    //     // )
+    //   );
+
+    return autoChooser.get();
   }
 
   public void disabledInit() {
     m_turret.setBrake(false);
   }
+
+  // private Command ReadyShoot (Turret turret, Shooter shooter, Drive drive) {
+  //   return Commands.run(
+  //     () -> {
+  //       if (m_currentTargetingState == TargetState.HUB_SCORING) {
+  //         shooter.shoot(drive);
+  //         turret.autoAim(drive);
+  //       } else {
+  //         Pose2d robotPose = drive.getPose();
+  //         Translation2d launcherPositionFieldRelative =
+  //           robotPose
+  //             .getTranslation()
+  //             .plus(
+  //               Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
+  //               .rotateBy(robotPose.getRotation()));
+
+  //         Translation2d closestPassingTarget = Constants.PASSING_TARGETS[0];
+
+  //         for (int i = 0; i < Constants.PASSING_TARGETS.length; i++) {
+  //           if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
+  //             closestPassingTarget = Constants.PASSING_TARGETS[i];
+  //           }
+  //         }
+
+  //         var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
+
+  //         shooter.passFromDistance(distance);
+          
+  //         if (turret.getManualControlStatus() == false) {
+  //           turret.setTurretPositionWithCoordinates(closestPassingTarget, robotPose);
+  //         }
+  //       }
+  //     },
+  //     turret, shooter
+  //     );
+  // }
 }

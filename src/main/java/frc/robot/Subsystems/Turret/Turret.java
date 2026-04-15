@@ -147,6 +147,18 @@ public class Turret extends SubsystemBase {
   public void setBrake(boolean brake) {
     m_io.setBrake(brake);
   }
+
+  /**
+   * Returns true if manual control is true
+   * @return
+   */
+  public boolean getManualControlStatus () {
+    return manualControlToggle;
+  }
+
+  public void autoAim(Drive drive) {
+
+  }
   // public void targetHub (Pose2d pose) {
     
   // }
