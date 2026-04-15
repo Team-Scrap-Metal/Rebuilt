@@ -22,6 +22,7 @@ import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotation;
 
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drive.Drive;
@@ -68,6 +69,17 @@ public class Turret extends SubsystemBase {
     m_io.setTurretVoltage(((double)percent) / 100 * 12);
   }
   public void setTurretPosition(double angle) {
+    double min = TurretConstants.BACKWARD_SOFT_LIMIT;
+    double max = TurretConstants.FORWARD_SOFT_LIMIT;
+
+    // Wrap angle into range
+    while (angle > max) {
+        angle -= 360;
+    }
+    while (angle < min) {
+        angle += 360;
+    }
+
     m_io.setTurretPosition(angle);
   }
   public void zeroEncoder () {
@@ -83,7 +95,7 @@ public class Turret extends SubsystemBase {
         double x = joystickX.getAsDouble();
         double y = joystickY.getAsDouble();
         System.out.println("JstickX: " + x + " JstickY: " + y);
-        double angle = Math.toDegrees(Math.atan2(y, x));
+        double angle = Math.toDegrees(Math.atan2(y, x)) + 90;
         double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         System.out.println("Angle: " + angle + "\n");
         System.out.println("Magnitude: " + magnitude + "\n");
@@ -119,7 +131,7 @@ public class Turret extends SubsystemBase {
     // 4. Convert to robot-relative
     Rotation2d angleRobotRelative = fieldAngle.minus(robotPose.getRotation());
 
-    setTurretPosition(angleRobotRelative.getDegrees());
+    setTurretPosition(angleRobotRelative.plus(Rotation2d.k180deg).getDegrees());
   }
 
   public void targetHub(Drive drive) {

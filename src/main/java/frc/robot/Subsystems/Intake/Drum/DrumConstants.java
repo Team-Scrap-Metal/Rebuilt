@@ -7,7 +7,7 @@ public final class DrumConstants {
     public static final boolean FOLLOWER_INVERTED = true;
     public static final int CURRENT_LIMIT = 30;
     public static final double GEAR_RATIO = 1;
-    public static final int INTAKING_DRUM_PERCENT = 20;
+    public static final int INTAKING_DRUM_PERCENT = 30;
     public static final int LAUNCHING_DRUM_PERCENT = 100;
 
     public static enum DrumState {

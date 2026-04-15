@@ -184,7 +184,7 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    autoChooser.addOption(
+    autoChooser.addDefaultOption(
       "8 Fuel Center Auto", 
       new SequentialCommandGroup(
         new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
@@ -230,8 +230,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> m_driverController.getLeftY(),
-            () -> m_driverController.getLeftX(),
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()));
 
     // Intake
@@ -315,8 +315,20 @@ public class RobotContainer {
     m_driverController
       .rightTrigger()
       .onTrue(
+        new SequentialCommandGroup(
+          new ParallelCommandGroup(
+            new InstantCommand(
+              () -> m_feeder.runReverse(),
+              m_feeder
+            ),
+            new InstantCommand(
+              () -> m_spindexer.runReverse(),
+              m_spindexer
+            )
+          ),
+          new WaitCommand(0.5),
           new Feed(m_feeder, m_spindexer)
-      )
+      ))
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
           () ->
@@ -352,10 +364,6 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_spindexer.runReverse(),
             m_spindexer
-          ),
-          new InstantCommand(
-            () -> m_shooter.runReverse(),
-            m_shooter
           )
         )
       ).onFalse(
@@ -367,10 +375,7 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_spindexer.setSpindexerPercent(0),
             m_spindexer
-          ),
-          new InstantCommand(
-            () -> m_shooter.setShooterPercent(0),
-            m_shooter)));
+          )));
 
     // Intake pivoting up (stowing)/down (extending)
     m_driverController
@@ -413,8 +418,8 @@ public class RobotContainer {
     m_turret.setDefaultCommand(
       m_turret.setTurretPositionWithController(
           m_turret,
-          () -> -m_auxController.getLeftY(),
           () -> m_auxController.getLeftX(),
+          () -> -m_auxController.getLeftY(),
           drive
       )
     );
@@ -538,9 +543,18 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
-    drive.getPoseEstimator().updateStartingPose();
+    // drive.getPoseEstimator().updateStartingPose();
 
-    return autoChooser.get();
+    return new SequentialCommandGroup(
+        new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
+        new WaitCommand(2),
+        new Feed(m_feeder, m_spindexer)
+        // new WaitCommand(10),
+        // new ParallelCommandGroup(
+        //   new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
+        //   new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
+        // )
+      );
   }
 
   public void disabledInit() {

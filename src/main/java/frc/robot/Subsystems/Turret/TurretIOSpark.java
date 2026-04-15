@@ -52,7 +52,7 @@ public class TurretIOSpark implements TurretIO {
     
         motorConfig
             .inverted(TurretConstants.INVERTED)
-            .idleMode(IdleMode.kBrake   )
+            .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(TurretConstants.CURRENT_LIMIT)
         .closedLoop
             .p(TurretConstants.kP)
