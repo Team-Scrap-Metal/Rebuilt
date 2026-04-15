@@ -331,7 +331,6 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setTurnOpenLoop(double output) {
-    System.out.println(output);
     turnSpark.setVoltage(output);
 }
 

@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Rotation;
+import static frc.robot.Subsystems.Drive.DriveConstants.ROBOT_STARTING_ANGLE;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -45,6 +48,7 @@ public class PoseEstimator extends SubsystemBase {
 //   private LimelightHelpers.PoseEstimate mt1;
 
   public PoseEstimator(Drive drive) {
+    m_startingPoseChooser = new LoggedDashboardChooser<Pose2d>("Starting position");
     m_startingPoseChooser.addOption(
       "Left", 
       new Pose2d(
@@ -70,7 +74,11 @@ public class PoseEstimator extends SubsystemBase {
     m_oldPoseChooserValue = m_startingPoseChooser.get();
     
     field2d = new Field2d();
-    field2d.setRobotPose(m_oldPoseChooserValue);
+    field2d.setRobotPose(new Pose2d(
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
+        Units.inchesToMeters(317.7/2), // center of field
+        Rotation2d.fromDegrees(0)) // left robot side against hub
+      );
 
     SmartDashboard.putData(field2d);
     this.drive = drive;
@@ -84,6 +92,12 @@ public class PoseEstimator extends SubsystemBase {
             stateStandardDevs,
             visionStandardDevs);
 
+    poseEstimator.resetPose(new Pose2d(
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
+        Units.inchesToMeters(317.7/2), // center of field
+        Rotation2d.fromDegrees(0)) // left robot side against hub
+      );
+
     // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
   }
 
@@ -93,10 +107,10 @@ public class PoseEstimator extends SubsystemBase {
     // joystick to driving
     field2d.setRobotPose(getPose());
 
-    if (m_oldPoseChooserValue != m_startingPoseChooser.get()) {
-      field2d.setRobotPose(m_startingPoseChooser.get());
-      poseEstimator.resetPose(m_startingPoseChooser.get());
-    }
+    // if (m_oldPoseChooserValue != m_startingPoseChooser.get()) {
+    //   field2d.setRobotPose(m_startingPoseChooser.get());
+    //   poseEstimator.resetPose(m_startingPoseChooser.get());
+    // }
 
     poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
@@ -142,6 +156,7 @@ public class PoseEstimator extends SubsystemBase {
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     
     if (visionResetsOdometry && visionRobotPoseMeters != null) {
+      System.out.println("resetting pose to vision");
       resetPose(visionRobotPoseMeters);
     }
   }
@@ -151,5 +166,10 @@ public class PoseEstimator extends SubsystemBase {
 
     field2d.setRobotPose(newPose);
     poseEstimator.resetPose(newPose);
+  }
+
+  public void zeroHeading () {
+    Pose2d oldPose = getPose();
+    resetPose(new Pose2d(oldPose.getTranslation(), Rotation2d.kZero));
   }
 }

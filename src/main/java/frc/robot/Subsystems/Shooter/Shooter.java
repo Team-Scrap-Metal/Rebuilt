@@ -143,11 +143,13 @@ public class Shooter extends SubsystemBase {
    * @param distance meters from shooter center to hub center
    */
   public void revForDistance(double distance) {
-    distance = getHubDistance();
+    // distance = getHubDistance();
     // var target_rpm = m_distanceBestFit.getBestFit(distance);
     var target_rpm = m_distanceRpmTable.get(distance);
 
-    setShooterRPM(target_rpm);
+    Logger.recordOutput("Shooter/TargetDistance", distance);
+
+    setShooterRPM(800);
   }
 
 

@@ -21,6 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
 import frc.robot.Subsystems.Vision.VisionConstants.*;
 
 /** IO implementation for real Limelight hardware. */
@@ -73,6 +76,8 @@ public class VisionIOLimelight implements VisionIO {
     // Read new pose observations from NetworkTables
     Set<Integer> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
+
+    List<Pose3d> mt1Poses = new LinkedList<Pose3d>();
     for (var rawSample : megatag1Subscriber.readQueue()) {
       if (rawSample.value.length == 0) continue;
       for (int i = 11; i < rawSample.value.length; i += 7) {
@@ -98,32 +103,41 @@ public class VisionIOLimelight implements VisionIO {
 
               // Observation type
               PoseObservationType.MEGATAG_1));
+
+      // mt1Poses.add(
+      //   parsePose(
+      //     rawSample.value
+      //   )
+      // )
     }
-    for (var rawSample : megatag2Subscriber.readQueue()) {
-      if (rawSample.value.length == 0) continue;
-      for (int i = 11; i < rawSample.value.length; i += 7) {
-        tagIds.add((int) rawSample.value[i]);
-      }
-      poseObservations.add(
-          new PoseObservation(
-              // Timestamp, based on server timestamp of publish and latency
-              rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
-              // 3D pose estimate
-              parsePose(rawSample.value),
+    // for (var rawSample : megatag2Subscriber.readQueue()) {
+    //   if (rawSample.value.length == 0) continue;
+    //   for (int i = 11; i < rawSample.value.length; i += 7) {
+    //     tagIds.add((int) rawSample.value[i]);
+    //   }
+    //   poseObservations.add(
+    //       new PoseObservation(
+    //           // Timestamp, based on server timestamp of publish and latency
+    //           rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
-              // Ambiguity, zeroed because the pose is already disambiguated
-              0.0,
+    //           // 3D pose estimate
+    //           parsePose(rawSample.value),
 
-              // Tag count
-              (int) rawSample.value[7],
+    //           // Ambiguity, zeroed because the pose is already disambiguated
+    //           0.0,
 
-              // Average tag distance
-              rawSample.value[9],
+    //           // Tag count
+    //           (int) rawSample.value[7],
 
-              // Observation type
-              PoseObservationType.MEGATAG_2));
-    }
+    //           // Average tag distance
+    //           rawSample.value[9],
+
+    //           // Observation type
+    //           PoseObservationType.MEGATAG_2));
+    // }
+
+    // Logger.recordOutput("Vision/IOLayer/PoseObservations", poseObservations.size());
 
     // Save pose observations to inputs object
     inputs.poseObservations = new PoseObservation[poseObservations.size()];
