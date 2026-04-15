@@ -33,6 +33,7 @@ import frc.robot.Subsystems.Turret.*;
 import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
+import java.lang.annotation.Target;
 import java.time.Instant;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -88,6 +89,13 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private enum TargetState {
+    HUB_SCORING,
+    PASSING
+  }
+
+  private TargetState m_currentTargetingState;
 
   // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
@@ -164,6 +172,8 @@ public class RobotContainer {
         m_vision = null;
         break;
     }
+
+    m_currentTargetingState = TargetState.HUB_SCORING;
 
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
@@ -371,6 +381,13 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_shooter.setShooterPercent(0),
             m_shooter)));
+
+    m_driverController
+      .y()
+      .onTrue(
+        new InstantCommand(() -> m_currentTargetingState =  m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING : TargetState.HUB_SCORING)
+      );
+
 
     // Intake pivoting up (stowing)/down (extending)
     m_driverController

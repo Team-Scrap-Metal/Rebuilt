@@ -18,6 +18,9 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import static edu.wpi.first.units.Units.Volts;
+
+import java.nio.file.ClosedDirectoryStreamException;
+
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -171,6 +174,29 @@ public class Shooter extends SubsystemBase {
         .plus(
           Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
           .rotateBy(robotPose.getRotation()));
+  }
+
+  public void shoot (Drive drive, boolean passing) {
+    if (!passing) {
+      shootAtHub(drive);
+    } else {
+      passFromPosition(drive);
+    }
+  }
+
+  public void passFromPosition(Drive drive) {
+    Pose2d robotPose = drive.getPose();
+    Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
+
+    Translation2d closestPassingTarget = Constants.PASSING_TARGETS[0];
+
+    for (int i = 0; i < Constants.PASSING_TARGETS.length; i++) {
+      if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
+        closestPassingTarget = Constants.PASSING_TARGETS[i];
+      }
+      }
+
+    var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
   }
 
   // public void shootFromDistance (double distance) {
