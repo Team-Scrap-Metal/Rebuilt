@@ -152,13 +152,13 @@ public class PoseEstimator extends SubsystemBase {
       double timestampSeconds,
       Matrix<N3, N1> visionMeasurementStdDevs) {
       Logger.recordOutput("Vision/VisionPose", visionRobotPoseMeters);
-    // poseEstimator.addVisionMeasurement(
-    //     visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    poseEstimator.addVisionMeasurement(
+        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     
-    // if (visionResetsOdometry && visionRobotPoseMeters != null) {
-    //   System.out.println("resetting pose to vision");
-    //   resetPose(visionRobotPoseMeters);
-    // }
+    if (visionResetsOdometry && visionRobotPoseMeters != null) {
+      System.out.println("resetting pose to vision");
+      resetPose(visionRobotPoseMeters);
+    }
   }
 
   public void updateStartingPose () {
