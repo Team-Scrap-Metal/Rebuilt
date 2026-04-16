@@ -46,6 +46,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -376,11 +377,11 @@ public class RobotContainer {
             m_spindexer
           )));
 
-    m_driverController
-      .y()
-      .onTrue(
-        new InstantCommand(() -> togglePassingMode())
-      );
+    // m_driverController
+    //   .y()
+    //   .onTrue(
+    //     new InstantCommand(() -> togglePassingMode())
+    //   );
 
 
     // Intake pivoting up (stowing)/down (extending)
@@ -484,15 +485,13 @@ public class RobotContainer {
           m_turret
         ));
 
-
-    /** Zero Turret Encoder */
     m_auxController
-        .b()
-        .onTrue(
-          Commands.runOnce (
-             () -> m_turret.zeroEncoder()
-          )
-        );
+      .b()
+      .onTrue(
+        new InstantCommand(
+          () -> togglePassingMode()
+        )
+      );
       
     m_auxController
       .y()
@@ -501,6 +500,15 @@ public class RobotContainer {
           () -> m_turret.toggleStaticSetpointOverride()
         )
       );
+
+    /** Zero Turret Encoder */
+    m_auxController
+        .x()
+        .onTrue(
+          Commands.runOnce (
+             () -> m_turret.zeroEncoder()
+          )
+        );
 
     // Reverse shooter
     // m_auxController
@@ -559,20 +567,20 @@ public class RobotContainer {
         ));
     
     // TODO: TEMP CODE REMOVE BEFORE UTAH
-    m_auxController
-      .x()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.shootAtTuned(),
-          m_shooter
-        )
-      )
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        )
-      );
+    // m_auxController
+    //   .x()
+    //   .onTrue(
+    //     new InstantCommand(
+    //       () -> m_shooter.shootAtTuned(),
+    //       m_shooter
+    //     )
+    //   )
+    //   .onFalse(
+    //     new InstantCommand(
+    //       () -> m_shooter.setShooterPercent(0),
+    //       m_shooter
+    //     )
+    //   );
   }        
 
   /**
@@ -607,6 +615,7 @@ public class RobotContainer {
     m_currentTargetingState =  m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING : TargetState.HUB_SCORING;
     Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
   }
+
   // private Command ReadyShoot (Turret turret, Shooter shooter, Drive drive) {
   //   return Commands.run(
   //     () -> {

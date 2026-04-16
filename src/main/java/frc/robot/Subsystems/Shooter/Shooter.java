@@ -149,6 +149,10 @@ public class Shooter extends SubsystemBase {
     setShooterRPM(getTunedRPM());
   }
 
+  public double calculateRpm(double distance) {
+    return m_distanceRpmTable.get(distance);
+  }
+
   /**
    * Rev shooter for distance to hub
    * @param distance meters from shooter center to hub center
@@ -156,13 +160,12 @@ public class Shooter extends SubsystemBase {
   public void revForDistance(double distance) {
     // distance = getHubDistance();
     // var target_rpm = m_distanceBestFit.getBestFit(distance);
-    var target_rpm = m_distanceRpmTable.get(distance);
+    var target_rpm = calculateRpm(distance)
 
     Logger.recordOutput("Shooter/TargetDistance", distance);
 
     setShooterRPM(target_rpm);
   }
-
 
   public void shootAtPosition(Translation2d target, Pose2d robotPose) {
     Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
@@ -182,7 +185,7 @@ public class Shooter extends SubsystemBase {
   /**
    * @return The field-relative position of the center of the launcher
    */
-  private Translation2d getLauncherPose(Pose2d robotPose) {
+  public Translation2d getLauncherPose(Pose2d robotPose) {
     return robotPose.getTranslation()
         .plus(
           Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
