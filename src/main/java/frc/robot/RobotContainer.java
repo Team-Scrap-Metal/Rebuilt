@@ -36,6 +36,7 @@ import frc.robot.commands.DriveCommands;
 import java.lang.annotation.Target;
 import java.time.Instant;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -176,6 +177,7 @@ public class RobotContainer {
     }
 
     m_currentTargetingState = TargetState.HUB_SCORING;
+    Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
 
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
@@ -377,7 +379,7 @@ public class RobotContainer {
     m_driverController
       .y()
       .onTrue(
-        new InstantCommand(() -> m_currentTargetingState =  m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING : TargetState.HUB_SCORING)
+        new InstantCommand(() -> togglePassingMode())
       );
 
 
@@ -434,6 +436,9 @@ public class RobotContainer {
       new ParallelCommandGroup(
         new InstantCommand(
           () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT)
         )));
 
     m_auxController
@@ -442,7 +447,11 @@ public class RobotContainer {
       new ParallelCommandGroup(
         new InstantCommand(
           () -> m_shooter.setStaticSetpoint(0)
-        )));
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(0)
+        )
+        ));
 
     m_auxController
     .rightBumper()
@@ -450,6 +459,9 @@ public class RobotContainer {
       new ParallelCommandGroup(
         new InstantCommand(
           () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_RIGHT)
         )));
 
     m_auxController
@@ -458,8 +470,10 @@ public class RobotContainer {
       new ParallelCommandGroup(
         new InstantCommand(
           () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)
         )));
-
 
     // Toggle manual/auto turret control
     m_auxController
@@ -479,34 +493,37 @@ public class RobotContainer {
              () -> m_turret.zeroEncoder()
           )
         );
-
-    // Reverse shooter
+      
     m_auxController
-      .povUp()
+      .y()
       .onTrue(
         new InstantCommand(
-          () -> m_shooter.runReverse(),
-          m_shooter))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        ));
+          () -> m_turret.toggleStaticSetpointOverride()
+        )
+      );
 
-    // reverse spindexer
+    // Reverse shooter
+    // m_auxController
+    //   .povUp()
+    //   .onTrue(
+    //     new InstantCommand(
+    //       () -> m_shooter.runReverse(),
+    //       m_shooter))
+    //   .onFalse(
+    //     new InstantCommand(
+    //       () -> m_shooter.setShooterPercent(0),
+    //       m_shooter
+    //     ));
+
+    // toggle turret enable
     m_auxController
       .povDown()
       .onTrue(
         new InstantCommand(
-          () -> m_spindexer.runReverse(),
-          m_spindexer))
-      .onFalse(
-        new InstantCommand(
-          () -> m_spindexer.setSpindexerPercent(0),
-          m_spindexer
-        ));
+          () -> m_turret.toggleTurretEnabled()
+          ));
 
-    // Reverse drum
+    // Reverse intake
     m_auxController
       .povLeft()
       .onTrue(
@@ -528,22 +545,22 @@ public class RobotContainer {
             () -> m_roller.setRollerPercent(0),
             m_roller)));
 
-    // Reverse feeder
+    // Reverse shooter
     m_auxController
       .povRight()
       .onTrue(
         new InstantCommand(
-          () -> m_feeder.runReverse(),
-          m_feeder))
+          () -> m_shooter.runReverse(),
+          m_shooter))
       .onFalse(
         new InstantCommand(
-          () -> m_feeder.setFeederPercent(0),
-          m_feeder
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
         ));
     
     // TODO: TEMP CODE REMOVE BEFORE UTAH
     m_auxController
-      .rightTrigger()
+      .x()
       .onTrue(
         new InstantCommand(
           () -> m_shooter.shootAtTuned(),
@@ -586,6 +603,10 @@ public class RobotContainer {
     m_turret.setBrake(false);
   }
 
+  private void togglePassingMode () {
+    m_currentTargetingState =  m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING : TargetState.HUB_SCORING;
+    Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
+  }
   // private Command ReadyShoot (Turret turret, Shooter shooter, Drive drive) {
   //   return Commands.run(
   //     () -> {

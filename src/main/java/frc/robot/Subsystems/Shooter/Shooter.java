@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
 
     private final SysIdRoutine m_sysIdRoutine;
   
-  private int rpmStaticSetpoint = 0;
+  private int rpmStaticSetpoint;
 
   public Shooter(ShooterIO io) {
     System.out.println("[Init] Creating Shooter");
@@ -95,6 +95,10 @@ public class Shooter extends SubsystemBase {
             this
         )
     );
+
+    rpmStaticSetpoint = 0;
+    Logger.recordOutput("Shooter/StaticSetpoint", "Hub");
+    
   }
 
   @Override
@@ -178,18 +182,18 @@ public class Shooter extends SubsystemBase {
   /**
    * @return The field-relative position of the center of the launcher
    */
-  // private Translation2d getLauncherPose(Pose2d robotPose) {
-  //   return robotPose.getTranslation()
-  //       .plus(
-  //         Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
-  //         .rotateBy(robotPose.getRotation()));
-  // }
+  private Translation2d getLauncherPose(Pose2d robotPose) {
+    return robotPose.getTranslation()
+        .plus(
+          Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
+          .rotateBy(robotPose.getRotation()));
+  }
 
   public void shoot (Drive drive) {
     if (rpmStaticSetpoint == 0) {
       shootAtHub(drive);
     } else {
-      m_io.setShooterRPM(rpmStaticSetpoint);
+      setShooterRPM(rpmStaticSetpoint);
     }
   }
 
@@ -204,6 +208,14 @@ public class Shooter extends SubsystemBase {
 
   public void setStaticSetpoint (int rpm) {
     rpmStaticSetpoint = rpm;
+
+    if (rpm == ShooterConstants.RPM_FROM_HUB) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Hub");
+    } else if (rpm == ShooterConstants.RPM_FROM_TRENCH) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Trench");
+    } else if (rpm == 0) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Auto");
+    }
   }
 
   // public void shootFromDistance (double distance) {

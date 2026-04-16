@@ -34,7 +34,11 @@ public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final LoggedNetworkNumber something = new LoggedNetworkNumber("/Tuning/Turret/something", 200);
   
+  private boolean staticSetpointOverridesTurret;
   private boolean manualControlToggle;
+  private double angleStaticSetpoint;
+
+  private boolean m_turretEnabled;
 
   private final MutVoltage m_appliedVoltage;
   private final MutAngle m_angle;
@@ -47,6 +51,11 @@ public class Turret extends SubsystemBase {
 
     manualControlToggle = TurretConstants.TURRET_DEFAULT_MANUAL_CONTROL;
     Logger.recordOutput("Turret/ManualControlToggled", manualControlToggle);
+    staticSetpointOverridesTurret = true;
+    Logger.recordOutput("Turret/StaticSetpointOverridesTurret", staticSetpointOverridesTurret);
+
+    m_turretEnabled = TurretConstants.TURRET_ENABLED_DEFAULT;
+    Logger.recordOutput("Turret/Enabled", m_turretEnabled);
   }
 
   @Override
@@ -69,6 +78,9 @@ public class Turret extends SubsystemBase {
     m_io.setTurretVoltage(((double)percent) / 100 * 12);
   }
   public void setTurretPosition(double angle) {
+    if (!m_turretEnabled) {
+      return;
+    }
     double min = TurretConstants.BACKWARD_SOFT_LIMIT;
     double max = TurretConstants.FORWARD_SOFT_LIMIT;
 
@@ -157,7 +169,30 @@ public class Turret extends SubsystemBase {
   }
 
   public void autoAim(Drive drive) {
+    if (angleStaticSetpoint == 0 || !staticSetpointOverridesTurret) {
+      targetHub(drive);
+    } else if (angleStaticSetpoint != 0 && staticSetpointOverridesTurret) {
+      setTurretPosition(angleStaticSetpoint);
+    }
+  }
 
+  public void toggleStaticSetpointOverride() {
+    staticSetpointOverridesTurret = !staticSetpointOverridesTurret;
+
+    Logger.recordOutput("Turret/StaticSetpointOverridesTurret", staticSetpointOverridesTurret);
+  }
+
+  public void setStaticSetpoint(double angle) {
+    angleStaticSetpoint = angle;
+  }
+
+  public void toggleTurretEnabled () {
+    m_turretEnabled = !m_turretEnabled;
+    Logger.recordOutput("Turret/Enabled", m_turretEnabled);
+
+    if (!m_turretEnabled) {
+      m_io.setTurretVoltage(0);
+    }
   }
   // public void targetHub (Pose2d pose) {
     

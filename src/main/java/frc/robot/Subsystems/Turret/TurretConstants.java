@@ -27,4 +27,10 @@ public final class TurretConstants {
     public static final boolean TURRET_DEFAULT_MANUAL_CONTROL = false;
     
     public static final double STARTING_ANGLE = -90;
+
+    public static final double ANGLE_FOR_STATIC_HUB = -90;
+    public static final double ANGLE_FOR_STATIC_TRENCH_LEFT = -270;
+    public static final double ANGLE_FOR_STATIC_TRENCH_RIGHT = -90;
+
+    public static final boolean TURRET_ENABLED_DEFAULT = true;
 }
