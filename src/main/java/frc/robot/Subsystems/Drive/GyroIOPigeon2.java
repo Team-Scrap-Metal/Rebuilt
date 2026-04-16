@@ -30,7 +30,7 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
   public GyroIOPigeon2() {
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
-    pigeon.getConfigurator().setYaw(0.0);
+    // pigeon.getConfigurator().setYaw(DriveConstants.ROBOT_STARTING_ANGLE);
     yaw.setUpdateFrequency(odometryFrequency);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
@@ -38,6 +38,8 @@ public class GyroIOPigeon2 implements GyroIO {
     var yawClone = yaw.clone(); // Status signals are not thread-safe
     // yawPositionQueue =
     //     yawClone.refresh().getValueAsDouble();
+
+    pigeon.setYaw(DriveConstants.ROBOT_STARTING_ANGLE);
   }
 
   @Override

@@ -58,4 +58,8 @@ public final class Constants {
     public static final Translation2d HUB_POSITION_M 
         = new Translation2d(4.62534, 4.03479);
 
+    public static final Translation2d[] PASSING_TARGETS = new Translation2d[] {
+      new Translation2d(Units.inchesToMeters(158.6/2), Units.inchesToMeters(317.7/4)),
+      new Translation2d(Units.inchesToMeters(158.6/2), Units.inchesToMeters(317.7/4 * 3)),
+    };
 }

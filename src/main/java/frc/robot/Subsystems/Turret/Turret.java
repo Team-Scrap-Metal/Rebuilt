@@ -22,6 +22,7 @@ import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotation;
 
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drive.Drive;
@@ -33,7 +34,11 @@ public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final LoggedNetworkNumber something = new LoggedNetworkNumber("/Tuning/Turret/something", 200);
   
+  private boolean staticSetpointOverridesTurret;
   private boolean manualControlToggle;
+  private double angleStaticSetpoint;
+
+  private boolean m_turretEnabled;
 
   private final MutVoltage m_appliedVoltage;
   private final MutAngle m_angle;
@@ -46,6 +51,11 @@ public class Turret extends SubsystemBase {
 
     manualControlToggle = TurretConstants.TURRET_DEFAULT_MANUAL_CONTROL;
     Logger.recordOutput("Turret/ManualControlToggled", manualControlToggle);
+    staticSetpointOverridesTurret = true;
+    Logger.recordOutput("Turret/StaticSetpointOverridesTurret", staticSetpointOverridesTurret);
+
+    m_turretEnabled = TurretConstants.TURRET_ENABLED_DEFAULT;
+    Logger.recordOutput("Turret/Enabled", m_turretEnabled);
   }
 
   @Override
@@ -68,6 +78,20 @@ public class Turret extends SubsystemBase {
     m_io.setTurretVoltage(((double)percent) / 100 * 12);
   }
   public void setTurretPosition(double angle) {
+    if (!m_turretEnabled) {
+      return;
+    }
+    double min = TurretConstants.BACKWARD_SOFT_LIMIT;
+    double max = TurretConstants.FORWARD_SOFT_LIMIT;
+
+    // Wrap angle into range
+    while (angle > max) {
+        angle -= 360;
+    }
+    while (angle < min) {
+        angle += 360;
+    }
+
     m_io.setTurretPosition(angle);
   }
   public void zeroEncoder () {
@@ -83,7 +107,7 @@ public class Turret extends SubsystemBase {
         double x = joystickX.getAsDouble();
         double y = joystickY.getAsDouble();
         System.out.println("JstickX: " + x + " JstickY: " + y);
-        double angle = Math.toDegrees(Math.atan2(y, x));
+        double angle = Math.toDegrees(Math.atan2(y, x)) + 90;
         double magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         System.out.println("Angle: " + angle + "\n");
         System.out.println("Magnitude: " + magnitude + "\n");
@@ -119,10 +143,11 @@ public class Turret extends SubsystemBase {
     // 4. Convert to robot-relative
     Rotation2d angleRobotRelative = fieldAngle.minus(robotPose.getRotation());
 
-    setTurretPosition(angleRobotRelative.getDegrees());
+    setTurretPosition(angleRobotRelative.plus(Rotation2d.k180deg).getDegrees());
   }
 
-  public void targetHub(Pose2d robotPose) {
+  public void targetHub(Drive drive) {
+    Pose2d robotPose = drive.getPose();
     setTurretPositionWithCoordinates(Constants.HUB_POSITION_M, robotPose);
   }
 
@@ -133,6 +158,41 @@ public class Turret extends SubsystemBase {
 
   public void setBrake(boolean brake) {
     m_io.setBrake(brake);
+  }
+
+  /**
+   * Returns true if manual control is true
+   * @return
+   */
+  public boolean getManualControlStatus () {
+    return manualControlToggle;
+  }
+
+  public void autoAim(Drive drive) {
+    if (angleStaticSetpoint == 0 || !staticSetpointOverridesTurret) {
+      targetHub(drive);
+    } else if (angleStaticSetpoint != 0 && staticSetpointOverridesTurret) {
+      setTurretPosition(angleStaticSetpoint);
+    }
+  }
+
+  public void toggleStaticSetpointOverride() {
+    staticSetpointOverridesTurret = !staticSetpointOverridesTurret;
+
+    Logger.recordOutput("Turret/StaticSetpointOverridesTurret", staticSetpointOverridesTurret);
+  }
+
+  public void setStaticSetpoint(double angle) {
+    angleStaticSetpoint = angle;
+  }
+
+  public void toggleTurretEnabled () {
+    m_turretEnabled = !m_turretEnabled;
+    Logger.recordOutput("Turret/Enabled", m_turretEnabled);
+
+    if (!m_turretEnabled) {
+      m_io.setTurretVoltage(0);
+    }
   }
   // public void targetHub (Pose2d pose) {
     

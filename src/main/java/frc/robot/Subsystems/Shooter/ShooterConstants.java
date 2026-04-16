@@ -12,7 +12,7 @@ public final class ShooterConstants {
     public static final int SHOOTING_SPEED_RPM = 100;
     public static final double MAX_OUTPUT = 1;
     public static final double MIN_OUTPUT = -1;
-    public static final double KP = 0.0002;
+    public static final double KP = 0.0005;
     public static final double KI = 0.0;
     public static final double KD = 0.03;
     public static final double KS = 0.185;
@@ -26,9 +26,6 @@ public final class ShooterConstants {
     public static final double SHOOTER_VELOCITY_COEFFICIENT = 1;
     // public static final int SHOOTING_PERCENT = 30;
 
-    /*** Target RPM to score while flush with hub ***/
-    public static final int RPM_FROM_HUB = 1850;
-
     public static final double[] BEST_FIT_X_VALUES_M = new double[] {
         Units.inchesToMeters(66),
         Units.inchesToMeters(106.25),
@@ -41,4 +38,23 @@ public final class ShooterConstants {
         2400,
         2680
     };
+
+    // TODO: UPDATE PASSING VALUES. FAKE 
+    public static final double[] BEST_FIT_PASSING_X_VALUES_M = new double[] {
+        Units.inchesToMeters(66),
+        Units.inchesToMeters(106.25),
+        Units.inchesToMeters(153.5),
+        Units.inchesToMeters(202)
+    };
+    public static final double[] BEST_FIT_PASSING_RPM_VALUES = new double[] {
+        1800,
+        2200,
+        2400,
+        2680
+    };
+
+    /*** Target RPM to score while flush with hub ***/
+    public static final int RPM_FROM_HUB = 1850;
+    public static final int RPM_FROM_TRENCH = 2400;
+
 }

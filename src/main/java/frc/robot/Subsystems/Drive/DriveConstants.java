@@ -17,8 +17,8 @@ import edu.wpi.first.math.util.Units;
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 4.8;
   public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(22.5);
-  public static final double wheelBase = Units.inchesToMeters(14.0);
+  public static final double trackWidth = Units.inchesToMeters(25.750);
+  public static final double wheelBase = Units.inchesToMeters(17.250); //14
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
@@ -27,6 +27,11 @@ public class DriveConstants {
         new Translation2d(-trackWidth / 2.0, wheelBase / 2.0),
         new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
       };
+  
+  public static final double BUMPER_THICKNESS_IN = 2;
+  /** bumper to bumper robot width */
+  public static final double ROBOT_WIDTH_BTB = Units.inchesToMeters(31.500 + BUMPER_THICKNESS_IN*2);
+  public static final double ROBOT_LENGTH_BTB = Units.inchesToMeters(23.125 + BUMPER_THICKNESS_IN*2);
 
   
   public static final boolean[] driveInverted = new boolean[] {
@@ -157,4 +162,11 @@ public class DriveConstants {
               driveMotorCurrentLimit,
               1),
           moduleTranslations);
+
+  public static final double BUMPER_WIDTH_M = Units.inchesToMeters(2);
+
+  public static final double GYRO_OFFSET = 
+  -90;
+
+  public static final double ROBOT_STARTING_ANGLE = -90;
 }

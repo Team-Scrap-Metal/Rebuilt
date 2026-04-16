@@ -33,21 +33,30 @@ import frc.robot.Subsystems.Turret.*;
 import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
+import java.lang.annotation.Target;
+import java.time.Instant;
+
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Feed;
+import frc.robot.commands.ReadyShoot;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -83,6 +92,13 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private enum TargetState {
+    HUB_SCORING,
+    PASSING
+  }
+
+  private TargetState m_currentTargetingState;
 
   // private final LoggedNetworkNumber speedPercentInput = new LoggedNetworkNumber("/Tuning/FeederPercent", FeederConstants.FEEDING_PERCENT);
 
@@ -160,10 +176,36 @@ public class RobotContainer {
         break;
     }
 
+    m_currentTargetingState = TargetState.HUB_SCORING;
+    Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
+
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
+
+    NamedCommands.registerCommand("Intake", 
+      new ParallelCommandGroup(
+        new InstantCommand( () -> m_drum.drumIntake(), m_drum),
+        new InstantCommand( () -> m_roller.runRoller(), m_roller)
+      )
+    );
+
+    NamedCommands.registerCommand("ZeroIntake", 
+      new ParallelCommandGroup(
+        new InstantCommand( () -> m_drum.setDrumPercent(0), m_drum),
+        new InstantCommand( () -> m_roller.setRollerPercent(0), m_roller)
+      )
+    );
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    autoChooser.addDefaultOption(
+      "8 Fuel Center Auto", 
+      new SequentialCommandGroup(
+        new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
+        new InstantCommand ( () -> m_shooter.shoot(drive), m_shooter),
+        new WaitCommand(1),
+        new Feed(m_feeder, m_spindexer)
+      ));
 
     // // Set up SysId routines
     // autoChooser.addOption(
@@ -194,38 +236,15 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> m_driverController.getLeftY(),
+            () -> m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()));
 
-    m_driverController
-      .leftTrigger()
-      .onTrue(
-          new  InstantCommand(
-            () -> m_shooter.shootAtHub(drive),
-            m_shooter
-            // m_shooter.setShooterRPM(m_shooter.getTunedRPM())
-          )
-      )
-      .onFalse(new ParallelCommandGroup(
-        new InstantCommand(
-          () ->
-            m_shooter.setShooterPercent(0),
-            m_shooter)));
-    m_driverController
-      .rightTrigger()
-      .onTrue(
-          new Feed(m_feeder, m_spindexer)
-      )
-      .onFalse(new ParallelCommandGroup(
-        new InstantCommand(
-          () ->
-            m_feeder.setFeederPercent(0),
-            m_feeder),
-        new InstantCommand(
-          () ->
-            m_spindexer.setSpindexerPercent(0),
-            m_spindexer)
-        )
-      );
-
+    // Intake
     m_driverController
       .leftBumper()
       .onTrue(
@@ -250,6 +269,24 @@ public class RobotContainer {
               m_roller.setRollerPercent(0),
               m_roller)
           ));
+
+    // Ready shoot - spin up shooter and aim turret at hub
+    m_driverController
+      .leftTrigger()
+      .whileTrue(
+        new ReadyShoot(m_shooter, m_turret, drive, m_currentTargetingState == TargetState.PASSING)
+      )
+      .onFalse(new ParallelCommandGroup(
+        new InstantCommand(
+          () ->
+            m_shooter.setShooterPercent(0),
+            m_shooter),
+        new InstantCommand(
+          () -> m_turret.setTurretPercent(0),
+          m_turret
+        )));
+
+    // Intake launch
     m_driverController
       .rightBumper()
       .onTrue(
@@ -275,47 +312,44 @@ public class RobotContainer {
               m_roller)
           ));
 
-
-        // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> m_driverController.getLeftY(),
-            () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()));
-  
-    m_turret.setDefaultCommand(
-      m_turret.setTurretPositionWithController(
-          m_turret,
-          () -> -m_auxController.getLeftY(),
-          () -> m_auxController.getLeftX(),
-          drive
-      )
-    );
-
+    // Shoot - feed spun up shooter
     m_driverController
-      .leftTrigger()
-      .whileTrue(
-        Commands.run(
-          () -> m_turret.targetHub(drive.getPose()),
-          m_turret))
-      .onFalse(
+      .rightTrigger()
+      .onTrue(
+        new SequentialCommandGroup(
+          new ParallelCommandGroup(
+            new InstantCommand(
+              () -> m_feeder.runReverse(),
+              m_feeder
+            ),
+            new InstantCommand(
+              () -> m_spindexer.runReverse(),
+              m_spindexer
+            )
+          ),
+          new WaitCommand(0.3),
+          new Feed(m_feeder, m_spindexer)
+      ))
+      .onFalse(new ParallelCommandGroup(
         new InstantCommand(
-          () -> m_turret.setTurretPercent(0),
-          m_turret
-        ));
-
-
-    // Reset gyro to 0° when B button is pressed
+          () ->
+            m_feeder.setFeederPercent(0),
+            m_feeder),
+        new InstantCommand(
+          () ->
+            m_spindexer.setSpindexerPercent(0),
+            m_spindexer)
+        )
+      );
+  
+    // toggle passive intake down
     m_driverController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () -> drive.zeroHeading()));
-        //                 drive.setPose(
-        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-        //             drive)
-        //         .ignoringDisable(true));
+      .a()
+      .onTrue(
+        new InstantCommand(
+          () -> m_pivot.togglePassiveDown(),
+          m_pivot
+      ));
 
     // Reverse feeding when x is pressed
     m_driverController
@@ -329,10 +363,6 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_spindexer.runReverse(),
             m_spindexer
-          ),
-          new InstantCommand(
-            () -> m_shooter.runReverse(),
-            m_shooter
           )
         )
       ).onFalse(
@@ -344,83 +374,16 @@ public class RobotContainer {
           new InstantCommand(
             () -> m_spindexer.setSpindexerPercent(0),
             m_spindexer
-          ),
-          new InstantCommand(
-            () -> m_shooter.setShooterPercent(0),
-            m_shooter)));
-    
-    // Aux reverse bindings
-    m_auxController
-      .povUp()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.runReverse(),
-          m_shooter))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        ));
+          )));
 
-    m_auxController
-      .povDown()
+    m_driverController
+      .y()
       .onTrue(
-        new InstantCommand(
-          () -> m_spindexer.runReverse(),
-          m_spindexer))
-      .onFalse(
-        new InstantCommand(
-          () -> m_spindexer.setSpindexerPercent(0),
-          m_spindexer
-        ));
-
-    m_auxController
-      .povLeft()
-      .onTrue(
-        new ParallelCommandGroup(
-          new InstantCommand(
-            () -> m_drum.runReverse(),
-            m_drum
-          ),
-          new InstantCommand(
-            () -> m_roller.runReverse(),
-            m_roller
-          )))
-      .onFalse(
-        new ParallelCommandGroup(
-          new InstantCommand(
-            () -> m_drum.setDrumPercent(0),
-            m_drum),
-          new InstantCommand(
-            () -> m_roller.setRollerPercent(0),
-            m_roller)));
-
-    m_auxController
-      .povRight()
-      .onTrue(
-        new InstantCommand(
-          () -> m_feeder.runReverse(),
-          m_feeder))
-      .onFalse(
-        new InstantCommand(
-          () -> m_feeder.setFeederPercent(0),
-          m_feeder
-        ));
-
-    m_auxController
-      .leftTrigger()
-      .onTrue(
-        new InstantCommand(
-          () -> m_shooter.shootFromHub(),
-          m_shooter
-        ))
-      .onFalse(
-        new InstantCommand(
-          () -> m_shooter.setShooterPercent(0),
-          m_shooter
-        )
+        new InstantCommand(() -> togglePassingMode())
       );
 
+
+    // Intake pivoting up (stowing)/down (extending)
     m_driverController
       .povUp()
       .onTrue(
@@ -447,14 +410,81 @@ public class RobotContainer {
           m_pivot
       ));
 
+    // Reset heading
     m_driverController
+        .povLeft()
+        .onTrue(
+            Commands.runOnce(
+                    () -> drive.zeroHeading()));
+        //                 drive.setPose(
+        //                     new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        //             drive)
+        //         .ignoringDisable(true));
+
+    m_turret.setDefaultCommand(
+      m_turret.setTurretPositionWithController(
+          m_turret,
+          () -> m_auxController.getLeftX(),
+          () -> -m_auxController.getLeftY(),
+          drive
+      )
+    );
+
+    m_auxController
+    .leftBumper()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT)
+        )));
+
+    m_auxController
+    .leftTrigger()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(0)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(0)
+        )
+        ));
+
+    m_auxController
+    .rightBumper()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_RIGHT)
+        )));
+
+    m_auxController
+    .rightTrigger()
+    .onTrue(
+      new ParallelCommandGroup(
+        new InstantCommand(
+          () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB)
+        ),
+        new InstantCommand(
+          () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)
+        )));
+
+    // Toggle manual/auto turret control
+    m_auxController
       .a()
       .onTrue(
         new InstantCommand(
-          () -> m_pivot.togglePassiveDown(),
-          m_pivot
-      ));
-    
+          () -> m_turret.toggleManualControl(),
+          m_turret
+        ));
+
+
     /** Zero Turret Encoder */
     m_auxController
         .b()
@@ -463,17 +493,74 @@ public class RobotContainer {
              () -> m_turret.zeroEncoder()
           )
         );
-
+      
     m_auxController
-      .leftBumper()
+      .y()
       .onTrue(
         new InstantCommand(
-          () -> m_turret.toggleManualControl(),
-          m_turret
-        ));
-      // TODO: TEMP CODE REMOVE BEFORE UTAH
+          () -> m_turret.toggleStaticSetpointOverride()
+        )
+      );
+
+    // Reverse shooter
+    // m_auxController
+    //   .povUp()
+    //   .onTrue(
+    //     new InstantCommand(
+    //       () -> m_shooter.runReverse(),
+    //       m_shooter))
+    //   .onFalse(
+    //     new InstantCommand(
+    //       () -> m_shooter.setShooterPercent(0),
+    //       m_shooter
+    //     ));
+
+    // toggle turret enable
     m_auxController
-      .rightTrigger()
+      .povDown()
+      .onTrue(
+        new InstantCommand(
+          () -> m_turret.toggleTurretEnabled()
+          ));
+
+    // Reverse intake
+    m_auxController
+      .povLeft()
+      .onTrue(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.runReverse(),
+            m_drum
+          ),
+          new InstantCommand(
+            () -> m_roller.runReverse(),
+            m_roller
+          )))
+      .onFalse(
+        new ParallelCommandGroup(
+          new InstantCommand(
+            () -> m_drum.setDrumPercent(0),
+            m_drum),
+          new InstantCommand(
+            () -> m_roller.setRollerPercent(0),
+            m_roller)));
+
+    // Reverse shooter
+    m_auxController
+      .povRight()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.runReverse(),
+          m_shooter))
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        ));
+    
+    // TODO: TEMP CODE REMOVE BEFORE UTAH
+    m_auxController
+      .x()
       .onTrue(
         new InstantCommand(
           () -> m_shooter.shootAtTuned(),
@@ -496,10 +583,63 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     // return m_shooter.runFullSysId();
+    // drive.getPoseEstimator().updateStartingPose();
+
+    // return new SequentialCommandGroup(
+    //     new InstantCommand ( () -> m_shooter.shootFromHub(), m_shooter),
+    //     new WaitCommand(2),
+    //     new Feed(m_feeder, m_spindexer)
+    //     // new WaitCommand(10),
+    //     // new ParallelCommandGroup(
+    //     //   new InstantCommand( () -> m_feeder.setFeederPercent(0), m_feeder),
+    //     //   new InstantCommand( () -> m_spindexer.setSpindexerPercent(0), m_spindexer)
+    //     // )
+    //   );
+
     return autoChooser.get();
   }
 
   public void disabledInit() {
     m_turret.setBrake(false);
   }
+
+  private void togglePassingMode () {
+    m_currentTargetingState =  m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING : TargetState.HUB_SCORING;
+    Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
+  }
+  // private Command ReadyShoot (Turret turret, Shooter shooter, Drive drive) {
+  //   return Commands.run(
+  //     () -> {
+  //       if (m_currentTargetingState == TargetState.HUB_SCORING) {
+  //         shooter.shoot(drive);
+  //         turret.autoAim(drive);
+  //       } else {
+  //         Pose2d robotPose = drive.getPose();
+  //         Translation2d launcherPositionFieldRelative =
+  //           robotPose
+  //             .getTranslation()
+  //             .plus(
+  //               Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
+  //               .rotateBy(robotPose.getRotation()));
+
+  //         Translation2d closestPassingTarget = Constants.PASSING_TARGETS[0];
+
+  //         for (int i = 0; i < Constants.PASSING_TARGETS.length; i++) {
+  //           if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
+  //             closestPassingTarget = Constants.PASSING_TARGETS[i];
+  //           }
+  //         }
+
+  //         var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
+
+  //         shooter.passFromDistance(distance);
+          
+  //         if (turret.getManualControlStatus() == false) {
+  //           turret.setTurretPositionWithCoordinates(closestPassingTarget, robotPose);
+  //         }
+  //       }
+  //     },
+  //     turret, shooter
+  //     );
+  // }
 }

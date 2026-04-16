@@ -18,6 +18,9 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
 import static edu.wpi.first.units.Units.Volts;
+
+import java.nio.file.ClosedDirectoryStreamException;
+
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -38,6 +41,7 @@ public class Shooter extends SubsystemBase {
 
   // private final BestFitLine m_distanceBestFit;
   private final InterpolatingDoubleTreeMap m_distanceRpmTable;
+  private final InterpolatingDoubleTreeMap m_passingRpmTable;
 
     private final MutVoltage m_appliedVoltage;
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
@@ -46,6 +50,8 @@ public class Shooter extends SubsystemBase {
     private final MutAngularVelocity m_velocity;
 
     private final SysIdRoutine m_sysIdRoutine;
+  
+  private int rpmStaticSetpoint;
 
   public Shooter(ShooterIO io) {
     System.out.println("[Init] Creating Shooter");
@@ -55,6 +61,10 @@ public class Shooter extends SubsystemBase {
     m_distanceRpmTable = new InterpolatingDoubleTreeMap();
     for (int i = 0; i < ShooterConstants.BEST_FIT_X_VALUES_M.length; i++) {
       m_distanceRpmTable.put(ShooterConstants.BEST_FIT_X_VALUES_M[i], ShooterConstants.BEST_FIT_RPM_VALUES[i]);
+    }
+    m_passingRpmTable = new InterpolatingDoubleTreeMap();
+    for (int i = 0; i < ShooterConstants.BEST_FIT_PASSING_X_VALUES_M.length; i++) {
+      m_distanceRpmTable.put(ShooterConstants.BEST_FIT_PASSING_X_VALUES_M[i], ShooterConstants.BEST_FIT_PASSING_RPM_VALUES[i]);
     }
 
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
@@ -85,6 +95,10 @@ public class Shooter extends SubsystemBase {
             this
         )
     );
+
+    rpmStaticSetpoint = 0;
+    Logger.recordOutput("Shooter/StaticSetpoint", "Hub");
+    
   }
 
   @Override
@@ -116,11 +130,11 @@ public class Shooter extends SubsystemBase {
     m_io.setShooterRPM(rpm);
   }
 
-  public void shootFromHub () {
-    double rpm = ShooterConstants.RPM_FROM_HUB;
+  // public void shootFromHub () {
+  //   double rpm = ShooterConstants.RPM_FROM_HUB;
 
-    setShooterRPM(rpm);
-  }
+  //   setShooterRPM(rpm);
+  // }
 
 
   public double getHubDistance() {
@@ -140,9 +154,11 @@ public class Shooter extends SubsystemBase {
    * @param distance meters from shooter center to hub center
    */
   public void revForDistance(double distance) {
-    distance = getHubDistance();
+    // distance = getHubDistance();
     // var target_rpm = m_distanceBestFit.getBestFit(distance);
     var target_rpm = m_distanceRpmTable.get(distance);
+
+    Logger.recordOutput("Shooter/TargetDistance", distance);
 
     setShooterRPM(target_rpm);
   }
@@ -171,6 +187,35 @@ public class Shooter extends SubsystemBase {
         .plus(
           Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
           .rotateBy(robotPose.getRotation()));
+  }
+
+  public void shoot (Drive drive) {
+    if (rpmStaticSetpoint == 0) {
+      shootAtHub(drive);
+    } else {
+      setShooterRPM(rpmStaticSetpoint);
+    }
+  }
+
+  public void passFromDistance(double distance) {
+    var target_rpm = m_passingRpmTable.get(distance);
+
+    Logger.recordOutput("Shooter/TargetDistance", distance);
+
+    setShooterRPM(target_rpm);
+
+  }
+
+  public void setStaticSetpoint (int rpm) {
+    rpmStaticSetpoint = rpm;
+
+    if (rpm == ShooterConstants.RPM_FROM_HUB) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Hub");
+    } else if (rpm == ShooterConstants.RPM_FROM_TRENCH) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Trench");
+    } else if (rpm == 0) {
+      Logger.recordOutput("Shooter/StaticSetpoint", "Auto");
+    }
   }
 
   // public void shootFromDistance (double distance) {
