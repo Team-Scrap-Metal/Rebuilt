@@ -160,7 +160,7 @@ public class Shooter extends SubsystemBase {
   public void revForDistance(double distance) {
     // distance = getHubDistance();
     // var target_rpm = m_distanceBestFit.getBestFit(distance);
-    var target_rpm = calculateRpm(distance)
+    var target_rpm = calculateRpm(distance);
 
     Logger.recordOutput("Shooter/TargetDistance", distance);
 

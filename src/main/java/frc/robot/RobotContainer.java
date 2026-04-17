@@ -567,20 +567,20 @@ public class RobotContainer {
         ));
     
     // TODO: TEMP CODE REMOVE BEFORE UTAH
-    // m_auxController
-    //   .x()
-    //   .onTrue(
-    //     new InstantCommand(
-    //       () -> m_shooter.shootAtTuned(),
-    //       m_shooter
-    //     )
-    //   )
-    //   .onFalse(
-    //     new InstantCommand(
-    //       () -> m_shooter.setShooterPercent(0),
-    //       m_shooter
-    //     )
-    //   );
+    m_driverController
+      .y()
+      .onTrue(
+        new InstantCommand(
+          () -> m_shooter.shootAtTuned(),
+          m_shooter
+        )
+      )
+      .onFalse(
+        new InstantCommand(
+          () -> m_shooter.setShooterPercent(0),
+          m_shooter
+        )
+      );
   }        
 
   /**

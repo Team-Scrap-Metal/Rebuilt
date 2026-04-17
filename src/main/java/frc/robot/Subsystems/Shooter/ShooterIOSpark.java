@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkMax;
@@ -50,6 +51,7 @@ public class ShooterIOSpark implements ShooterIO {
                 .i(ShooterConstants.KI)
                 .d(ShooterConstants.KD)
                 .outputRange(ShooterConstants.MIN_OUTPUT, ShooterConstants.MAX_OUTPUT)
+                // .allowedClosedLoopError(ShooterConstants.PID_TOLERANCE, ClosedLoopSlot.kSlot0)
             .feedForward
                 .kS(ShooterConstants.KS)
                 .kV(ShooterConstants.KV);

@@ -17,6 +17,7 @@ public final class ShooterConstants {
     public static final double KD = 0.03;
     public static final double KS = 0.185;
     public static final double KV = 0.00211;
+    public static final double PID_TOLERANCE = 40;
     public static final double SHOOTER_ANGLE = 19.11;
     public static final double HUB_HEIGHT_IN = 72.0;
     public static final double SHOOTER_HEIGHT_IN = 18.5;
