@@ -38,8 +38,6 @@ public class GyroIOPigeon2 implements GyroIO {
     var yawClone = yaw.clone(); // Status signals are not thread-safe
     // yawPositionQueue =
     //     yawClone.refresh().getValueAsDouble();
-
-    pigeon.setYaw(DriveConstants.ROBOT_STARTING_ANGLE);
   }
 
   @Override
@@ -62,5 +60,10 @@ public class GyroIOPigeon2 implements GyroIO {
   @Override
   public void zeroHeading(){
     pigeon.reset();
+  }
+
+  @Override
+  public void setYaw(double angle) {
+    pigeon.setYaw(angle);
   }
 }

@@ -44,6 +44,7 @@ public class PoseEstimator extends SubsystemBase {
   private Field2d field2d;
 
   private LoggedDashboardChooser<Pose2d> m_startingPoseChooser;
+  private LoggedDashboardChooser<Double> m_startingAngleChooser;
   private Pose2d m_oldPoseChooserValue;
 //   private LimelightHelpers.PoseEstimate mt1;
 
@@ -54,24 +55,41 @@ public class PoseEstimator extends SubsystemBase {
       new Pose2d(
         Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB/2, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
         Units.inchesToMeters(317.7) - DriveConstants.ROBOT_WIDTH_BTB/2, // flush with field wall
-        Rotation2d.k180deg) // Intake facing driver station
+        Rotation2d.kZero) // Intake facing driver station
       );
     m_startingPoseChooser.addDefaultOption(
       "Center", 
       new Pose2d(
         Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
         Units.inchesToMeters(317.7/2), // center of field
-        Rotation2d.fromDegrees(-90)) // left robot side against hub
+        Rotation2d.kZero) // left robot side against hub
       );
     m_startingPoseChooser.addOption(
       "Right", 
       new Pose2d(
         Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
         DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
-        Rotation2d.k180deg) // Intake facing driver station
+        Rotation2d.kZero) // Intake facing driver station
       );
     
-    m_oldPoseChooserValue = m_startingPoseChooser.get();
+    
+    m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
+    m_startingAngleChooser.addOption(
+      "Forward", 
+      0.0
+    );
+    m_startingAngleChooser.addDefaultOption(
+      "Right", 90.0
+      );
+    m_startingAngleChooser.addOption(
+      "Backwards", 
+      180.0
+      );
+    m_startingAngleChooser.addOption(
+      "Left", 
+      -90.0
+      );
+    
     
     field2d = new Field2d();
     field2d.setRobotPose(new Pose2d(
@@ -97,7 +115,6 @@ public class PoseEstimator extends SubsystemBase {
         Units.inchesToMeters(317.7/2), // center of field
         Rotation2d.fromDegrees(0)) // left robot side against hub
       );
-
     // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
   }
 
@@ -163,7 +180,9 @@ public class PoseEstimator extends SubsystemBase {
 
   public void updateStartingPose () {
     Pose2d newPose = m_startingPoseChooser.get();
+    double newAngle = m_startingAngleChooser.get();
 
+    drive.setHeading(newAngle);
     field2d.setRobotPose(newPose);
     poseEstimator.resetPose(newPose);
   }
