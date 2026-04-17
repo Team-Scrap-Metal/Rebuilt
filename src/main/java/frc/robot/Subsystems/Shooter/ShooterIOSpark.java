@@ -34,6 +34,7 @@ public class ShooterIOSpark implements ShooterIO {
     private double lastKS = ShooterConstants.KS;
     private double lastKV = ShooterConstants.KV;
 
+    private double m_shooterVelocityRPM = 0;
     
     public ShooterIOSpark() {
         m_shooterMotor = new SparkMax(ShooterConstants.CAN_ID, MotorType.kBrushless);
@@ -72,6 +73,7 @@ public class ShooterIOSpark implements ShooterIO {
         inputs.shooterPosition = m_shooterEncoder.getPosition();
         inputs.shooterAppliedCurrent = m_shooterMotor.getOutputCurrent();
 
+        m_shooterVelocityRPM = inputs.shooterVelocityRPM;
         double newKP = kP.get();
         double newKI = kI.get();
         double newKD = kD.get();
@@ -114,5 +116,9 @@ public class ShooterIOSpark implements ShooterIO {
         System.out.println("Shooter rpm set to: " + rpm);
         m_shooterMotor.getClosedLoopController().setSetpoint(rpm, ControlType.kVelocity);
     }
-  
+ 
+    @Override
+    public double getShooterRPM() {
+        return m_shooterVelocityRPM;
+    }
 }
