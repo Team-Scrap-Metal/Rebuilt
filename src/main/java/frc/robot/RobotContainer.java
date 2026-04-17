@@ -203,7 +203,7 @@ public class RobotContainer {
       "8 Fuel Center Auto", 
       new SequentialCommandGroup(
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
-        new ReadyShoot (m_shooter, m_turret, drive, TargetState.HUB_SCORING),
+        new ReadyShoot (m_shooter, m_turret, drive, false),
         new WaitCommand(1),
         new Feed(m_feeder, m_spindexer)
       ));
@@ -212,7 +212,7 @@ public class RobotContainer {
       new SequentialCommandGroup(
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
         new InstantCommand( () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT), m_turret),
-        new ReadyShoot (m_shooter, m_turret, drive, TargetState.HUB_SCORING),
+        new ReadyShoot (m_shooter, m_turret, drive, false),
         // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
         new WaitCommand(1),
         new Feed(m_feeder, m_spindexer)
@@ -223,7 +223,7 @@ public class RobotContainer {
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
         new InstantCommand ( () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_RIGHT), m_turret),
         // new InstantCommand ( () -> m_shooter.shoot(drkive), m_shooter),
-        new ReadyShoot (m_shooter, m_turret, drive, TargetState.HUB_SCORING),
+        new ReadyShoot (m_shooter, m_turret, drive, false),
         new WaitCommand(1),
         new Feed(m_feeder, m_spindexer)
       ));
