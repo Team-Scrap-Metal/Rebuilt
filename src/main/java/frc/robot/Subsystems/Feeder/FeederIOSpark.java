@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+
 public class FeederIOSpark implements FeederIO {
     private final SparkBase feederMotor;
     private final RelativeEncoder feederEncoder;
@@ -24,7 +25,7 @@ public class FeederIOSpark implements FeederIO {
         var motorConfig = new SparkMaxConfig();
         motorConfig
             .inverted(FeederConstants.INVERTED)
-            .idleMode(IdleMode.kCoast)
+            .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(FeederConstants.CURRENT_LIMIT);
         feederMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

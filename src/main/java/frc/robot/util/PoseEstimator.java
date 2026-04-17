@@ -46,7 +46,7 @@ public class PoseEstimator extends SubsystemBase {
   private Field2d field2d;
 
   private LoggedDashboardChooser<Pose2d> m_startingPoseChooser;
-  private LoggedDashboardChooser<Double> m_startingAngleChooser;
+  // private LoggedDashboardChooser<Double> m_startingAngleChooser;
   private Pose2d m_oldPoseChooserValue;
 //   private LimelightHelpers.PoseEstimate mt1;
 
@@ -70,7 +70,7 @@ public class PoseEstimator extends SubsystemBase {
     m_startingPoseChooser.addOption(
       "Right", 
       new Pose2d(
-        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        Units.inchesToMeters(158.6) + DriveConstants.ROBOT_LENGTH_BTB-DriveConstants.BUMPER_THICKNESS_IN, // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
         DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
         Rotation2d.kZero) // Intake facing driver station
       );
@@ -99,22 +99,22 @@ public class PoseEstimator extends SubsystemBase {
     }
     
     
-    m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
-    m_startingAngleChooser.addOption(
-      "Forward", 
-      0.0
-    );
-    m_startingAngleChooser.addDefaultOption(
-      "Right", 90.0
-      );
-    m_startingAngleChooser.addOption(
-      "Backwards", 
-      180.0
-      );
-    m_startingAngleChooser.addOption(
-      "Left", 
-      -90.0
-      );
+    // m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
+    // m_startingAngleChooser.addOption(
+    //   "Forward", 
+    //   0.0
+    // );
+    // m_startingAngleChooser.addDefaultOption(
+    //   "Right", 90.0
+    //   );
+    // m_startingAngleChooser.addOption(
+    //   "Backwards", 
+    //   180.0
+    //   );
+    // m_startingAngleChooser.addOption(
+    //   "Left", 
+    //   -90.0
+    //   );
     
     
     field2d = new Field2d();
@@ -207,9 +207,9 @@ public class PoseEstimator extends SubsystemBase {
 
   public void updateStartingPose () {
     Pose2d newPose = m_startingPoseChooser.get();
-    double newAngle = m_startingAngleChooser.get();
+    // Double newAngle = m_startingAngleChooser.get();
 
-    drive.setHeading(newAngle);
+    // drive.setHeading(newAngle);
     field2d.setRobotPose(newPose);
     poseEstimator.resetPose(newPose);
   }

@@ -55,7 +55,7 @@ public final class ShooterConstants {
     };
 
     /*** Target RPM to score while flush with hub ***/
-    public static final int RPM_FROM_HUB = 1850;
-    public static final int RPM_FROM_TRENCH = 2400;
+    public static final int RPM_FROM_HUB = 1950;
+    public static final int RPM_FROM_TRENCH = 2500;
 
 }
