@@ -19,12 +19,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Drive.DriveConstants;
+import frc.robot.Constants;
 import frc.robot.Subsystems.Vision.Vision.VisionConsumer;
 
 /** This class handels the odometry and locates the robots current position */
@@ -50,6 +52,7 @@ public class PoseEstimator extends SubsystemBase {
 
   public PoseEstimator(Drive drive) {
     m_startingPoseChooser = new LoggedDashboardChooser<Pose2d>("Starting position");
+    if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
     m_startingPoseChooser.addOption(
       "Left", 
       new Pose2d(
@@ -71,6 +74,29 @@ public class PoseEstimator extends SubsystemBase {
         DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
         Rotation2d.kZero) // Intake facing driver station
       );
+    } else {
+    m_startingPoseChooser.addOption(
+      "Right", 
+      new Pose2d(
+        16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB/2), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        Units.inchesToMeters(317.7) - DriveConstants.ROBOT_WIDTH_BTB/2, // flush with field wall
+        Rotation2d.kZero.plus(new Rotation2d(Math.PI))) // Intake facing driver station
+      );
+    m_startingPoseChooser.addDefaultOption(
+      "Center", 
+      new Pose2d(
+        16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2), // bumpers flush with hub
+        Units.inchesToMeters(317.7/2), // center of field
+        Rotation2d.kZero.plus(new Rotation2d(Math.PI))) // left robot side against hub
+      );
+    m_startingPoseChooser.addOption(
+      "Left", 
+      new Pose2d(
+        16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
+        DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
+        Rotation2d.kZero.plus(new Rotation2d(Math.PI))) // Intake facing driver station
+      );
+    }
     
     
     // m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
@@ -110,11 +136,12 @@ public class PoseEstimator extends SubsystemBase {
             stateStandardDevs,
             visionStandardDevs);
 
-    poseEstimator.resetPose(new Pose2d(
-        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
-        Units.inchesToMeters(317.7/2), // center of field
-        Rotation2d.fromDegrees(0)) // left robot side against hub
-      );
+    poseEstimator.resetPose(m_startingPoseChooser.get());
+      // new Pose2d(
+      //   Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
+      //   Units.inchesToMeters(317.7/2), // center of field
+      //   Rotation2d.fromDegrees(0)) // left robot side against hub
+      // );
     // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
   }
 
