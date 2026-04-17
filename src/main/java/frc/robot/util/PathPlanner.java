@@ -42,7 +42,7 @@ public class PathPlanner extends SubsystemBase {
               0.0, 
               0.0), 
             new PIDConstants(
-              5.0, 
+              6.0, 
               0.0, 
               0.0)
               ),
