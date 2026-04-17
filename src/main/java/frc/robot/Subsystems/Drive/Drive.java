@@ -343,4 +343,9 @@ public class Drive extends SubsystemBase {
     gyroIO.zeroHeading();
     poseEstimator.zeroHeading();
   }
+
+  public void setHeading(double angle) {
+    gyroIO.setYaw(angle);
+  }
+
 }

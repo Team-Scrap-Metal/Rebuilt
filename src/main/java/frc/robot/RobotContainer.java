@@ -604,6 +604,8 @@ public class RobotContainer {
     //     // )
     //   );
 
+    drive.getPoseEstimator().updateStartingPose();
+
     return autoChooser.get();
   }
 

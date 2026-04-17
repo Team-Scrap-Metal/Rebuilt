@@ -24,4 +24,5 @@ public interface GyroIO {
 
 
 public default void zeroHeading(){}
+public default void setYaw(double angle){}
 }
