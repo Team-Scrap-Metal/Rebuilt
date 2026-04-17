@@ -92,7 +92,7 @@ public class DriveConstants {
       0.005,
       0.0,
       0.0,
-      0.011
+      0.02
   };
   public static final double[] driveKd = new double[] {
     0.0,
@@ -168,5 +168,5 @@ public class DriveConstants {
   public static final double GYRO_OFFSET = 
   -90;
 
-  public static final double ROBOT_STARTING_ANGLE = 0;
+  public static final double ROBOT_STARTING_ANGLE = -90;
 }

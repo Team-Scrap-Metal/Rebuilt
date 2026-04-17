@@ -81,7 +81,7 @@ public class RobotContainer {
   private final Pivot m_pivot;
 
 
-  // private final PathPlanner m_pathplanner;
+  private final PathPlanner m_pathplanner;
 //   private final PoseEstimator m_poseEstimator;
 
   private final Drive drive;
@@ -181,7 +181,7 @@ public class RobotContainer {
     m_currentTargetingState = TargetState.HUB_SCORING;
     Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
 
-    // m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
+    m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
     NamedCommands.registerCommand("Intake", 
       new ParallelCommandGroup(
@@ -198,34 +198,25 @@ public class RobotContainer {
     );
 
     // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addDefaultOption(
       "8 Fuel Center Auto", 
       new SequentialCommandGroup(
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
-        new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)),
-        new ParallelCommandGroup(
-          new ReadyShoot (m_shooter, m_turret, drive, false),
-          // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
-          new SequentialCommandGroup(
-            new WaitCommand(3),
-            new Feed(m_feeder, m_spindexer, m_shooter)
-          ))
+        new ReadyShoot (m_shooter, m_turret, drive, false),
+        new WaitCommand(1),
+        new Feed(m_feeder, m_spindexer)
       ));
     autoChooser.addOption(
       "8 Fuel Left Auto", 
       new SequentialCommandGroup(
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
         new InstantCommand( () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT), m_turret),
-        new ParallelCommandGroup(
-          new ReadyShoot (m_shooter, m_turret, drive, false),
-          // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
-          new SequentialCommandGroup(
-            new WaitCommand(3),
-            new Feed(m_feeder, m_spindexer, m_shooter)
-          )
-        )
+        new ReadyShoot (m_shooter, m_turret, drive, false),
+        // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
+        new WaitCommand(1),
+        new Feed(m_feeder, m_spindexer)
       ));
     autoChooser.addOption(
       "8 Fuel Right Auto", 
@@ -233,17 +224,13 @@ public class RobotContainer {
         new InstantCommand ( () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
         new InstantCommand ( () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_RIGHT), m_turret),
         // new InstantCommand ( () -> m_shooter.shoot(drkive), m_shooter),
-        new ParallelCommandGroup(
-          new ReadyShoot (m_shooter, m_turret, drive, false),
-          // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
-          new SequentialCommandGroup(
-            new WaitCommand(3),
-            new Feed(m_feeder, m_spindexer, m_shooter)
-          ))
+        new ReadyShoot (m_shooter, m_turret, drive, false),
+        new WaitCommand(1),
+        new Feed(m_feeder, m_spindexer)
       ));
-    // autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
-    // autoChooser.addOption("Rotate Test", new PathPlannerAuto("Rotate"));
-    // autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
+    autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
+    autoChooser.addOption("Rotate Test", new PathPlannerAuto("Rotate"));
+    autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
 
     // // Set up SysId routines
     // autoChooser.addOption(
@@ -353,7 +340,7 @@ public class RobotContainer {
     // Shoot - feed spun up shooter
     m_driverController
       .rightTrigger()
-      .whileTrue(
+      .onTrue(
         new SequentialCommandGroup(
           new ParallelCommandGroup(
             new InstantCommand(
@@ -366,7 +353,7 @@ public class RobotContainer {
             )
           ),
           new WaitCommand(0.3),
-          new Feed(m_feeder, m_spindexer, m_shooter)
+          new Feed(m_feeder, m_spindexer)
       ))
       .onFalse(new ParallelCommandGroup(
         new InstantCommand(
