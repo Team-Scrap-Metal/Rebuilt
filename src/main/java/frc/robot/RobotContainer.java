@@ -42,6 +42,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -227,6 +228,9 @@ public class RobotContainer {
         new WaitCommand(1),
         new Feed(m_feeder, m_spindexer)
       ));
+    autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
+    autoChooser.addOption("Rotate Test", new PathPlannerAuto("Rotate"));
+    autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
 
     // // Set up SysId routines
     // autoChooser.addOption(
