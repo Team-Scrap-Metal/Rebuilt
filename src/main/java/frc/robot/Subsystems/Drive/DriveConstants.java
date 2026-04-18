@@ -29,6 +29,7 @@ public class DriveConstants {
       };
   
   public static final double BUMPER_THICKNESS_IN = 3.25;
+  
   /** bumper to bumper robot width */
   public static final double ROBOT_WIDTH_BTB = Units.inchesToMeters(31.500 + BUMPER_THICKNESS_IN*2);
   public static final double ROBOT_LENGTH_BTB = Units.inchesToMeters(23.125 + BUMPER_THICKNESS_IN*2);
@@ -42,17 +43,11 @@ public class DriveConstants {
   };
 
   // Zeroed rotation values for each module, see setup instructions
-  // TODO: zero module values
   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-2.523);
   public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.663);
   public static final Rotation2d backLeftZeroRotation = new Rotation2d(1.525);
   public static final Rotation2d backRightZeroRotation = new Rotation2d(0.319);
-  // public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.728);
-  // public static final Rotation2d frontRightZeroRotation = new Rotation2d(-2.489);
-  // public static final Rotation2d backLeftZeroRotation = new Rotation2d(-1.594);
-  // public static final Rotation2d backRightZeroRotation = new Rotation2d(-2.815);
 
-  //TODO: can IDs
   // Device CAN IDs
   public static final int pigeonCanId = 23;
 

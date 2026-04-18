@@ -96,23 +96,13 @@ public class ModuleIOReal implements ModuleIO {
 
   // Voltage control requests
   private final VoltageOut voltageRequest = new VoltageOut(0);
-  private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
-
-  // Closed loop controllers
-//   private final SparkClosedLoopController turnController;
-
   private CANcoder absoluteEncoder;
 
   // Queue inputs from odometry thread
-//   private final Queue<Double> timestampQueue;
-
   private final StatusSignal<Angle> drivePosition;
-  // private final Queue<Double> drivePositionQueue;
   private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Voltage> driveAppliedVolts;
   private final StatusSignal<Current> driveCurrent;
-
-  // private final Queue<Double> turnPositionQueue;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -188,10 +178,6 @@ public class ModuleIOReal implements ModuleIO {
     drivePIDController = new PIDController(DriveConstants.driveKp[module], 0, DriveConstants.driveKd[module]);
     driveFeedForward = new SimpleMotorFeedforward(DriveConstants.driveKs[module], DriveConstants.driveKv[module]);
     steerPIDController = new PIDController(DriveConstants.turnKp[module], 0, DriveConstants.turnKd[module]);
-
-    // turnEncoder = turnSpark.getAbsoluteEncoder();
-    // driveController = driveTalon.getClosedLoopController();
-    // turnController = turnSpark.getClosedLoopController();
         
     // Configure drive motor
     var driveConfig = new TalonFXConfiguration();
@@ -211,48 +197,19 @@ public class ModuleIOReal implements ModuleIO {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(turnMotorCurrentLimit)
         .voltageCompensation(12.0);
-    // turnConfig
-    //     .absoluteEncoder
-    //     .inverted(turnEncoderInverted)
-    //     .positionConversionFactor(turnEncoderPositionFactor)
-    //     .velocityConversionFactor(turnEncoderVelocityFactor)
-    //     .averageDepth(2);
-    // turnConfig
-    //     .closedLoop
-    //     .feedbackSensor(FeedbackSensor.kNoSensor)
-    //     .positionWrappingEnabled(true)
-    //     .positionWrappingInputRange(turnPIDMinInput, turnPIDMaxInput)
-    //     .pid(0.0, 0.0, 0.0);
         
     drivePIDController.setPID(driveKp[module], 0.0, driveKd[module]);
     driveFeedForward.setKs(driveKs[module]);
     driveFeedForward.setKv(driveKv[module]);
     steerPIDController.setPID(turnKp[module], 0.0, turnKd[module]);
     steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
-        // .p
-    // turnConfig
-    //     .signals
-    //     .absoluteEncoderPositionAlwaysOn(true)
-    //     .absoluteEncoderPositionPeriodMs((int) (1000.0 / odometryFrequency))
-    //     .absoluteEncoderVelocityAlwaysOn(true)
-    //     .absoluteEncoderVelocityPeriodMs(20)
-    //     .appliedOutputPeriodMs(20)
-    //     .busVoltagePeriodMs(20)
-    //     .outputCurrentPeriodMs(20);
+
     SparkUtil.tryUntilOk(
         turnSpark,
         5,
         () ->
             turnSpark.configure(
                 turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-
-    // Create odometry queues
-    // timestampQueue = odometryThread.getInstance().makeTimestampQueue();
-  
-    // drivePositionQueue =
-    //     odometryThread.getInstance().registerSignal(drivePos::getValueAsDouble);
-    // turnPositionQueue =
-    //     odometryThread.getInstance().registerSignal(turnSpark, ()-> absoluteEncoder.getAbsolutePosition().getValueAsDouble());
 
     drivePosition = driveTalon.getPosition();
     driveVelocity = driveTalon.getVelocity();
@@ -290,11 +247,6 @@ public class ModuleIOReal implements ModuleIO {
 
     // Update turn inputs
     SparkUtil.sparkStickyFault = false;
-    // SparkUtil.ifOk(
-    //     turnSpark,
-    //     turnEncoder::getPosition,
-    //     (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation));
-    // SparkUtil.ifOk(turnSpark, turnEncoder::getVelocity, (value) -> inputs.turnVelocityRadPerSec = value);
     SparkUtil.ifOk(
         turnSpark,
         new DoubleSupplier[] {turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
@@ -309,19 +261,6 @@ public class ModuleIOReal implements ModuleIO {
     absoluteTurnPosition = inputs.turnPosition;
     
     updatePidInputs();
-    // Update odometry inputs
-    // inputs.odometryTimestamps =
-    //     timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryDrivePositionRad =
-    //     driveTalon.getPosition().getValueAsDouble();
-        // drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-    // inputs.odometryTurnPosition =
-    //     turnPositionQueue.stream()
-    //         .map((Double value) -> new Rotation2d(value).minus(zeroRotation))
-    //         .toArray(Rotation2d[]::new);
-    // timestampQueue.clear();
-    // drivePositionQueue.clear();
-    // turnPositionQueue.clear();
   }
 
   @Override

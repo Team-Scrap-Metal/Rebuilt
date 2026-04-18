@@ -49,17 +49,6 @@ public class Module {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
-    // Calculate positions for odometry
-    // int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-    // odometryPositions = new SwerveModulePosition[sampleCount];
-    // for (int i = 0; i < sampleCount; i++) {
-    //   double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
-    //   Rotation2d angle = inputs.odometryTurnPositions[i];
-    //   odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-    // }
-
-    
-
     odometryPosition =
       new SwerveModulePosition(
         inputs.drivePositionRad * wheelRadiusMeters,
@@ -122,11 +111,6 @@ public class Module {
   /** Returns the module positions received this cycle. */
   public SwerveModulePosition getOdometryPosition() {
     return odometryPosition;
-  }
-
-  /** Returns the timestamps of the samples received this cycle. */
-  public double[] getOdometryTimestamps() {
-    return inputs.odometryTimestamps;
   }
 
   /** Returns the module position in radians. */
