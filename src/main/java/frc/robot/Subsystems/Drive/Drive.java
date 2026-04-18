@@ -271,6 +271,17 @@ public class Drive extends SubsystemBase {
     }
     return states;
   }
+  /** Returns the inverted module positions (turn angles and drive positions) for all of the modules. */
+  public SwerveModulePosition[] getInvertedModulePositions() {
+    SwerveModulePosition[] states = new SwerveModulePosition[4];
+    for (int i = 0; i < 4; i++) {
+      // states[i] = modules[i].getInvertedPosition();
+      double statePositionDouble = -modules[i].getPosition().distanceMeters;
+      // states [i] = modules[i].getPosition().
+      states[i] = new SwerveModulePosition(statePositionDouble, modules[i].getAngle());
+    }
+    return states;
+  }
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")

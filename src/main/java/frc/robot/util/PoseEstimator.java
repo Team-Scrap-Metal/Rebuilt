@@ -136,12 +136,12 @@ public class PoseEstimator extends SubsystemBase {
             stateStandardDevs,
             visionStandardDevs);
 
-    // poseEstimator.resetPose(m_startingPoseChooser.get());
-      // new Pose2d(
-      //   Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
-      //   Units.inchesToMeters(317.7/2), // center of field
-      //   Rotation2d.fromDegrees(0)) // left robot side against hub
-      // );
+    poseEstimator.resetPose(
+      new Pose2d(
+        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
+        Units.inchesToMeters(317.7/2), // center of field
+        Rotation2d.fromDegrees(0)) // left robot side against hub
+      );
     // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
   }
 
@@ -156,9 +156,14 @@ public class PoseEstimator extends SubsystemBase {
     //   poseEstimator.resetPose(m_startingPoseChooser.get());
     // }
 
-    poseEstimator.updateWithTime(
+    // if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
+    //   poseEstimator.updateWithTime(
+    //       Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getInvertedModulePositions());
+    // } else {
+      poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
+    // }
     // System.out.println(mt1.tagCount);
     // System.out.println(mt1.pose);
 

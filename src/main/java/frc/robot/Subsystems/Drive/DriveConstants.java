@@ -168,5 +168,5 @@ public class DriveConstants {
   public static final double GYRO_OFFSET = 
   -90;
 
-  public static final double ROBOT_STARTING_ANGLE = 0;
+  public static final double ROBOT_STARTING_ANGLE = -90;
 }
