@@ -70,8 +70,19 @@ public class DriveCommands {
     return Commands.run(
         () -> {
           System.out.println("x: " + (xSupplier.getAsDouble()));
+          // Translation2d linearVelocity;
 
-          // Get linear velocity
+          // if (              DriverStation.getAlliance().isPresent()
+          //   && DriverStation.getAlliance().get() == Alliance.Blue) {
+          //       linearVelocity =
+          //     getLinearVelocityFromJoysticks(-xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          //   } else {
+          //     linearVelocity =
+          //     getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+          //   }
+
+          // // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
@@ -87,6 +98,11 @@ public class DriveCommands {
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
+
+          // if (              DriverStation.getAlliance().isPresent()
+          //         && DriverStation.getAlliance().get() == Alliance.Red) {
+          //           speeds.minus(speeds).minus(speeds)
+          //         }
 
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()

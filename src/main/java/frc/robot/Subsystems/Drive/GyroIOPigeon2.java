@@ -38,7 +38,7 @@ public class GyroIOPigeon2 implements GyroIO {
     var yawClone = yaw.clone(); // Status signals are not thread-safe
     // yawPositionQueue =
     //     yawClone.refresh().getValueAsDouble();
-    pigeon.setYaw(ROBOT_STARTING_ANGLE);
+    pigeon.setYaw(0);
   }
 
   @Override
