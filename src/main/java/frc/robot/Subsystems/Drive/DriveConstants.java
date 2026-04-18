@@ -28,7 +28,7 @@ public class DriveConstants {
         new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
       };
   
-  public static final double BUMPER_THICKNESS_IN = 2;
+  public static final double BUMPER_THICKNESS_IN = 3.25;
   /** bumper to bumper robot width */
   public static final double ROBOT_WIDTH_BTB = Units.inchesToMeters(31.500 + BUMPER_THICKNESS_IN*2);
   public static final double ROBOT_LENGTH_BTB = Units.inchesToMeters(23.125 + BUMPER_THICKNESS_IN*2);
