@@ -6,7 +6,6 @@ package frc.robot.Subsystems.Intake.Pivot;
 // import frc.robot.Subsystems.Intake.Pivot.PivotIO;
 
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

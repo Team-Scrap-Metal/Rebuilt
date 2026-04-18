@@ -19,8 +19,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
-import java.util.Queue;
-
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon = new Pigeon2(pigeonCanId);

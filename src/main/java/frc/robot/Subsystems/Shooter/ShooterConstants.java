@@ -25,7 +25,6 @@ public final class ShooterConstants {
     public static final double GRAVITY_CONSTANT = 9.8;
 
     public static final double SHOOTER_VELOCITY_COEFFICIENT = 1;
-    // public static final int SHOOTING_PERCENT = 30;
 
     public static final double[] BEST_FIT_X_VALUES_M = new double[] {
         Units.inchesToMeters(66),

@@ -130,13 +130,6 @@ public class Shooter extends SubsystemBase {
     m_io.setShooterRPM(rpm);
   }
 
-  // public void shootFromHub () {
-  //   double rpm = ShooterConstants.RPM_FROM_HUB;
-
-  //   setShooterRPM(rpm);
-  // }
-
-
   public double getHubDistance() {
     return (double)shootDistanceInput.getAsDouble();
   }

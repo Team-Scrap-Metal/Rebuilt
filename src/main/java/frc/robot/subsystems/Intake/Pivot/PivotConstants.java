@@ -1,8 +1,8 @@
 package frc.robot.Subsystems.Intake.Pivot;
 
 public final class PivotConstants {
-    public static final int CAN_ID = 3; // TODO: update
-    public static final int FOLLOWER_CAN_ID = 11; // TODO: update
+    public static final int CAN_ID = 3; 
+    public static final int FOLLOWER_CAN_ID = 11; 
     public static final boolean INVERTED = true;
     public static final boolean FOLLOWER_INVERTED = true;
     public static final int CURRENT_LIMIT = 14;

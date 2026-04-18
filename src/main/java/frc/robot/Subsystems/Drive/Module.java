@@ -12,16 +12,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.Subsystems.Drive.ModuleIOInputsAutoLogged;
-import frc.robot.Subsystems.Shooter.ShooterConstants;
 
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import org.littletonrobotics.junction.Logger;
-
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class Module {
   private final ModuleIO io;

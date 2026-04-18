@@ -10,8 +10,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Subsystems.Intake.Roller.RollerIO;
-import frc.robot.Subsystems.Intake.Roller.RollerIOInputsAutoLogged;
 
 public class Roller extends SubsystemBase {
   private final RollerIO m_io;
