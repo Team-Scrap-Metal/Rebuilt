@@ -136,7 +136,7 @@ public class PoseEstimator extends SubsystemBase {
             stateStandardDevs,
             visionStandardDevs);
 
-    poseEstimator.resetPose(m_startingPoseChooser.get());
+    // poseEstimator.resetPose(m_startingPoseChooser.get());
       // new Pose2d(
       //   Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
       //   Units.inchesToMeters(317.7/2), // center of field
