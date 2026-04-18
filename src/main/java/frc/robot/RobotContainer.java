@@ -81,7 +81,7 @@ public class RobotContainer {
   private final Pivot m_pivot;
 
 
-  // private final PathPlanner m_pathplanner;
+  private final PathPlanner m_pathplanner;
 //   private final PoseEstimator m_poseEstimator;
 
   private final Drive drive;
@@ -181,7 +181,7 @@ public class RobotContainer {
     m_currentTargetingState = TargetState.HUB_SCORING;
     Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
 
-    // m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
+    m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
     NamedCommands.registerCommand("Intake", 
       new ParallelCommandGroup(
@@ -241,9 +241,9 @@ public class RobotContainer {
             new Feed(m_feeder, m_spindexer, m_shooter)
           ))
       ));
-    // autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
-    // autoChooser.addOption("Rotate Test", new PathPlannerAuto("Rotate"));
-    // autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
+    autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
+    autoChooser.addOption("Rotate", new PathPlannerAuto("PathRotates"));
+    autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
 
     // // Set up SysId routines
     // autoChooser.addOption(
