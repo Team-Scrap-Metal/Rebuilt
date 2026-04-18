@@ -46,7 +46,7 @@ public class PoseEstimator extends SubsystemBase {
   private Field2d field2d;
 
   private LoggedDashboardChooser<Pose2d> m_startingPoseChooser;
-  // private LoggedDashboardChooser<Double> m_startingAngleChooser;
+  private LoggedDashboardChooser<Double> m_startingAngleChooser;
   private Pose2d m_oldPoseChooserValue;
 //   private LimelightHelpers.PoseEstimate mt1;
 
@@ -99,22 +99,22 @@ public class PoseEstimator extends SubsystemBase {
     }
     
     
-    // m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
-    // m_startingAngleChooser.addOption(
-    //   "Forward", 
-    //   0.0
-    // );
-    // m_startingAngleChooser.addDefaultOption(
-    //   "Right", 90.0
-    //   );
-    // m_startingAngleChooser.addOption(
-    //   "Backwards", 
-    //   180.0
-    //   );
-    // m_startingAngleChooser.addOption(
-    //   "Left", 
-    //   -90.0
-    //   );
+    m_startingAngleChooser = new LoggedDashboardChooser<Double>("Starting angle");
+    m_startingAngleChooser.addOption(
+      "Forward", 
+      0.0
+    );
+    m_startingAngleChooser.addDefaultOption(
+      "Right", 90.0
+      );
+    m_startingAngleChooser.addOption(
+      "Backwards", 
+      180.0
+      );
+    m_startingAngleChooser.addOption(
+      "Left", 
+      -90.0
+      );
     
     
     field2d = new Field2d();
@@ -156,14 +156,14 @@ public class PoseEstimator extends SubsystemBase {
     //   poseEstimator.resetPose(m_startingPoseChooser.get());
     // }
 
-    // if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
-    //   poseEstimator.updateWithTime(
-    //       Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getInvertedModulePositions());
-    // } else {
+    if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
+      poseEstimator.updateWithTime(
+          Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getInvertedModulePositions());
+    } else {
       poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
-    // }
+    }
     // System.out.println(mt1.tagCount);
     // System.out.println(mt1.pose);
 
@@ -212,9 +212,9 @@ public class PoseEstimator extends SubsystemBase {
 
   public void updateStartingPose () {
     Pose2d newPose = m_startingPoseChooser.get();
-    // Double newAngle = m_startingAngleChooser.get();
+    double newAngle = m_startingAngleChooser.get().doubleValue();
 
-    // drive.setHeading(newAngle);
+    drive.setHeading(newAngle);
     field2d.setRobotPose(newPose);
     poseEstimator.resetPose(newPose);
   }
