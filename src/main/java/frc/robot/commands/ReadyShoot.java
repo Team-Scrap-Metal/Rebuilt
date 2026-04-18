@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drive.Drive;
 import frc.robot.Subsystems.Shooter.Shooter;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 import frc.robot.Subsystems.Turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -40,6 +41,7 @@ public class ReadyShoot extends Command {
   public void initialize() {
     if (!m_passing) {
       m_shooter.shoot(m_drive);
+      // m_shooter.setStaticSetpoint(ShooterConstants.RPM_FOR_PASSING);
       m_turret.autoAim(m_drive);
     } else {
       Pose2d robotPose = m_drive.getPose();
@@ -60,7 +62,8 @@ public class ReadyShoot extends Command {
 
       var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
 
-      m_shooter.passFromDistance(distance);
+      // m_shooter.passFromDistance(distance);
+      m_shooter.setShooterRPM(ShooterConstants.RPM_FOR_PASSING);
       
       m_manualTurretControlEnabled = m_turret.getManualControlStatus();
       }
@@ -95,7 +98,9 @@ public class ReadyShoot extends Command {
         m_turret.setTurretPositionWithCoordinates(closestPassingTarget, robotPose);
       }
 
-      m_shooter.passFromDistance(distance);
+      // m_shooter.passFromDistance(distance);
+      m_shooter.setShooterRPM(ShooterConstants.RPM_FOR_PASSING);
+      
     }
   }
 
