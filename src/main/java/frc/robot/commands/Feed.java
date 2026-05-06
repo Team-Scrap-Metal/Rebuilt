@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.Feeder.Feeder;
 import frc.robot.Subsystems.Feeder.FeederConstants;
 import frc.robot.Subsystems.Shooter.Shooter;
+import frc.robot.Subsystems.Shooter.ShooterConstants;
 import frc.robot.Subsystems.Spindexer.Spindexer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -29,7 +30,9 @@ public class Feed extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_shooter.getVelocity() > 800) {
+    var shooterSetpoint = m_shooter.getSetpoint();
+    var shooterVelocity = m_shooter.getVelocity();
+    if (shooterVelocity > 0 && Math.abs(shooterVelocity - shooterSetpoint) < ShooterConstants.THRESHOLD_TOLERANCE_TO_FEED_RPM) {
       m_feeder.setFeederPercent(FeederConstants.FEEDING_PERCENT);
       m_spindexer.setSpindexerPercent(FeederConstants.FEEDING_PERCENT);
     } else {

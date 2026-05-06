@@ -142,6 +142,10 @@ public class Shooter extends SubsystemBase {
     return (double)shootDistanceInput.getAsDouble();
   }
 
+  public double getSetpoint () {
+    return m_io.getShooterSetpoint();
+  }
+
   public double getTunedRPM() {
     return shootRpmInput.getAsDouble();
   }

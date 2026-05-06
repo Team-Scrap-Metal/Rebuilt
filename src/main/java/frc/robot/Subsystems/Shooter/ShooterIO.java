@@ -19,4 +19,6 @@ public interface ShooterIO {
     public default void setShooterRPM (double rpm) {}
 
     public default double getShooterRPM () {return 0.0;}
+
+    public default double getShooterSetpoint () {return 0.0;}
 }

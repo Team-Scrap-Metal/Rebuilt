@@ -64,6 +64,9 @@ public final class ShooterConstants {
         2680
     };
 
+    // Tolerance for shooter RPM to vary from setpoint in order to feed the launcher
+    public static final double THRESHOLD_TOLERANCE_TO_FEED_RPM = 100;
+
     /*** Target RPM to score while flush with hub ***/
     public static final int RPM_FROM_HUB = 1950;
     public static final int RPM_FROM_TRENCH = 2600;
