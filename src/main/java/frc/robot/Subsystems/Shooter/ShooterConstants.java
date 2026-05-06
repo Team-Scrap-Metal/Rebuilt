@@ -28,17 +28,27 @@ public final class ShooterConstants {
     // public static final int SHOOTING_PERCENT = 30;
 
     public static final double[] BEST_FIT_X_VALUES_M = new double[] {
-        Units.inchesToMeters(66),
-        Units.inchesToMeters(106.25),
-        Units.inchesToMeters(153.5),
-        Units.inchesToMeters(202)
+        Units.inchesToMeters(51.1),
+        Units.inchesToMeters(126),
+        Units.inchesToMeters(145.5)
     };
     public static final double[] BEST_FIT_RPM_VALUES = new double[] {
-        1800,
-        2200,
+        1950,
         2400,
-        2680
+        2600
     };
+    // public static final double[] BEST_FIT_X_VALUES_M = new double[] {
+    //     Units.inchesToMeters(66),
+    //     Units.inchesToMeters(106.25),
+    //     Units.inchesToMeters(153.5),
+    //     Units.inchesToMeters(202)
+    // };
+    // public static final double[] BEST_FIT_RPM_VALUES = new double[] {
+    //     1800,
+    //     2200,
+    //     2400,
+    //     2680
+    // };
 
     // TODO: UPDATE PASSING VALUES. FAKE 
     public static final double[] BEST_FIT_PASSING_X_VALUES_M = new double[] {

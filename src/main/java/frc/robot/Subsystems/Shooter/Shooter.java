@@ -21,6 +21,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import java.nio.file.ClosedDirectoryStreamException;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -169,14 +170,24 @@ public class Shooter extends SubsystemBase {
 
   public void shootAtPosition(Translation2d target, Pose2d robotPose) {
     Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
-
+    Logger.recordOutput("Shooter/LauncherPosition", launcherPositionFieldRelative);
     double distanceToHub = launcherPositionFieldRelative.getDistance(target);
+    Logger.recordOutput("Shooter/DistanceToHub", distanceToHub);
 
     revForDistance(distanceToHub);
   }
 
   public void shootAtHub(Drive drive) {
-    Translation2d hubPosition = Constants.HUB_POSITION_M;
+    Translation2d hubPosition;
+    
+    if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
+      hubPosition = new Translation2d(
+        16.54 - Constants.HUB_POSITION_M.getX(),
+        Constants.HUB_POSITION_M.getY()
+      );
+    } else {
+      hubPosition = Constants.HUB_POSITION_M;
+    }
     Pose2d robotPose = drive.getPose();
 
     shootAtPosition(hubPosition, robotPose);
@@ -193,7 +204,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot (Drive drive) {
-    if (rpmStaticSetpoint == 0) {
+        if (rpmStaticSetpoint == 0) {
       shootAtHub(drive);
     } else {
       setShooterRPM(rpmStaticSetpoint);
@@ -212,6 +223,7 @@ public class Shooter extends SubsystemBase {
   public void setStaticSetpoint (int rpm) {
     rpmStaticSetpoint = rpm;
 
+    Logger.recordOutput("Shooter/StaticSetpointRPM", rpm);
     if (rpm == ShooterConstants.RPM_FROM_HUB) {
       Logger.recordOutput("Shooter/StaticSetpoint", "Hub");
     } else if (rpm == ShooterConstants.RPM_FROM_TRENCH) {

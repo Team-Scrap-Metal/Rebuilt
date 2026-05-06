@@ -16,7 +16,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
+import static edu.wpi.first.units.Units.Rotation;
 import static frc.robot.Subsystems.Drive.DriveConstants.*;
 
 import java.util.Queue;
@@ -65,6 +68,14 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public void setYaw(double angle) {
-    pigeon.setYaw(angle);
+
+    if (DriverStation.getAlliance().isPresent()
+      && DriverStation.getAlliance().get() == Alliance.Red) {
+      pigeon.setYaw(Rotation2d.fromDegrees(angle).plus(Rotation2d.k180deg).getDegrees());
+    } else {
+      pigeon.setYaw(angle); 
+    }
+
+    // pigeon.setYaw(angle);
   }
 }

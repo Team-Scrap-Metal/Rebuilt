@@ -80,20 +80,21 @@ public class PoseEstimator extends SubsystemBase {
       new Pose2d(
         16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB/2), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
         Units.inchesToMeters(317.7) - DriveConstants.ROBOT_WIDTH_BTB/2, // flush with field wall
-        Rotation2d.k180deg)); // Intake facing driver statio
+        Rotation2d.kZero) // Intake facing driver station
+      );
     m_startingPoseChooser.addDefaultOption(
       "Center", 
       new Pose2d(
         16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2), // bumpers flush with hub
         Units.inchesToMeters(317.7/2), // center of field
-        Rotation2d.k180deg) // left robot side against hub
+        Rotation2d.kZero) // left robot side against hub
       );
     m_startingPoseChooser.addOption(
       "Left", 
       new Pose2d(
         16.54 - (Units.inchesToMeters(158.6) - DriveConstants.ROBOT_LENGTH_BTB), // frame perimeter flush with starting line. Robot rotation zero'd off edge of field
         DriveConstants.ROBOT_LENGTH_BTB/2, // flush with field wall
-        Rotation2d.k180deg) // Intake facing driver station
+        Rotation2d.kZero) // Intake facing driver station
       );
     }
     
@@ -135,12 +136,12 @@ public class PoseEstimator extends SubsystemBase {
             stateStandardDevs,
             visionStandardDevs);
 
-    poseEstimator.resetPose(
-      new Pose2d(
-        Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
-        Units.inchesToMeters(317.7/2), // center of field
-        Rotation2d.fromDegrees(0)) // left robot side against hub
-      );
+    // poseEstimator.resetPose(m_startingPoseChooser.get());
+      // new Pose2d(
+      //   Units.inchesToMeters(158.6) - DriveConstants.ROBOT_WIDTH_BTB/2, // bumpers flush with hub
+      //   Units.inchesToMeters(317.7/2), // center of field
+      //   Rotation2d.fromDegrees(0)) // left robot side against hub
+      // );
     // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
   }
 
@@ -155,14 +156,14 @@ public class PoseEstimator extends SubsystemBase {
     //   poseEstimator.resetPose(m_startingPoseChooser.get());
     // }
 
-    if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
-      poseEstimator.updateWithTime(
-          Timer.getFPGATimestamp(), drive.getRawGyroRotation().plus(Rotation2d.k180deg), drive.getInvertedModulePositions());
-    } else {
+    // if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
+    //   poseEstimator.updateWithTime(
+    //       Timer.getFPGATimestamp(), drive.getRawGyroRotation().plus(Rotation2d.k180deg), drive.getInvertedModulePositions());
+    // } else {
       poseEstimator.updateWithTime(
         Timer.getFPGATimestamp(), drive.getRawGyroRotation(), drive.getModulePositions());
 
-    }
+    // }
     // System.out.println(mt1.tagCount);
     // System.out.println(mt1.pose);
 

@@ -431,7 +431,7 @@ public class RobotContainer {
         .povLeft()
         .onTrue(
             Commands.runOnce(
-                () -> drive.zeroHeading()));
+                () -> drive.setHeading(0)));
     // drive.setPose(
     // new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
     // drive)
@@ -449,7 +449,7 @@ public class RobotContainer {
         .onTrue(
             new ParallelCommandGroup(
                 new InstantCommand(
-                    () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH)),
+                    () -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FOR_PASSING)),
                 new InstantCommand(
                     () -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT))));
 
