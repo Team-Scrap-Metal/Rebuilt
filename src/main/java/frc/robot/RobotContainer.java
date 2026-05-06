@@ -49,6 +49,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -570,6 +571,10 @@ public class RobotContainer {
             new InstantCommand(
                 () -> m_shooter.setShooterPercent(0),
                 m_shooter));
+
+    // disabled().onTrue(
+    //     new ZeroAll(m_spindexer, m_feeder, m_shooter, m_drum, m_roller)
+    // );
   }
 
   /**
@@ -600,12 +605,21 @@ public class RobotContainer {
 
   public void disabledInit() {
     m_turret.setBrake(false);
+    // new ZeroAll(m_spindexer, m_feeder, m_shooter, m_drum, m_roller).schedule();
   }
 
+
+  public void teleopInit () {
+    new ZeroAll(m_spindexer, m_feeder, m_shooter, m_drum, m_roller).schedule();
+  }
   private void togglePassingMode() {
     m_currentTargetingState = m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING
         : TargetState.HUB_SCORING;
     Logger.recordOutput("Targeting/TargetingState", m_currentTargetingState);
+  }
+
+  private static Trigger disabled() {
+    return new Trigger(DriverStation::isDisabled);
   }
 
   // private Command ReadyShoot (Turret turret, Shooter shooter, Drive drive) {
