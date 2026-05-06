@@ -105,7 +105,7 @@ public class PoseEstimator extends SubsystemBase {
       0.0
     );
     m_startingAngleChooser.addDefaultOption(
-      "Right", 90.0
+      "Right", -90.0
       );
     m_startingAngleChooser.addOption(
       "Backwards", 
@@ -113,7 +113,7 @@ public class PoseEstimator extends SubsystemBase {
       );
     m_startingAngleChooser.addOption(
       "Left", 
-      -90.0
+      90.0
       );
     
     
@@ -212,12 +212,12 @@ public class PoseEstimator extends SubsystemBase {
 
   public void updateStartingPose () {
     Pose2d newPose = m_startingPoseChooser.get();
-    // double newAngle = m_startingAngleChooser.get().doubleValue();
+    double newAngle = m_startingAngleChooser.get().doubleValue();
 
-    // drive.setHeading(newAngle);
     field2d.setRobotPose(newPose);
     poseEstimator.resetPose(newPose);
-    drive.setHeading(DriveConstants.ROBOT_STARTING_ANGLE);
+    // drive.setHeading(DriveConstants.ROBOT_STARTING_ANGLE);
+    drive.setHeading(newAngle);
   }
 
   public void zeroHeading () {
