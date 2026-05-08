@@ -68,6 +68,7 @@ public final class ShooterConstants {
     public static final double THRESHOLD_TOLERANCE_TO_FEED_RPM = 100;
 
     /*** Target RPM to score while flush with hub ***/
+    /** RPM FROM HUB is normally 1950 - switched to 400 for testing. */
     public static final int RPM_FROM_HUB = 1950;
     public static final int RPM_FROM_TRENCH = 2600;
     public static final int RPM_FOR_PASSING = 5000;
