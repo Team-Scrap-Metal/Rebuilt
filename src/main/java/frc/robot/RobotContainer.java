@@ -61,6 +61,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Feed;
 import frc.robot.commands.ReadyShoot;
 import frc.robot.commands.ReadyShootOnMove;
+import frc.robot.commands.ShotPreparation;
 import frc.robot.commands.ZeroAll;
 import frc.robot.util.PathPlanner;
 import frc.robot.util.PoseEstimator;
@@ -333,22 +334,20 @@ public class RobotContainer {
                 () -> m_turret.setTurretPercent(0),
                 m_turret)));
 
-    // Intake launch
+    // Rev Button 
     m_driverController
         .rightBumper()
         .whileTrue(
-            new ParallelCommandGroup(
-                
-            )
+            new ShotPreparation(m_shooter, m_turret, drive, null)
         )
-        .onFalse(
-            new ParallelCommandGroup(
-                new InstantCommand(
-                    () -> m_drum.setDrumPercent(0),
-                    m_drum),
-                new InstantCommand(
-                    () -> m_roller.setRollerPercent(0),
-                    m_roller)));
+        .onFalse(new ParallelCommandGroup(
+            new InstantCommand(
+                () -> m_shooter.setShooterPercent(0),
+                m_shooter),
+            new InstantCommand(
+                () -> m_turret.setTurretPercent(0),
+                m_turret))
+           );
 
     // Shoot - feed spun up shooter
     m_driverController

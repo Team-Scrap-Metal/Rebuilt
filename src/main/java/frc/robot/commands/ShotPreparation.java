@@ -44,56 +44,15 @@ public class ShotPreparation extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if (!m_passing) {
       m_shooter.shoot(m_drive);
-    
-    
+    }  
  }
-    
-
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_passing = m_robotContainer.isPassing();
     if (!m_passing) {
       m_shooter.shoot(m_drive);
-      m_turret.autoAim(m_drive);
-    } else {
-      Pose2d robotPose = m_drive.getPose();
-      Translation2d launcherPositionFieldRelative =
-        robotPose
-          .getTranslation()
-          .plus(
-            Constants.LAUNCHER_POSITION_ROBOT_RELATIVE_M
-            .rotateBy(robotPose.getRotation()));
-
-      if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        closestPassingTarget = Constants.PASSING_TARGETS_BLUE[0];
-
-        for (int i = 0; i < Constants.PASSING_TARGETS_BLUE.length; i++) {
-          if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS_BLUE[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
-            closestPassingTarget = Constants.PASSING_TARGETS_BLUE[i];
-          }
-        }
-      } else {
-        closestPassingTarget = Constants.PASSING_TARGETS_BLUE[0];
-
-        for (int i = 0; i < Constants.PASSING_TARGETS_BLUE.length; i++) {
-          if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS_BLUE[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
-            closestPassingTarget = Constants.PASSING_TARGETS_BLUE[i];
-          }
-        }
-
-      }
-
-      var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
-
-      if (!m_manualTurretControlEnabled) {
-        m_turret.setTurretPositionWithCoordinates(closestPassingTarget, robotPose);
-      }
-
-      // m_shooter.passFromDistance(distance);
-      m_shooter.setShooterRPM(ShooterConstants.RPM_FOR_PASSING);
-      
     }
   }
 
