@@ -336,14 +336,11 @@ public class RobotContainer {
     // Intake launch
     m_driverController
         .rightBumper()
-        .onTrue(
+        .whileTrue(
             new ParallelCommandGroup(
-                new InstantCommand(
-                    () -> m_drum.drumLaunch(),
-                    m_drum),
-                new InstantCommand(
-                    () -> m_roller.runRoller(),
-                    m_roller)))
+                
+            )
+        )
         .onFalse(
             new ParallelCommandGroup(
                 new InstantCommand(
