@@ -497,12 +497,29 @@ public class RobotContainer {
             new InstantCommand(
                 () -> m_turret.toggleStaticSetpointOverride()));
 
-    // /** Zero Turret Encoder */
+    /** Zero Turret Encoder */
     // m_auxController
-    //     .x()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //             () -> m_turret.zeroEncoder()));
+        // .x()
+        // .onTrue(
+        //     new SequentialCommandGroup(
+        //         new ParallelCommandGroup(
+        //        new InstantCommand(
+        //                 () -> m_feeder.runReverse(),
+        //                 m_feeder),
+        //             new InstantCommand(
+        //                 () -> m_spindexer.runReverse(),
+        //                 m_spindexer)),
+        //         new WaitCommand(0.3),
+        //         new ParallelCommandGroup(
+        //        new InstantCommand(
+        //                 () -> m_feeder.runFor(),
+        //                 m_feeder),
+        //             new InstantCommand(
+        //                 () -> m_spindexer.runReverse(),
+        //                 m_spindexer))
+
+                
+        //     ));
 
     // Reverse shooter
     // m_auxController

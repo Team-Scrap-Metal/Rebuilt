@@ -49,4 +49,7 @@ public class Spindexer extends SubsystemBase {
   public void runReverse () {
     setSpindexerPercent(-getTunedPercent());
   }
+  public void runForward () {
+    setSpindexerPercent(getTunedPercent());
+  }
 }
