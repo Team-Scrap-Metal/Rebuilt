@@ -205,7 +205,7 @@ public class RobotContainer {
             new InstantCommand(() -> m_roller.setRollerPercent(0), m_roller)));
 
     NamedCommands.registerCommand("Feeder", new Feed(m_feeder, m_spindexer, m_shooter));
-    NamedCommands.registerCommand("ReadyShoot", new ReadyShoot(m_shooter, m_turret, drive, false)); // parallel deadline group
+    NamedCommands.registerCommand("ReadyShoot", new ReadyShoot(m_shooter, m_turret, drive, this)); // parallel deadline group
     // NamedCommands.registerCommand("ShootOnMove", new ReadyShootOnMove(null, drive, m_shooter, m_turret));
     NamedCommands.registerCommand("IntakeDown", new InstantCommand(() -> m_pivot.runPivot(false), m_pivot));
     NamedCommands.registerCommand("IntakeOff", new InstantCommand(() -> m_pivot.setPivotPercent(0), m_pivot));
@@ -220,7 +220,7 @@ public class RobotContainer {
             new InstantCommand(() -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
             new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)),
             new ParallelCommandGroup(
-                new ReadyShoot(m_shooter, m_turret, drive, false),
+                new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
                 new SequentialCommandGroup(
                     new WaitCommand(3),
@@ -232,7 +232,7 @@ public class RobotContainer {
             new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT),
                 m_turret),
             new ParallelCommandGroup(
-                new ReadyShoot(m_shooter, m_turret, drive, false),
+                new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
                 new SequentialCommandGroup(
                     new WaitCommand(3),
@@ -245,7 +245,7 @@ public class RobotContainer {
                 m_turret),
             // new InstantCommand ( () -> m_shooter.shoot(drkive), m_shooter),
             new ParallelCommandGroup(
-                new ReadyShoot(m_shooter, m_turret, drive, false),
+                new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
                 new SequentialCommandGroup(
                     new WaitCommand(3),
@@ -324,7 +324,7 @@ public class RobotContainer {
     m_driverController
         .leftTrigger()
         .whileTrue(
-            new ReadyShoot(m_shooter, m_turret, drive, m_currentTargetingState == TargetState.PASSING))
+            new ReadyShoot(m_shooter, m_turret, drive, this))
         .onFalse(new ParallelCommandGroup(
             new InstantCommand(
                 () -> m_shooter.setShooterPercent(0),
@@ -501,12 +501,12 @@ public class RobotContainer {
             new InstantCommand(
                 () -> m_turret.toggleStaticSetpointOverride()));
 
-    /** Zero Turret Encoder */
-    m_auxController
-        .x()
-        .onTrue(
-            Commands.runOnce(
-                () -> m_turret.zeroEncoder()));
+    // /** Zero Turret Encoder */
+    // m_auxController
+    //     .x()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //             () -> m_turret.zeroEncoder()));
 
     // Reverse shooter
     // m_auxController
@@ -567,6 +567,10 @@ public class RobotContainer {
             new InstantCommand(
                 () -> m_shooter.shootAtTuned(),
                 m_shooter))
+        .whileTrue(
+            new InstantCommand(
+                () -> m_shooter.getTargetDistance(Constants.HUB_POSITION_M, drive))
+        )
         .onFalse(
             new InstantCommand(
                 () -> m_shooter.setShooterPercent(0),
@@ -601,6 +605,10 @@ public class RobotContainer {
     drive.getPoseEstimator().updateStartingPose();
 
     return autoChooser.get();
+  }
+
+  public boolean isPassing () {
+    return m_currentTargetingState == TargetState.PASSING;
   }
 
   public void disabledInit() {

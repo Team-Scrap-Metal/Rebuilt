@@ -172,6 +172,20 @@ public class Shooter extends SubsystemBase {
     setShooterRPM(target_rpm);
   }
 
+  //TODO: Delete temp logging fix
+  public void getTargetDistance(Translation2d target, Drive drive) {
+    var robotPose = drive.getPose();
+
+    Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
+    Logger.recordOutput("Shooter/LauncherPosition", launcherPositionFieldRelative);
+    double distanceToHub = launcherPositionFieldRelative.getDistance(target);
+    Logger.recordOutput("Shooter/DistanceToHub", distanceToHub);
+
+    var target_rpm = calculateRpm(distanceToHub);
+
+    Logger.recordOutput("Shooter/TargetDistance", target_rpm);
+
+  }
   public void shootAtPosition(Translation2d target, Pose2d robotPose) {
     Translation2d launcherPositionFieldRelative = getLauncherPose(robotPose);
     Logger.recordOutput("Shooter/LauncherPosition", launcherPositionFieldRelative);
@@ -184,7 +198,7 @@ public class Shooter extends SubsystemBase {
   public void shootAtHub(Drive drive) {
     Translation2d hubPosition;
     
-    if (Constants.getAlliance().get() == DriverStation.Alliance.Blue) {
+    if (Constants.getAlliance().get() == DriverStation.Alliance.Red) {
       hubPosition = new Translation2d(
         16.54 - Constants.HUB_POSITION_M.getX(),
         Constants.HUB_POSITION_M.getY()

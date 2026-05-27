@@ -24,7 +24,7 @@ public class SpindexerIOSpark implements SpindexerIO {
         var motorConfig = new SparkFlexConfig();
         motorConfig
             .inverted(SpindexerConstants.INVERTED)
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(SpindexerConstants.CURRENT_LIMIT);
         m_spindexerMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

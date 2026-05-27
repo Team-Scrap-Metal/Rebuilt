@@ -8,6 +8,9 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -148,7 +151,15 @@ public class Turret extends SubsystemBase {
 
   public void targetHub(Drive drive) {
     Pose2d robotPose = drive.getPose();
-    setTurretPositionWithCoordinates(Constants.HUB_POSITION_M, robotPose);
+
+    var hubPosition = Constants.HUB_POSITION_M;
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      hubPosition = new Translation2d(
+        16.54 - Constants.HUB_POSITION_M.getX(),
+        Constants.HUB_POSITION_M.getY());
+    }
+    setTurretPositionWithCoordinates(hubPosition, robotPose);
+
   }
 
   public void toggleManualControl () {

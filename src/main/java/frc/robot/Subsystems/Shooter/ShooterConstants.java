@@ -51,25 +51,41 @@ public final class ShooterConstants {
     // };
 
     // TODO: UPDATE PASSING VALUES. FAKE 
-    public static final double[] BEST_FIT_PASSING_X_VALUES_M = new double[] {
-        Units.inchesToMeters(66),
-        Units.inchesToMeters(106.25),
-        Units.inchesToMeters(153.5),
-        Units.inchesToMeters(202)
+    // TODO: REMOVE LATER
+    // public static final double[] BEST_FIT_PASSING_X_VALUES_M = new double[] {
+    //     Units.inchesToMeters(66),
+    //     Units.inchesToMeters(106.25),
+    //     Units.inchesToMeters(153.5),
+    //     Units.inchesToMeters(202)
+    // };
+    // public static final double[] BEST_FIT_PASSING_RPM_VALUES = new double[] {
+    //     1800,
+    //     2200,
+    //     2400,
+    //     2680
+    // };
+     public static final double[] BEST_FIT_PASSING_X_VALUES_M = new double[] {
+    
+        1.954,
+        3.143,
+        2.587,
+        1.325
     };
     public static final double[] BEST_FIT_PASSING_RPM_VALUES = new double[] {
-        1800,
-        2200,
-        2400,
-        2680
+    
+        2100,
+        2377,
+        2148,
+        1800
     };
 
+
     // Tolerance for shooter RPM to vary from setpoint in order to feed the launcher
-    public static final double THRESHOLD_TOLERANCE_TO_FEED_RPM = 100;
+    public static final double THRESHOLD_TOLERANCE_TO_FEED_RPM = 200;
 
     /*** Target RPM to score while flush with hub ***/
     /** RPM FROM HUB is normally 1950 - switched to 400 for testing. */
-    public static final int RPM_FROM_HUB = 1950;
+    public static final int RPM_FROM_HUB = 1850;
     public static final int RPM_FROM_TRENCH = 2600;
     public static final int RPM_FOR_PASSING = 5000;
 }
