@@ -17,14 +17,13 @@ import frc.robot.Subsystems.Spindexer.Spindexer;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ZeroAll extends ParallelCommandGroup {
   /** Creates a new ZeroAll. */
-  public ZeroAll(Spindexer spin, Feeder feed, Shooter shoot, Drum drum, Roller roll) {
+  public ZeroAll(Spindexer spin, Feeder feed, Shooter shoot, Roller roll) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new InstantCommand(()-> spin.setSpindexerVoltage(0), spin),
       new InstantCommand(()-> feed.setFeederVoltage(0), feed),
       new InstantCommand(()-> shoot.setShooterVoltage(0), shoot),
-      new InstantCommand(()-> drum.setDrumVoltage(0), drum),
       new InstantCommand(()-> roll.setRollerVoltage(0), roll)
     );
   }

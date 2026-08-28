@@ -12,7 +12,6 @@ import frc.robot.Subsystems.Drive.ModuleIO;
 import frc.robot.Subsystems.Drive.ModuleIOReal;
 import frc.robot.Subsystems.Drive.ModuleIOSim;
 import frc.robot.Subsystems.Feeder.*;
-import frc.robot.Subsystems.Intake.Drum.*;
 import frc.robot.Subsystems.Intake.Roller.*;
 import frc.robot.Subsystems.Shooter.*;
 import frc.robot.Subsystems.Spindexer.*;
@@ -20,16 +19,6 @@ import frc.robot.Subsystems.Turret.*;
 import frc.robot.Subsystems.Vision.Vision;
 import frc.robot.Subsystems.Vision.VisionIO;
 import frc.robot.Subsystems.Vision.VisionIOLimelight;
-import frc.robot.Subsystems.Drive.Drive;
-import frc.robot.Subsystems.Drive.GyroIO;
-import frc.robot.Subsystems.Drive.GyroIOPigeon2;
-import frc.robot.Subsystems.Drive.ModuleIO;
-import frc.robot.Subsystems.Drive.ModuleIOReal;
-import frc.robot.Subsystems.Drive.ModuleIOSim;
-import frc.robot.Subsystems.Feeder.*;
-import frc.robot.Subsystems.Shooter.*;
-import frc.robot.Subsystems.Spindexer.*;
-import frc.robot.Subsystems.Turret.*;
 import frc.robot.Subsystems.Intake.Pivot.*;
 import frc.robot.commands.DriveCommands;
 
@@ -79,7 +68,6 @@ public class RobotContainer {
   private final Feeder m_feeder;
   // private final Spindexer m_spindexer;
   private final Shooter m_shooter;
-  private final Drum m_drum;
   private final Roller m_roller;
   private final Spindexer m_spindexer;
   private final Turret m_turret;
@@ -120,7 +108,6 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSpark());
         // m_spindexer = new Spindexer(new SpindexerIOSpark());
         m_shooter = new Shooter(new ShooterIOSpark());
-        m_drum = new Drum(new DrumIOSpark());
         m_roller = new Roller(new RollerIOSpark());
         m_turret = new Turret(new TurretIOSpark());
         m_pivot = new Pivot(new PivotIOSpark());
@@ -142,7 +129,6 @@ public class RobotContainer {
         m_feeder = new Feeder(new FeederIOSim());
         // m_spindexer = new Spindexer(new SpindexerIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
         m_turret = new Turret(new TurretIOSim());
         m_pivot = new Pivot(new PivotIOSim());
@@ -167,7 +153,6 @@ public class RobotContainer {
       default:
         m_feeder = new Feeder(new FeederIOSim());
         m_shooter = new Shooter(new ShooterIOSim());
-        m_drum = new Drum(new DrumIOSim());
         m_roller = new Roller(new RollerIOSim());
         m_turret = new Turret(new TurretIOSim());
         m_spindexer = new Spindexer(new SpindexerIOSim());
@@ -196,12 +181,10 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Intake",
         new ParallelCommandGroup(
-            new InstantCommand(() -> m_drum.drumIntake(), m_drum),
             new InstantCommand(() -> m_roller.runRoller(), m_roller)));
 
     NamedCommands.registerCommand("ZeroIntake",
         new ParallelCommandGroup(
-            new InstantCommand(() -> m_drum.setDrumPercent(0), m_drum),
             new InstantCommand(() -> m_roller.setRollerPercent(0), m_roller)));
 
     NamedCommands.registerCommand("Feeder", new Feed(m_feeder, m_spindexer, m_shooter));
@@ -209,7 +192,7 @@ public class RobotContainer {
     // NamedCommands.registerCommand("ShootOnMove", new ReadyShootOnMove(null, drive, m_shooter, m_turret));
     NamedCommands.registerCommand("IntakeDown", new InstantCommand(() -> m_pivot.runPivot(false), m_pivot));
     NamedCommands.registerCommand("IntakeOff", new InstantCommand(() -> m_pivot.setPivotPercent(0), m_pivot));
-    NamedCommands.registerCommand("ZeroAll", new ZeroAll(m_spindexer, m_feeder, m_shooter, m_drum, m_roller));
+    NamedCommands.registerCommand("ZeroAll", new ZeroAll(m_spindexer, m_feeder, m_shooter, m_roller));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -306,16 +289,10 @@ public class RobotContainer {
         .onTrue(
             new ParallelCommandGroup(
                 new InstantCommand(
-                    () -> m_drum.drumIntake(),
-                    m_drum),
-                new InstantCommand(
                     () -> m_roller.runRoller(),
                     m_roller)))
         .onFalse(
             new ParallelCommandGroup(
-                new InstantCommand(
-                    () -> m_drum.setDrumPercent(0),
-                    m_drum),
                 new InstantCommand(
                     () -> m_roller.setRollerPercent(0),
                     m_roller)));
@@ -339,16 +316,10 @@ public class RobotContainer {
         .onTrue(
             new ParallelCommandGroup(
                 new InstantCommand(
-                    () -> m_drum.drumLaunch(),
-                    m_drum),
-                new InstantCommand(
                     () -> m_roller.runRoller(),
                     m_roller)))
         .onFalse(
             new ParallelCommandGroup(
-                new InstantCommand(
-                    () -> m_drum.setDrumPercent(0),
-                    m_drum),
                 new InstantCommand(
                     () -> m_roller.setRollerPercent(0),
                     m_roller)));
@@ -534,16 +505,10 @@ public class RobotContainer {
         .onTrue(
             new ParallelCommandGroup(
                 new InstantCommand(
-                    () -> m_drum.runReverse(),
-                    m_drum),
-                new InstantCommand(
                     () -> m_roller.runReverse(),
                     m_roller)))
         .onFalse(
             new ParallelCommandGroup(
-                new InstantCommand(
-                    () -> m_drum.setDrumPercent(0),
-                    m_drum),
                 new InstantCommand(
                     () -> m_roller.setRollerPercent(0),
                     m_roller)));
@@ -618,7 +583,7 @@ public class RobotContainer {
 
 
   public void teleopInit () {
-    new ZeroAll(m_spindexer, m_feeder, m_shooter, m_drum, m_roller).schedule();
+    new ZeroAll(m_spindexer, m_feeder, m_shooter, m_roller).schedule();
   }
   private void togglePassingMode() {
     m_currentTargetingState = m_currentTargetingState == TargetState.HUB_SCORING ? TargetState.PASSING

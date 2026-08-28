@@ -52,7 +52,6 @@ public class PivotIOSpark implements PivotIO {
         pivotMotor = new SparkMax(PivotConstants.CAN_ID, MotorType.kBrushless);
         pivotFollowerMotor = new SparkMax(PivotConstants.FOLLOWER_CAN_ID, MotorType.kBrushless);
         pivotEncoder = pivotMotor.getEncoder();
-        // pivotClosedLoopController = pivotMotor.getClosedLoopController();
 
         var motorConfig = new SparkMaxConfig();
         var followerConfig = new SparkMaxConfig();
@@ -61,29 +60,17 @@ public class PivotIOSpark implements PivotIO {
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(PivotConstants.CURRENT_LIMIT)
             .encoder.positionConversionFactor(1/PivotConstants.GEAR_RATIO)
-                .velocityConversionFactor(1/PivotConstants.GEAR_RATIO);
-                
-        pivotEncoder.setPosition(0);
-                    
-        // motorConfig
-        //     .closedLoop
-        //         .p(PivotConstants.Kp)
-        //         .i(PivotConstants.Ki)
-        //         .d(PivotConstants.Kd)
-        //     .feedForward 
-        //         .kS(PivotConstants.Ks)
-        //         .kV(PivotConstants.Kv);
+            .velocityConversionFactor(1/PivotConstants.GEAR_RATIO);
         followerConfig
             .apply(motorConfig)
             .follow(pivotMotor, PivotConstants.FOLLOWER_INVERTED);
-
+        pivotEncoder.setPosition(0);
         pid = new ProfiledPIDController(
             lastKP, 
             lastKI, 
             lastKD,
             new Constraints(PivotConstants.MAX_VELOCITY, PivotConstants.MAX_ACCELERATION));
         ff = new ArmFeedforward(lastKS, lastKG, lastKV);
-
         pivotMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         pivotFollowerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

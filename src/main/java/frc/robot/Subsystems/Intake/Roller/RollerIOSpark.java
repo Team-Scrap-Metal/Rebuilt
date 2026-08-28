@@ -15,18 +15,26 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class RollerIOSpark implements RollerIO {
     private final SparkBase rollerMotor;
+    private final SparkBase rollerFollowerMotor;
     private final RelativeEncoder rollerEncoder;
 
     public RollerIOSpark() {
         rollerMotor = new SparkMax(RollerConstants.CAN_ID, MotorType.kBrushless);
+        rollerFollowerMotor = new SparkMax(RollerConstants.FOLLOWER_CAN_ID, MotorType.kBrushless);
         rollerEncoder = rollerMotor.getEncoder();
-
         var motorConfig = new SparkMaxConfig();
+        var followerConfig = new SparkMaxConfig();
+
         motorConfig
             .inverted(RollerConstants.INVERTED)
             .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(RollerConstants.CURRENT_LIMIT);
+        followerConfig
+            .apply(motorConfig)
+            .inverted(RollerConstants.FOLLOWER_INVERTED);
+
         rollerMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rollerFollowerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
@@ -38,7 +46,6 @@ public class RollerIOSpark implements RollerIO {
     }
 
     @Override
-    public void setRollerVoltage (double volts) {
-        rollerMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
-    }
+    public void setRollerVoltage (double volts) { rollerMotor.setVoltage(MathUtil.clamp(volts, -12, 12)); }
+    public void setPivotVoltage (double volts) { }
 }
