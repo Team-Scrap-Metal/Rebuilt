@@ -22,8 +22,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.Drive.Drive;
-import frc.robot.subsystems.Drive.DriveConstants;
+import frc.robot.Subsystems.Drive.Drive;
+import frc.robot.Subsystems.Drive.DriveConstants;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -69,8 +70,19 @@ public class DriveCommands {
     return Commands.run(
         () -> {
           System.out.println("x: " + (xSupplier.getAsDouble()));
+          // Translation2d linearVelocity;
 
-          // Get linear velocity
+          // if (              DriverStation.getAlliance().isPresent()
+          //   && DriverStation.getAlliance().get() == Alliance.Blue) {
+          //       linearVelocity =
+          //     getLinearVelocityFromJoysticks(-xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          //   } else {
+          //     linearVelocity =
+          //     getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+          //   }
+
+          // // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
@@ -87,15 +99,20 @@ public class DriveCommands {
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
 
-          boolean isFlipped =
+          // if (              DriverStation.getAlliance().isPresent()
+          //         && DriverStation.getAlliance().get() == Alliance.Red) {
+          //           speeds.minus(speeds).minus(speeds)
+          //         }
+
+          boolean isFlipped = 
               DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Red;
+                  && DriverStation.getAlliance().get() == Alliance.Blue;
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+                      ? drive.getRawGyroRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRawGyroRotation()));
         },
         drive);
   }
