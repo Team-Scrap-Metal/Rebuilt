@@ -1,5 +1,6 @@
 package frc.robot.Subsystems.Intake.Roller;
 
+import com.ctre.phoenix6.controls.Follower;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -46,6 +47,9 @@ public class RollerIOSpark implements RollerIO {
     }
 
     @Override
-    public void setRollerVoltage (double volts) { rollerMotor.setVoltage(MathUtil.clamp(volts, -12, 12)); }
+    public void setRollerVoltage (double volts) { 
+        rollerMotor.setVoltage(MathUtil.clamp(volts, -12, 12));
+        rollerFollowerMotor.setVoltage(MathUtil.clamp(-volts, -12, 12));
+    }
     public void setPivotVoltage (double volts) { }
 }
