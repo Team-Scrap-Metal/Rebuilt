@@ -180,7 +180,7 @@ public class RobotContainer {
     m_pathplanner = new PathPlanner(drive, drive.getPoseEstimator());
 
     NamedCommands.registerCommand("Intake",
-        new ParallelCommandGroup(
+        new ParallelCommandGroup(   
             new InstantCommand(() -> m_roller.runRoller(), m_roller)));
 
     NamedCommands.registerCommand("ZeroIntake",
@@ -197,18 +197,30 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-    autoChooser.addDefaultOption(
+    autoChooser.addDefaultOption (
         "8 Fuel Center Auto",
         new SequentialCommandGroup(
-            new InstantCommand(() -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
-            new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)),
-            new ParallelCommandGroup(
+            new PathPlannerAuto("Backup"),
+            new ReadyShoot(m_shooter, m_turret, drive, this)
+        ));
+    autoChooser.addOption(
+        "Simple Time Backup",
+        Commands.startEnd(
+            // Start: Drive backwards at 1.0 m/s (Negative X velocity)
+            () -> drive.runVelocity(new ChassisSpeeds(-1.0, 0.0, 0.0)),
+            // End: Stop the robot completely when the command ends
+            () -> drive.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)),
+            drive // Requires the drive subsystem
+        ).withTimeout(1.5) // Adjust this duration (seconds) to control distance
+    );
+          /*  new ParallelCommandGroup(
                 new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
                 new SequentialCommandGroup(
                     new WaitCommand(3),
                     new Feed(m_feeder, m_spindexer, m_shooter)))));
-    autoChooser.addOption(
+                    */
+    /* autoChooser.addOption(
         "8 Fuel Left Auto",
         new SequentialCommandGroup(
             new InstantCommand(() -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
@@ -233,6 +245,7 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                     new WaitCommand(3),
                     new Feed(m_feeder, m_spindexer, m_shooter)))));
+                    */
     autoChooser.addOption("Straight Test", new PathPlannerAuto("Straight"));
     autoChooser.addOption("Rotate", new PathPlannerAuto("PathRotates"));
     autoChooser.addOption("Rotate and Drive", new PathPlannerAuto("Final Test"));
