@@ -67,15 +67,14 @@ public class ReadyShoot extends Command {
           }
         }
       } else {
-        closestPassingTarget = Constants.PASSING_TARGETS_BLUE[0];
+        closestPassingTarget = Constants.PASSING_TARGETS_RED[0];
 
-        for (int i = 0; i < Constants.PASSING_TARGETS_BLUE.length; i++) {
-          if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS_BLUE[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
-            closestPassingTarget = Constants.PASSING_TARGETS_BLUE[i];
+        for (int i = 0; i < Constants.PASSING_TARGETS_RED.length; i++) {
+          if (launcherPositionFieldRelative.getDistance(Constants.PASSING_TARGETS_RED[i]) < launcherPositionFieldRelative.getDistance(closestPassingTarget)) {
+            closestPassingTarget = Constants.PASSING_TARGETS_RED[i];
           }
         }
-
-      }      var distance = launcherPositionFieldRelative.getDistance(closestPassingTarget);
+      }
 
       // m_shooter.passFromDistance(distance);
       m_shooter.setShooterRPM(ShooterConstants.RPM_FOR_PASSING);
