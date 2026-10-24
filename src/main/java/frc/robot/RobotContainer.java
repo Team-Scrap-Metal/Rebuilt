@@ -282,12 +282,11 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     
     drive.setDefaultCommand(
-        new RunCommand(()->
         DriveCommands.joystickDrive(
             drive,
             () -> m_driverController.getLeftY(),
             () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX())));
+            () -> -m_driverController.getRightX()));
 
     // Intake
     m_driverController
@@ -335,12 +334,11 @@ public class RobotContainer {
         .rightTrigger()
         .whileTrue(
             new ParallelCommandGroup(
-                new RunCommand( ()->
                     DriveCommands.joystickDrive(
                     drive,
                      () -> m_driverController.getLeftY() * 0.5,
                      () -> m_driverController.getLeftX() * 0.5,
-                     () -> -m_driverController.getRightX() * 0.5)),
+                     () -> -m_driverController.getRightX() * 0.5),
             new SequentialCommandGroup(
                 new ParallelCommandGroup(
                     new InstantCommand(
