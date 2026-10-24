@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -279,12 +280,14 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Default command, normal field-relative drive
+    
     drive.setDefaultCommand(
+        new RunCommand(()->
         DriveCommands.joystickDrive(
             drive,
             () -> m_driverController.getLeftY(),
             () -> m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()));
+            () -> -m_driverController.getRightX())));
 
     // Intake
     m_driverController
@@ -331,6 +334,13 @@ public class RobotContainer {
     m_driverController
         .rightTrigger()
         .whileTrue(
+            new ParallelCommandGroup(
+                new RunCommand( ()->
+                    DriveCommands.joystickDrive(
+                    drive,
+                     () -> m_driverController.getLeftY() * 0.5,
+                     () -> m_driverController.getLeftX() * 0.5,
+                     () -> -m_driverController.getRightX() * 0.5)),
             new SequentialCommandGroup(
                 new ParallelCommandGroup(
                     new InstantCommand(
@@ -340,7 +350,9 @@ public class RobotContainer {
                         () -> m_spindexer.runReverse(),
                         m_spindexer)),
                 new WaitCommand(0.3),
-                new Feed(m_feeder, m_spindexer, m_shooter)))
+                new Feed(m_feeder, m_spindexer, m_shooter))
+                
+                ))
         .onFalse(new ParallelCommandGroup(
             new InstantCommand(
                 () -> m_feeder.setFeederPercent(0),
