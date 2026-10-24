@@ -199,19 +199,17 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     
-                
-    autoChooser.addOption(
-        "8 Fuel Left Auto",
+    autoChooser.addDefaultOption(
+        "8 Fuel Center Auto",
         new SequentialCommandGroup(
-            new InstantCommand(() -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_TRENCH), m_shooter),
-            new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_TRENCH_LEFT),
-                m_turret),
+            new InstantCommand(() -> m_shooter.setStaticSetpoint(ShooterConstants.RPM_FROM_HUB), m_shooter),
+            new InstantCommand(() -> m_turret.setStaticSetpoint(TurretConstants.ANGLE_FOR_STATIC_HUB)),
             new ParallelCommandGroup(
                 new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
                 new SequentialCommandGroup(
                     new WaitCommand(3),
-                    new Feed(m_feeder, m_spindexer, m_shooter)))));      
+                    new Feed(m_feeder, m_spindexer, m_shooter)))));        
     /* autoChooser.addOption(
         "Simple Time Backup",
         Commands.startEnd(
