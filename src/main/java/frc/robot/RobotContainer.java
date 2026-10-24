@@ -203,16 +203,6 @@ public class RobotContainer {
             new PathPlannerAuto("Backup"),
             new ReadyShoot(m_shooter, m_turret, drive, this)
         ));
-    autoChooser.addOption(
-        "Simple Time Backup",
-        Commands.startEnd(
-            // Start: Drive backwards at 1.0 m/s (Negative X velocity)
-            () -> drive.runVelocity(new ChassisSpeeds(-1.0, 0.0, 0.0)),
-            // End: Stop the robot completely when the command ends
-            () -> drive.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)),
-            drive // Requires the drive subsystem
-        ).withTimeout(1.5) // Adjust this duration (seconds) to control distance
-    );
           /*  new ParallelCommandGroup(
                 new ReadyShoot(m_shooter, m_turret, drive, this),
                 // new InstantCommand ( () -> m_shooter.shootk(drive), m_shooter),
@@ -394,22 +384,6 @@ public class RobotContainer {
     // );
 
     // Intake pivoting up (stowing)/down (extending)
-    m_driverController
-        .povUp()
-        .onTrue(
-            new InstantCommand(() -> m_pivot.runPivot(true),
-                m_pivot))
-        .onFalse(
-            new InstantCommand(() -> m_pivot.setPivotPercent(0),
-                m_pivot));
-    m_driverController
-        .povDown()
-        .onTrue(
-            new InstantCommand(() -> m_pivot.runPivot(false),
-                m_pivot))
-        .onFalse(
-            new InstantCommand(() -> m_pivot.setPivotPercent(0),
-                m_pivot));
 
     // Reset heading
     m_driverController
@@ -485,6 +459,22 @@ public class RobotContainer {
             new InstantCommand(
                 () -> m_turret.toggleStaticSetpointOverride()));
 
+    m_auxController
+        .povUp()
+        .onTrue(
+            new InstantCommand(() -> m_pivot.runPivot(true),
+                m_pivot))
+        .onFalse(
+            new InstantCommand(() -> m_pivot.setPivotPercent(0),
+                m_pivot));
+    m_auxController
+        .povDown()
+        .onTrue(
+            new InstantCommand(() -> m_pivot.runPivot(false),
+                m_pivot))
+        .onFalse(
+            new InstantCommand(() -> m_pivot.setPivotPercent(0),
+                m_pivot));
     // /** Zero Turret Encoder */
     // m_auxController
     //     .x()
